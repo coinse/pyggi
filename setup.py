@@ -18,3 +18,4 @@ setup(name='pyggi',
       install_requires=[],
       dependency_links=[],
       zip_safe=False)
+

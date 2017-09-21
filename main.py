@@ -19,11 +19,12 @@ if __name__ == "__main__":
             continue
         if best_patch.test_result.execution_time <= patch.test_result.execution_time:
             continue
-        print ("#{}: Best found".format(i))
-        print (patch.test_result.execution_time)
+        print ("#{}: Best found (execution time: {})".format(i, patch.test_result.execution_time))
         print (patch)
         best_patch = patch
     
     best_program = best_patch.apply()
-    print (best_patch)
+    print ("===============================")
+    print (best_patch.get_diff())
+    print ("===============================")
     print (best_program)

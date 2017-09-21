@@ -1,4 +1,6 @@
 import random
+import copy
+import subprocess
 from .program import Program
 
 class Patch:
@@ -7,22 +9,29 @@ class Patch:
     def __init__(self, program):
         self.program = program
         self.modified_program = None
-        self.number_of_units = len(self.program.contents)
-        self.edits = []
         self.test_result = None
+        # A set of lines to delete
+        self.deletions = set()
+        # Key: Insertion point, Value: Queue of lines which should be inserted
+        self.insertions = {}
+        self.history = []
         pass
 
     def __str__(self):
-        return '|'.join(map(lambda e: str(e), self.edits))
+        return ' | '.join(self.history)
 
-    def length(self):
-        return len(self.edits)
+    def get_diff(self):
+        if not self.modified_program:
+            self.apply()
+        stdoutdata = subprocess.getoutput("diff -u {} {}".format(self.program.path, self.modified_program.path))
+        return stdoutdata
 
     def clone(self):
         clone_patch = Patch(self.program)
-        clone_patch.edits = self.edits[:]
-        clone_patch.number_of_units = self.number_of_units
-        clone_patch.test_result = self.test_result
+        clone_patch.deletions = copy.deepcopy(self.deletions)
+        clone_patch.insertions = copy.deepcopy(self.insertions) 
+        clone_patch.history = copy.deepcopy(self.history)
+        clone_patch.test_result = None
         return clone_patch
 
     def run_test(self, test_file_path):
@@ -33,19 +42,14 @@ class Patch:
 
     def apply(self):
         if self.program.manipulation_level == 'physical_line':
-            contents = self.program.contents[:]
-            for edit in self.edits:
-                if edit['type'] == 'delete':
-                    del contents[edit['target']]
-                elif edit['type'] == 'copy':
-                    contents.insert(edit['insertion_point'], contents[edit['target']])
-                elif edit['type'] == 'move':
-                    target_code = contents[edit['target']]
-                    del contents[edit['target']]
-                    contents.insert(edit['insertion_point'], target_code)
-                else:
-                    print("[Error] invalid edit type: {}".format(edit['type']))
-            self.modified_program = Program.create_program_with_contents(self.program.get_program_name(), contents)
+            new_contents = []
+            for i in range(len(self.program.contents) + 1):
+                if i in self.insertions:
+                    for target in self.insertions[i]:
+                        new_contents.append(self.program.contents[target])
+                if i < len(self.program.contents) and i not in self.deletions:
+                    new_contents.append(self.program.contents[i])
+            self.modified_program = Program.create_program_with_contents(self.program.get_program_name(), new_contents)
             return self.modified_program
         else:
             print("[Error] invalid manipulation level: {}".format(self.program.manipulation_level))
@@ -53,33 +57,41 @@ class Patch:
 
     def add_random_edit(self):
         if self.program.manipulation_level == 'physical_line':
-            edit_type = random.choice(['delete', 'copy', 'move']) 
+            number_of_program_lines = len(self.program.contents)
+            edit_type = random.choice(['delete', 'copy', 'move'])
+            # line number starts from 0
+            while True:
+                target_line = random.randrange(0, number_of_program_lines)
+                if not edit_type == 'delete' or target_line not in self.deletions:
+                    break
             if edit_type == 'delete':
-                if self.number_of_units > 0:
-                    target = random.randrange(0, self.number_of_units)
-                    self.delete(target)
-                else:
-                    self.add_random_edit()
+                self.delete(target_line)
             elif edit_type == 'copy':
-                target = random.randrange(0, self.number_of_units)
-                insertion_point = random.randrange(0, self.number_of_units + 1)
-                self.copy(target, insertion_point)
+                insertion_point = random.randrange(0, number_of_program_lines + 1)
+                self.copy(target_line, insertion_point)
             elif edit_type == 'move':
-                target = random.randrange(0, self.number_of_units)
-                insertion_point = random.randrange(0, self.number_of_units)
-                self.move(target, insertion_point)
+                insertion_point = random.randrange(0, number_of_program_lines + 1)
+                self.move(target_line, insertion_point)
         else:
             print("[Error] invalid manipulation level: {}".format(self.program.manipulation_level))
             sys.exit()
         return
 
     def delete(self, target):
-        self.edits.append({ 'type': 'delete', 'target': target })
-        self.number_of_units -= 1
+        self.history.append("DELETE {}".format(target)) 
+        self.deletions.add(target)
 
     def copy(self, target, insertion_point):
-        self.edits.append({ 'type': 'copy', 'target': target, 'insertion_point': insertion_point })
-        self.number_of_units += 1
+        self.history.append("COPY {} -> {}".format(target, insertion_point)) 
+        if insertion_point in self.insertions:
+            self.insertions[insertion_point].append(target)
+        else:
+            self.insertions[insertion_point] = [target]
 
     def move(self, target, insertion_point):
-        self.edits.append({ 'type': 'move', 'target': target, 'insertion_point': insertion_point })
+        self.history.append("MOVE {} -> {}".format(target, insertion_point)) 
+        if insertion_point in self.insertions:
+            self.insertions[insertion_point].append(target)
+        else:
+            self.insertions[insertion_point] = [target]
+        self.deletions.add(target)

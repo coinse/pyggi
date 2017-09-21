@@ -6,7 +6,11 @@ ITERATIONS = 10
 if __name__ == "__main__":
     if len(sys.argv) < 3:
         print ("[Error] No file name and test name")
-    p = Program(sys.argv[1], 'physical_line')
+
+    # Let all target code file paths are retrived by 
+    # first argument (a.k.a path) divided by white space
+    path_list = sys.argv[1].split()
+    p = Program(path_list, 'physical_line')
     
     best_patch = Patch(p)
     best_patch.run_test(sys.argv[2])

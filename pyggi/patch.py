@@ -51,8 +51,7 @@ class Patch:
             empty_codeline_list = []
             for i in range(len(target_file_list)):
                 empty_codeline_list.append([])
-            new_contents = dict(
-                zip(target_file_list, empty_codeline_list))
+            new_contents = dict(zip(target_file_list, empty_codeline_list))
 
             for target_file in target_file_list:
                 orig_codeline_list = self.program.contents[target_file]
@@ -103,8 +102,7 @@ class Patch:
             while True:
                 # Choice according to the probability distribution
                 def weighted_choice(choice_weight_list):
-                    total = sum(weight
-                                for choice, weight in choice_weight_list)
+                    total = sum(weight for choice, weight in choice_weight_list)
                     ridx = random.uniform(0, total)
                     upto = 0
                     for choice, weight in choice_weight_list:
@@ -142,12 +140,12 @@ class Patch:
         self.deletions.append((target_file, target_line))
 
     def copy(self, target_file, target_line, insertion_point):
-        self.history.append("COPY {}: {} -> {}".format(
-            target_file, target_line, insertion_point))
+        self.history.append("COPY {}: {} -> {}".format(target_file, target_line,
+                                                       insertion_point))
         self.insertions.append((target_file, target_line, insertion_point))
 
     def move(self, target_file, target_line, insertion_point):
-        self.history.append("MOVE {}: {} -> {}".format(
-            target_file, target_line, insertion_point))
+        self.history.append("MOVE {}: {} -> {}".format(target_file, target_line,
+                                                       insertion_point))
         self.insertions.append((target_file, target_line, insertion_point))
         self.deletions.append((target_file, target_line))

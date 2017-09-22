@@ -56,9 +56,16 @@ class Program:
         return TestResult(True, random.randrange(1, 7), 5, 3, 4)
 
     @staticmethod
+<<<<<<< 6ba3d4976f5c0f244779bc1e1a60e0de9c462b13
     def create_program_with_contents(contents,
                                      manipulation_level='physical_line'):
 
+=======
+    def create_program_with_contents(file_name,
+                                     contents,
+                                     manipulation_level='physical_line'):
+        path = Program.tmp_dir + file_name
+>>>>>>> [YAPF] Formatting codes
         if manipulation_level == 'physical_line':
             new_path_list = []
             for k in sorted(contents.keys()):

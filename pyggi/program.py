@@ -4,15 +4,17 @@ import random
 import shutil
 from .test_result import TestResult
 
+
 class Program:
     available_manipulation_levels = ['physical_line']
     tmp_dir = "tmp/"
     contents = {}
 
-    def __init__(self, path_list, manipulation_level = 'physical_line'):
+    def __init__(self, path_list, manipulation_level='physical_line'):
 
         if manipulation_level not in Program.available_manipulation_levels:
-            print("[Error] invalid manipulation level: {}".format(manipulation_level))
+            print("[Error] invalid manipulation level: {}".format(
+                manipulation_level))
             sys.exit()
         self.path_list = path_list
         self.manipulation_level = manipulation_level
@@ -37,23 +39,26 @@ class Program:
         contents = {}
         if manipulation_level == 'physical_line':
             for path in path_list:
-                code_lines = list(map(str.rstrip, list(open(path, 'r').readlines())))
+                code_lines = list(
+                    map(str.rstrip, list(open(path, 'r').readlines())))
                 contents[path] = code_lines
         else:
-            print("[Error] invalid manipulation level: {}".format(manipulation_level))
+            print("[Error] invalid manipulation level: {}".format(
+                manipulation_level))
             sys.exit()
         return contents
 
     def run_test(self, test_file_path):
         shutil.copy2(test_file_path, Program.tmp_dir)
         shutil.copy2('TestRunner.java', Program.tmp_dir)
-        
+
         # dummy data
-        return TestResult(True, random.randrange(1,7), 5, 3, 4)
+        return TestResult(True, random.randrange(1, 7), 5, 3, 4)
 
     @staticmethod
-    def create_program_with_contents(contents, manipulation_level = 'physical_line'):
-        
+    def create_program_with_contents(contents,
+                                     manipulation_level='physical_line'):
+
         if manipulation_level == 'physical_line':
             new_path_list = []
             for k in sorted(contents.keys()):
@@ -64,5 +69,6 @@ class Program:
             ret = Program(new_path_list, manipulation_level)
             return ret
         else:
-            print("[Error] invalid manipulation level: {}".format(manipulation_level))
+            print("[Error] invalid manipulation level: {}".format(
+                manipulation_level))
             sys.exit()

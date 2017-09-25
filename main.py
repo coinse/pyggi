@@ -4,6 +4,13 @@ import sys
 ITERATIONS = 10
 
 if __name__ == "__main__":
+    '''
+        python main.py sample/java/Triangle/ run.sh
+
+        - argv[1]: A project path
+        - argv[2]: Run script in the project path
+    '''
+
     if len(sys.argv) < 3:
         print("[Error] No file name and test name")
 

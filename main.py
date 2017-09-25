@@ -5,9 +5,12 @@ ITERATIONS = 10
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print ("[Error] No file name and test name")
-    p = Program(sys.argv[1], 'physical_line')
-    
+        print("[Error] No file name and test name")
+
+    # Let all target code file paths are retrived by
+    # first argument (a.k.a path) divided by white space
+    path_list = sys.argv[1].split()
+    p = Program(path_list, 'physical_line')
     best_patch = Patch(p)
     best_patch.run_test(sys.argv[2])
 
@@ -19,12 +22,13 @@ if __name__ == "__main__":
             continue
         if best_patch.test_result.execution_time <= patch.test_result.execution_time:
             continue
-        print ("#{}: Best found (execution time: {})".format(i, patch.test_result.execution_time))
-        print (patch)
+        print("#{}: Best found (execution time: {})".format(
+            i, patch.test_result.execution_time))
+        print(patch)
         best_patch = patch
-    
+
     best_program = best_patch.apply()
-    print ("===============================")
-    print (best_patch.get_diff())
-    print ("===============================")
-    print (best_program)
+    print("===============================")
+    print(best_patch.get_diff())
+    print("===============================")
+    print(best_program)

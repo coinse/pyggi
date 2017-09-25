@@ -4,56 +4,71 @@ import random
 import shutil
 from .test_result import TestResult
 
+
 class Program:
     available_manipulation_levels = ['physical_line']
     tmp_dir = "tmp/"
+    contents = {}
 
-    def __init__(self, path, manipulation_level = 'physical_line'):
+    def __init__(self, path_list, manipulation_level='physical_line'):
+
         if manipulation_level not in Program.available_manipulation_levels:
-            print("[Error] invalid manipulation level: {}".format(manipulation_level))
+            print("[Error] invalid manipulation level: {}".format(
+                manipulation_level))
             sys.exit()
-        self.path = path
+        self.path_list = path_list
         self.manipulation_level = manipulation_level
-        self.contents = self.parse(path, manipulation_level)
+        self.contents = self.parse(path_list, manipulation_level)
 
     def __str__(self):
         if self.manipulation_level == 'physical_line':
             code = ''
-            for i in range(len(self.contents)):
-                code += "{}: {}".format(i, self.contents[i])
+            for k in sorted(self.contents.keys()):
+                idx = 0
+                for line in self.contents[k]:
+                    code += "{}\t: {}\t: {}\n".format(k, idx, line)
+                    idx += 1
             return code
         else:
-            return path
+            return self.path_list
 
-    def get_program_name(self):
-        return os.path.basename(self.path)
+    def get_program_name_list(self):
+        return list(map(os.path.basename, self.path_list))
 
-    def parse(self, path, manipulation_level):
+    def parse(self, path_list, manipulation_level):
+        contents = {}
         if manipulation_level == 'physical_line':
-            f = open(path)
-            lines = f.readlines()
-            f.close()
-            return lines
+            for path in path_list:
+                code_lines = list(
+                    map(str.rstrip, list(open(path, 'r').readlines())))
+                contents[path] = code_lines
         else:
-            print("[Error] invalid manipulation level: {}".format(manipulation_level))
+            print("[Error] invalid manipulation level: {}".format(
+                manipulation_level))
             sys.exit()
+        return contents
 
     def run_test(self, test_file_path):
         shutil.copy2(test_file_path, Program.tmp_dir)
         shutil.copy2('TestRunner.java', Program.tmp_dir)
-        
+
         # dummy data
-        return TestResult(True, random.randrange(1,7), 5, 3, 4)
+        return TestResult(True, random.randrange(1, 7), 5, 3, 4)
 
     @staticmethod
-    def create_program_with_contents(file_name, contents, manipulation_level = 'physical_line'):
-        path = Program.tmp_dir + file_name
+    def create_program_with_contents(contents,
+                                     manipulation_level='physical_line'):
+
         if manipulation_level == 'physical_line':
-            f = open(path, 'w')
-            for content in contents:
-                f.write(content)
-            f.close()
-            return Program(path, manipulation_level)
+            new_path_list = []
+            for k in sorted(contents.keys()):
+                path = Program.tmp_dir + os.path.basename(k)
+                new_path_list.append(path)
+                with open(path, 'w') as f:
+                    f.write('\n'.join(contents[k]))
+            ret = Program(new_path_list, manipulation_level)
+            return ret
         else:
-            print("[Error] invalid manipulation level: {}".format(manipulation_level))
+            print("[Error] invalid manipulation level: {}".format(
+                manipulation_level))
             sys.exit()

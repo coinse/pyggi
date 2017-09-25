@@ -48,8 +48,11 @@ class Patch:
     def apply(self):
         if self.program.manipulation_level == 'physical_line':
             target_file_list = self.program.contents.keys()
+            empty_codeline_list = []
+            for i in range(len(target_file_list)):
+                empty_codeline_list.append([])
             new_contents = dict(
-                zip(target_file_list, [[]] * len(target_file_list)))
+                zip(target_file_list, empty_codeline_list))
 
             for target_file in target_file_list:
                 orig_codeline_list = self.program.contents[target_file]

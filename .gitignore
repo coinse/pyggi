@@ -11,3 +11,8 @@
 
 # Pyenv
 .python-version
+
+# Gradle
+.gradle
+**/build/
+

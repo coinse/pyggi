@@ -7,7 +7,7 @@ from .test_result import TestResult
 class Program:
     available_manipulation_levels = ['physical_line']
     tmp_dir = "tmp/"
-    contents = []
+    contents = {}
 
     def __init__(self, path_list, manipulation_level = 'physical_line'):
 
@@ -21,8 +21,11 @@ class Program:
     def __str__(self):
         if self.manipulation_level == 'physical_line':
             code = ''
-            for i in range(len(self.contents)):
-                code += "{}\t: {}\t: {}\n".format(i, self.contents[i][0], self.contents[i][1])
+            for k in sorted(self.contents.keys()):
+                idx = 0
+                for line in self.contents[k]:
+                    code += "{}\t: {}\t: {}\n".format(k, idx, line)
+                    idx += 1
             return code
         else:
             return self.path_list
@@ -32,12 +35,9 @@ class Program:
 
     def parse(self, path_list, manipulation_level):
         if manipulation_level == 'physical_line':
-            line_cnt = 0
             for path in path_list:
-                code_lines = list(map(lambda x: (path, x),
-                    open(path, 'r').readlines()))
-                self.contents += code_lines
-                f.close()
+                code_lines = list(map(str.rstrip, list(open(path, 'r').readlines())))
+                self.contents[path] = code_lines
         else:
             print("[Error] invalid manipulation level: {}".format(manipulation_level))
             sys.exit()
@@ -50,18 +50,15 @@ class Program:
         return TestResult(True, random.randrange(1,7), 5, 3, 4)
 
     @staticmethod
-    def create_program_with_contents(filename_list, contents, manipulation_level = 'physical_line'):
+    def create_program_with_contents(contents, manipulation_level = 'physical_line'):
         
         if manipulation_level == 'physical_line':
             new_path_list = []
-            for filename in filename_list:
-                path = Program.tmp_dir + filename
+            for k in sorted(contents.key()):
+                path = Program.tmp_dir + os.path.basename(k)
                 new_path_list.append(path)
-                f = open(path, 'w')
-                for content in list(filter(lambda x: filename in x[0],
-                                                     contents)):
-                    f.write(content[1])
-                f.close()
+                with open(path, 'w') as f:
+                    f.write('\n'.join(contents[k]))
             return Program(new_path_list, manipulation_level)
         else:
             print("[Error] invalid manipulation level: {}".format(manipulation_level))

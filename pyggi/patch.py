@@ -49,7 +49,7 @@ class Patch:
                         new_contents.append(self.program.contents[target])
                 if i < len(self.program.contents) and i not in self.deletions:
                     new_contents.append(self.program.contents[i])
-            self.modified_program = Program.create_program_with_contents(self.program.get_program_name(), new_contents)
+            self.modified_program = Program.create_program_with_contents(new_contents)
             return self.modified_program
         else:
             print("[Error] invalid manipulation level: {}".format(self.program.manipulation_level))

@@ -24,7 +24,9 @@ class Patch:
     def get_diff(self):
         if not self.modified_program:
             self.apply()
-        stdoutdata = subprocess.getoutput("diff -u {} {}".format(self.program.path, self.modified_program.path))
+        stdoutdata = ''
+        for i in range(len(self.program.path_list)):
+            stdoutdata += subprocess.getoutput("diff -u {} {}".format(self.program.path_list[i], self.modified_program.path_list[i]))
         return stdoutdata
 
     def clone(self):
@@ -53,7 +55,6 @@ class Patch:
                 # Create deletions set for target file: (target_file, target_line)
                 target_file_deletions = set(filter(lambda x: x[0] == target_file,
                                                    self.deletions))
-
                 # Create insertions dict for target file: insertion_point => [target_lines]
                 target_file_insertions = list(filter(lambda x: x[0] == target_file,
                                                     self.insertions))
@@ -61,7 +62,7 @@ class Patch:
                 target_file_insertions = dict(zip(
                     insertion_points,
                     list(map(lambda key: list(map(lambda x: x[1],
-                                                  list(filter(lambda y: y[2] == insertion_points,
+                                                  list(filter(lambda y: y[2] == key,
                                                               target_file_insertions)))),
                              insertion_points))
                 ))

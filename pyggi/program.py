@@ -34,13 +34,15 @@ class Program:
         return list(map(os.path.basename, self.path_list))
 
     def parse(self, path_list, manipulation_level):
+        contents = {}
         if manipulation_level == 'physical_line':
             for path in path_list:
                 code_lines = list(map(str.rstrip, list(open(path, 'r').readlines())))
-                self.contents[path] = code_lines
+                contents[path] = code_lines
         else:
             print("[Error] invalid manipulation level: {}".format(manipulation_level))
             sys.exit()
+        return contents
 
     def run_test(self, test_file_path):
         shutil.copy2(test_file_path, Program.tmp_dir)
@@ -54,12 +56,13 @@ class Program:
         
         if manipulation_level == 'physical_line':
             new_path_list = []
-            for k in sorted(contents.key()):
+            for k in sorted(contents.keys()):
                 path = Program.tmp_dir + os.path.basename(k)
                 new_path_list.append(path)
                 with open(path, 'w') as f:
                     f.write('\n'.join(contents[k]))
-            return Program(new_path_list, manipulation_level)
+            ret = Program(new_path_list, manipulation_level)
+            return ret
         else:
             print("[Error] invalid manipulation level: {}".format(manipulation_level))
             sys.exit()

@@ -87,7 +87,7 @@ class Patch:
 
             # Write modified program
             self.modified_program = Program.create_program_with_contents(
-                new_contents)
+                self.program.project_path, new_contents)
             return self.modified_program
         else:
             print("[Error] invalid manipulation level: {}".format(

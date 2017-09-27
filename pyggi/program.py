@@ -1,7 +1,10 @@
 import sys
 import os
 import random
+import subprocess
 import shutil
+import re
+
 from .test_result import TestResult
 
 
@@ -10,12 +13,15 @@ class Program:
     tmp_dir = "tmp/"
     contents = {}
 
-    def __init__(self, path_list, manipulation_level='physical_line'):
-
+    def __init__(self,
+                 project_path,
+                 path_list,
+                 manipulation_level='physical_line'):
         if manipulation_level not in Program.available_manipulation_levels:
             print("[Error] invalid manipulation level: {}".format(
                 manipulation_level))
             sys.exit()
+        self.project_path = project_path
         self.path_list = path_list
         self.manipulation_level = manipulation_level
         self.contents = self.parse(path_list, manipulation_level)
@@ -49,31 +55,39 @@ class Program:
         return contents
 
     def run_test(self, test_file_path):
-        shutil.copy2(test_file_path, Program.tmp_dir)
-        shutil.copy2('TestRunner.java', Program.tmp_dir)
+        tmp_test_file_path = os.path.join(Program.tmp_dir, test_file_path)
 
-        # dummy data
-        return TestResult(True, random.randrange(1, 7), 5, 3, 4)
+        sprocess = subprocess.Popen(
+            "./" + tmp_test_file_path,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+        stdout, stderr = sprocess.communicate()
+        test_result = re.findall(
+            "Result: \(([0-9]+) tests, ([0-9]+) passed, ([0-9]+) failed, ([0-9]+) skipped\)",
+            stdout.decode("ascii"))
+        if len(test_result) == 0:
+            print("Build failed!")
+            print(stderr.decode("ascii"))
+            return TestResult(False, 0, 0, 0, 0)
+        else:
+            tests, passed, failed, skipped = test_result[0]
+            print("Build succeed!")
+            print(tests, passed, failed, skipped)
+            return TestResult(True, 0, tests, passed, failed)
 
     @staticmethod
-<<<<<<< 6ba3d4976f5c0f244779bc1e1a60e0de9c462b13
-    def create_program_with_contents(contents,
-                                     manipulation_level='physical_line'):
-
-=======
-    def create_program_with_contents(file_name,
+    def create_program_with_contents(project_path,
                                      contents,
                                      manipulation_level='physical_line'):
-        path = Program.tmp_dir + file_name
->>>>>>> [YAPF] Formatting codes
         if manipulation_level == 'physical_line':
             new_path_list = []
             for k in sorted(contents.keys()):
-                path = Program.tmp_dir + os.path.basename(k)
+                path = os.path.join(Program.tmp_dir,
+                                    os.path.relpath(k, project_path))
                 new_path_list.append(path)
                 with open(path, 'w') as f:
                     f.write('\n'.join(contents[k]))
-            ret = Program(new_path_list, manipulation_level)
+            ret = Program(project_path, new_path_list, manipulation_level)
             return ret
         else:
             print("[Error] invalid manipulation level: {}".format(

@@ -2,15 +2,14 @@ import random
 import copy
 import subprocess
 import sys
+import os
+import re
 from .program import Program
-
+from .test_result import TestResult
 
 class Patch:
-    tmpdir = "tmp/"
-
     def __init__(self, program):
         self.program = program
-        self.modified_program = None
         self.test_result = None
         # A list of deletions: (target_file, target_line)
         self.deletions = []
@@ -23,12 +22,12 @@ class Patch:
         return ' | '.join(self.history)
 
     def get_diff(self):
-        if not self.modified_program:
-            self.apply()
+        self.apply()
         stdoutdata = ''
-        for i in range(len(self.program.path_list)):
-            stdoutdata += subprocess.getoutput("diff -u {} {}".format(
-                self.program.path_list[i], self.modified_program.path_list[i]))
+        for i in range(len(self.program.target_files)):
+            original_target_file = os.path.join(self.program.project_path, self.program.target_files[i])
+            modified_target_file = os.path.join(self.program.tmp_project_path, self.program.target_files[i])
+            stdoutdata += subprocess.getoutput("diff -u {} {}".format(original_target_file, modified_target_file))
         return stdoutdata
 
     def clone(self):
@@ -39,21 +38,37 @@ class Patch:
         clone_patch.test_result = None
         return clone_patch
 
-    def run_test(self, test_file_path):
-        # patch.test_result = patch.apply().run_test(/path/to/test/suite)
-        # is equal to
-        # patch.run_test(/path/to/test/suite)
-        self.test_result = self.apply().run_test(test_file_path)
-
+    def run_test(self):
+        contents = self.apply()
+        test_script_path = os.path.join(self.program.tmp_project_path, self.program.test_script_path)
+        sprocess = subprocess.Popen(
+            ["./" + test_script_path, self.program.tmp_project_path],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+        stdout, stderr = sprocess.communicate()
+        test_result = re.findall(
+            "Result: \(([0-9]+) tests, ([0-9]+) passed, ([0-9]+) failed, ([0-9]+) skipped\)",
+            stdout.decode("ascii"))
+        if len(test_result) == 0:
+            print("Build failed!")
+            # print(stderr.decode("ascii"))
+            self.test_result = TestResult(False, 0, 0, 0, 0)
+        else:
+            tests, passed, failed, skipped = test_result[0]
+            print("Build succeed!")
+            print(tests, passed, failed, skipped)
+            self.test_result = TestResult(True, 0, passed, failed, skipped)
+        return self.test_result
+    
     def apply(self):
         if self.program.manipulation_level == 'physical_line':
-            target_file_list = self.program.contents.keys()
+            target_files = self.program.contents.keys()
             empty_codeline_list = []
-            for i in range(len(target_file_list)):
+            for i in range(len(target_files)):
                 empty_codeline_list.append([])
-            new_contents = dict(zip(target_file_list, empty_codeline_list))
+            new_contents = dict(zip(target_files, empty_codeline_list))
 
-            for target_file in target_file_list:
+            for target_file in target_files:
                 orig_codeline_list = self.program.contents[target_file]
                 new_codeline_list = new_contents[target_file]
 
@@ -84,11 +99,11 @@ class Patch:
                     if i < len(orig_codeline_list) and (
                             target_file, i) not in target_file_deletions:
                         new_codeline_list.append(orig_codeline_list[i])
-
-            # Write modified program
-            self.modified_program = Program.create_program_with_contents(
-                self.program.project_path, new_contents)
-            return self.modified_program
+            
+            for target_file in sorted(new_contents.keys()):
+                target_file_path = os.path.join(self.program.tmp_project_path, target_file)
+                with open(target_file_path, 'w') as f:
+                    f.write('\n'.join(new_contents[target_file]))
         else:
             print("[Error] invalid manipulation level: {}".format(
                 self.program.manipulation_level))
@@ -96,7 +111,7 @@ class Patch:
 
     def add_random_edit(self):
         if self.program.manipulation_level == 'physical_line':
-            target_file_list = sorted(self.program.contents.keys())
+            target_files = sorted(self.program.contents.keys())
             edit_type = random.choice(['delete', 'copy', 'move'])
             # line number starts from 0
             while True:
@@ -113,7 +128,7 @@ class Patch:
 
                 # Choose files based on the probability distribution by number of the code lines
                 target_file = weighted_choice(list(map(lambda filename: (filename, len(self.program.contents[filename])),
-                                                   target_file_list)))
+                                                   target_files)))
                 target_line = random.randrange(
                     0, len(self.program.contents[target_file]))
                 if not edit_type == 'delete' or (

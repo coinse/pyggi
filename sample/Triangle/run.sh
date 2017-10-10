@@ -1,10 +1,10 @@
 #!/bin/sh
 set -e
 
-cd tmp
+cd $1
 gradle clean
 
-if gradle build; then
+if time gradle build; then
   echo "Gradle build succeeded" >&2
 else
   echo "Gradle build failed" >&2

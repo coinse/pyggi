@@ -42,22 +42,28 @@ class Patch:
         contents = self.apply()
         test_script_path = os.path.join(self.program.tmp_project_path, self.program.test_script_path)
         sprocess = subprocess.Popen(
-            ["./" + test_script_path, self.program.tmp_project_path],
+            ['time', "./" + test_script_path, self.program.tmp_project_path],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
         stdout, stderr = sprocess.communicate()
-        test_result = re.findall(
+        
+        # Execution time (real, user, sys)
+        execution_time = re.findall(
+            "\s+(.*)\sreal\s+(.*)\suser\s+(.*)\ssys",
+            stderr.decode("ascii"))[-1]
+
+        # Test Result (tests, passed, failed, skipped) 
+        execution_result = re.findall(
             "Result: \(([0-9]+) tests, ([0-9]+) passed, ([0-9]+) failed, ([0-9]+) skipped\)",
             stdout.decode("ascii"))
-        if len(test_result) == 0:
+        
+        if len(execution_result) == 0:
             print("Build failed!")
-            # print(stderr.decode("ascii"))
-            self.test_result = TestResult(False, 0, 0, 0, 0)
+            self.test_result = TestResult(False, execution_time, (0, 0, 0, 0))
         else:
-            tests, passed, failed, skipped = test_result[0]
             print("Build succeed!")
-            print(tests, passed, failed, skipped)
-            self.test_result = TestResult(True, 0, passed, failed, skipped)
+            print(execution_result[0])
+            self.test_result = TestResult(True, execution_time, execution_result[0])
         return self.test_result
     
     def apply(self):

@@ -5,11 +5,6 @@ from pyggi import *
 ITERATIONS = 10
 
 if __name__ == "__main__":
-    '''
-        python main.py sample/Triangle
-        - argv[1]: project path
-            ./{project_path}/config.json
-    '''
     project_path = sys.argv[1]
     p = Program(project_path, 'physical_line')
     best_patch = Patch(p)
@@ -26,8 +21,7 @@ if __name__ == "__main__":
         print (patch.get_diff())
         if best_patch.test_result.passed > patch.test_result.passed:
             continue
-        print("********* Best found (execution time: {})".format(
-            i, patch.test_result.execution_time))
+        print("********* Best found (execution time: {})".format(patch.test_result.real_time))
         print(patch)
         best_patch = patch
 

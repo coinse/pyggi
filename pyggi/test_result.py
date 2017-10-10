@@ -3,9 +3,11 @@ import pyggi
 
 class TestResult:
 
-    def __init__(self, compiled, execution_time, passed, failed, skipped):
+    def __init__(self, compiled, execution_time, execution_result):
         self.compiled = compiled
-        self.execution_time = execution_time
-        self.passed = passed
-        self.failed = failed
-        self.skipped = skipped
+        self.real_time = float(execution_time[0])
+        self.user_time = float(execution_time[1])
+        self.sys_time = float(execution_time[2])
+        self.passed = int(execution_result[1])
+        self.failed = int(execution_result[2])
+        self.skipped = int(execution_result[3])

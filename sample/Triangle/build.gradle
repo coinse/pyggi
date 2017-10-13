@@ -5,8 +5,8 @@ plugins {
 
 apply plugin: 'java'
 apply plugin: 'application'
-sourceCompatibility = 1.9
-targetCompatibility = 1.9
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 mainClassName = "TestRunner"
 
@@ -47,10 +47,10 @@ test {
   }
   afterSuite { desc, result ->
     if (!desc.parent)
-        println("Result: " +
-            "(${result.testCount} tests, " +
-            "${result.successfulTestCount} passed, " +
-            "${result.failedTestCount} failed, " +
-            "${result.skippedTestCount} skipped)")
+        println("[PYGGI_RESULT] {" +
+            "tests: ${result.testCount}, " +
+            "passed: ${result.successfulTestCount}, " +
+            "failed: ${result.failedTestCount}, " +
+            "skipped: ${result.skippedTestCount}}")
   }
 }

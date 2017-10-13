@@ -6,6 +6,7 @@ import os
 import re
 from .program import Program
 from .test_result import TestResult
+from .test_result import pyggi_result_parser
 
 class Patch:
     def __init__(self, program):
@@ -20,6 +21,9 @@ class Patch:
 
     def __str__(self):
         return ' | '.join(self.history)
+    
+    def __len__(self):
+        return len(self.history)
 
     def get_diff(self):
         self.apply()
@@ -29,7 +33,7 @@ class Patch:
             modified_target_file = os.path.join(self.program.tmp_project_path, self.program.target_files[i])
             stdoutdata += subprocess.getoutput("diff -u {} {}".format(original_target_file, modified_target_file))
         return stdoutdata
-
+    
     def clone(self):
         clone_patch = Patch(self.program)
         clone_patch.deletions = copy.deepcopy(self.deletions)
@@ -48,22 +52,28 @@ class Patch:
         stdout, stderr = sprocess.communicate()
         
         # Execution time (real, user, sys)
-        execution_time = re.findall(
+        real_time, user_time, sys_time = re.findall(
             "\s+(.*)\sreal\s+(.*)\suser\s+(.*)\ssys",
             stderr.decode("ascii"))[-1]
 
-        # Test Result (tests, passed, failed, skipped) 
+        execution_time = {
+            'real': real_time,
+            'user': user_time,
+            'sys': sys_time
+        }
+
+        # print(stdout.decode("ascii"))
         execution_result = re.findall(
-            "Result: \(([0-9]+) tests, ([0-9]+) passed, ([0-9]+) failed, ([0-9]+) skipped\)",
+            "\[PYGGI_RESULT\]\s*\{(.*?)\}\s",
             stdout.decode("ascii"))
-        
+
         if len(execution_result) == 0:
             print("Build failed!")
-            self.test_result = TestResult(False, execution_time, (0, 0, 0, 0))
+            self.test_result = TestResult(False, execution_time, None)
         else:
             print("Build succeed!")
-            print(execution_result[0])
-            self.test_result = TestResult(True, execution_time, execution_result[0])
+            self.test_result = TestResult(True, execution_time, pyggi_result_parser(execution_result[0]))
+
         return self.test_result
     
     def apply(self):
@@ -109,11 +119,22 @@ class Patch:
             for target_file in sorted(new_contents.keys()):
                 target_file_path = os.path.join(self.program.tmp_project_path, target_file)
                 with open(target_file_path, 'w') as f:
-                    f.write('\n'.join(new_contents[target_file]))
+                    f.write('\n'.join(new_contents[target_file]) + '\n')
         else:
             print("[Error] invalid manipulation level: {}".format(
                 self.program.manipulation_level))
             sys.exit()
+
+    def remove(self):
+        last_edit = self.history.pop()
+        edit_type = last_edit.split()[0].strip()
+        if edit_type == "DELETE":
+            self.deletions.pop()
+        elif edit_type == "COPY":
+            self.insertions.pop()
+        elif edit_type == "MOVE":
+            self.insertions.pop()
+            self.deletions.pop()
 
     def add_random_edit(self):
         if self.program.manipulation_level == 'physical_line':

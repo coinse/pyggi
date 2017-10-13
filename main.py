@@ -4,7 +4,7 @@ import random
 from pyggi import *
 
 ITERATIONS = 100
-WARMUP_REPS = 10
+WARMUP_REPS = 1
 
 if __name__ == "__main__":
     project_path = sys.argv[1]
@@ -21,14 +21,18 @@ if __name__ == "__main__":
         print()
         print("======== Iteration {} ========".format(i))
         patch = best_patch.clone()
+        print ("current_best:\t" + str(best_patch))
         if len(patch) > 0 and random.uniform(0, 1) > 0.5:
-            patch.remove()
+            index_to_remove = random.randrange(0, len(patch))
+            print ("remove index: {}".format(index_to_remove))
+            patch.remove(index_to_remove)
         else:
             patch.add_random_edit()
+            print ("add random edit")
+        print ("current_patch:\t" + str(patch))
         patch.run_test()
         if not patch.test_result.compiled:
             continue
-        print (patch)
         print ("-------------------------------")
         print (patch.test_result)
         print ("-------------------------------")

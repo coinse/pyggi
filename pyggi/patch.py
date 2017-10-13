@@ -12,19 +12,28 @@ class Patch:
     def __init__(self, program):
         self.program = program
         self.test_result = None
-        # A list of deletions: (target_file, target_line)
-        self.deletions = []
-        # A list of insertions: (target_file, target_line, insertion_point)
-        self.insertions = []
         self.history = []
         pass
 
     def __str__(self):
-        return ' | '.join(self.history)
+        return ' | '.join(list(map(lambda e: str(e), self.history)))
     
     def __len__(self):
         return len(self.history)
 
+    def history_to_del_ins(self):
+        insertions = []
+        deletions = []
+        for edit in self.history:
+            if edit.edit_type == "DELETE":
+                deletions.append((edit.target_file, edit.target_line))
+            elif edit.edit_type == "COPY":
+                insertions.append((edit.target_file, edit.target_line, edit.insertion_point))
+            elif edit.edit_type == "MOVE":
+                deletions.append((edit.target_file, edit.target_line))
+                insertions.append((edit.target_file, edit.target_line, edit.insertion_point))
+        return (insertions, deletions)
+    
     def get_diff(self):
         self.apply()
         stdoutdata = ''
@@ -33,11 +42,9 @@ class Patch:
             modified_target_file = os.path.join(self.program.tmp_project_path, self.program.target_files[i])
             stdoutdata += subprocess.getoutput("diff -u {} {}".format(original_target_file, modified_target_file))
         return stdoutdata
-    
+   
     def clone(self):
         clone_patch = Patch(self.program)
-        clone_patch.deletions = copy.deepcopy(self.deletions)
-        clone_patch.insertions = copy.deepcopy(self.insertions)
         clone_patch.history = copy.deepcopy(self.history)
         clone_patch.test_result = None
         return clone_patch
@@ -84,16 +91,17 @@ class Patch:
                 empty_codeline_list.append([])
             new_contents = dict(zip(target_files, empty_codeline_list))
 
+            insertions, deletions = self.history_to_del_ins()
             for target_file in target_files:
                 orig_codeline_list = self.program.contents[target_file]
                 new_codeline_list = new_contents[target_file]
 
                 # Create deletions set for target file: (target_file, target_line)
                 target_file_deletions = set(
-                    filter(lambda x: x[0] == target_file, self.deletions))
+                    filter(lambda x: x[0] == target_file, deletions))
                 # Create insertions dict for target file: insertion_point => [target_lines]
                 target_file_insertions = list(
-                    filter(lambda x: x[0] == target_file, self.insertions))
+                    filter(lambda x: x[0] == target_file, insertions))
                 insertion_points = list(
                     set(map(lambda x: x[2], target_file_insertions)))
                 target_file_insertions = dict(zip(
@@ -125,21 +133,14 @@ class Patch:
                 self.program.manipulation_level))
             sys.exit()
 
-    def remove(self):
-        last_edit = self.history.pop()
-        edit_type = last_edit.split()[0].strip()
-        if edit_type == "DELETE":
-            self.deletions.pop()
-        elif edit_type == "COPY":
-            self.insertions.pop()
-        elif edit_type == "MOVE":
-            self.insertions.pop()
-            self.deletions.pop()
+    def remove(self, index):
+        del self.history[index]
 
     def add_random_edit(self):
         if self.program.manipulation_level == 'physical_line':
             target_files = sorted(self.program.contents.keys())
             edit_type = random.choice(['delete', 'copy', 'move'])
+            insertions, deletions = self.history_to_del_ins()
             # line number starts from 0
             while True:
                 # Choice according to the probability distribution
@@ -159,7 +160,7 @@ class Patch:
                 target_line = random.randrange(
                     0, len(self.program.contents[target_file]))
                 if not edit_type == 'delete' or (
-                        target_file, target_line) not in self.deletions:
+                        target_file, target_line) not in deletions:
                     break
             if edit_type == 'delete':
                 self.delete(target_file, target_line)
@@ -178,16 +179,30 @@ class Patch:
         return
 
     def delete(self, target_file, target_line):
-        self.history.append("DELETE {}: {}".format(target_file, target_line))
-        self.deletions.append((target_file, target_line))
+        self.history.append(Edit('DELETE', target_file, target_line, None))
 
     def copy(self, target_file, target_line, insertion_point):
-        self.history.append("COPY {}: {} -> {}".format(target_file, target_line,
-                                                       insertion_point))
-        self.insertions.append((target_file, target_line, insertion_point))
+        self.history.append(Edit('COPY', target_file, target_line, insertion_point))
 
     def move(self, target_file, target_line, insertion_point):
-        self.history.append("MOVE {}: {} -> {}".format(target_file, target_line,
-                                                       insertion_point))
-        self.insertions.append((target_file, target_line, insertion_point))
-        self.deletions.append((target_file, target_line))
+        self.history.append(Edit('MOVE', target_file, target_line, insertion_point))
+
+class Edit:
+    def __init__(self, edit_type, target_file, target_line, insertion_point):
+        self.edit_type = edit_type
+        self.target_file = target_file
+        self.target_line = target_line
+        self.insertion_point = insertion_point
+
+    def __str__(self):
+        if self.edit_type == 'DELETE':
+            return "DELETE {}:{}".format(self.target_file, self.target_line)
+        elif self.edit_type == 'COPY':
+            return "COPY {}:{} -> {}:{}".format(self.target_file, self.target_line, self.target_file, self.insertion_point)
+        elif self.edit_type == 'MOVE':
+            return "MOVE {}:{} -> {}:{}".format(self.target_file, self.target_line, self.target_file, self.insertion_point)
+        else:
+            return ''
+    
+    def __copy__(self):
+        return Edit(self.edit_type, self.target_file, self.target_line, self.insertion_point)

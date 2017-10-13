@@ -27,11 +27,13 @@ class Patch:
         deletions = []
         for edit in self.history:
             if edit.edit_type == "DELETE":
-                deletions.append((edit.target_file, edit.target_line))
+                if not (edit.target_file, edit.target_line) in deletions: 
+                    deletions.append((edit.target_file, edit.target_line))
             elif edit.edit_type == "COPY":
                 insertions.append((edit.target_file, edit.target_line, edit.insertion_point))
             elif edit.edit_type == "MOVE":
-                deletions.append((edit.target_file, edit.target_line))
+                if not (edit.target_file, edit.target_line) in deletions: 
+                    deletions.append((edit.target_file, edit.target_line))
                 insertions.append((edit.target_file, edit.target_line, edit.insertion_point))
         return (insertions, deletions)
     
@@ -133,7 +135,7 @@ class Patch:
     def add_random_edit(self, ignore_empty_line=True):
         if self.program.manipulation_level == 'physical_line':
             target_files = sorted(self.program.contents.keys())
-            edit_type = random.choice(['delete', 'copy', 'move'])
+            edit_type = random.choice(['DELETE', 'COPY', 'MOVE'])
             insertions, deletions = self.history_to_del_ins()
             # line number starts from 0
             while True:
@@ -151,23 +153,19 @@ class Patch:
                 # Choose files based on the probability distribution by number of the code lines
                 target_file = weighted_choice(list(map(lambda filename: (filename, len(self.program.contents[filename])),
                                                    target_files)))
-                while True:
-                    target_line = random.randrange(
-                        0, len(self.program.contents[target_file]))
-                    if not ignore_empty_line:
-                        break
-                    if len(self.program.contents[target_file][target_line]) > 0:
-                        break
-                if not edit_type == 'delete' or (
-                        target_file, target_line) not in deletions:
+                target_line = random.randrange(0, len(self.program.contents[target_file]))
+                if (target_file, target_line) in deletions:
+                    continue
+                if ignore_empty_line and len(self.program.contents[target_file][target_line]) > 0:
                     break
-            if edit_type == 'delete':
+
+            if edit_type == 'DELETE':
                 self.delete(target_file, target_line)
-            elif edit_type == 'copy':
+            elif edit_type == 'COPY':
                 insertion_point = random.randrange(
                     0, len(self.program.contents[target_file]) + 1)
                 self.copy(target_file, target_line, insertion_point)
-            elif edit_type == 'move':
+            elif edit_type == 'MOVE':
                 insertion_point = random.randrange(
                     0, len(self.program.contents[target_file]) + 1)
                 self.move(target_file, target_line, insertion_point)

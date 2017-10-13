@@ -3,7 +3,7 @@ import sys
 import random
 from pyggi import *
 
-ITERATIONS = 100
+ITERATIONS = 150
 WARMUP_REPS = 10
 
 if __name__ == "__main__":

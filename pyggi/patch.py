@@ -4,6 +4,7 @@ import subprocess
 import sys
 import os
 import re
+import time
 from .program import Program
 from .test_result import TestResult
 from .test_result import pyggi_result_parser
@@ -53,33 +54,26 @@ class Patch:
         contents = self.apply()
         test_script_path = os.path.join(self.program.tmp_project_path, self.program.test_script_path)
         sprocess = subprocess.Popen(
-            ['time', "./" + test_script_path, self.program.tmp_project_path],
+            ["./" + test_script_path, self.program.tmp_project_path],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
-        stdout, stderr = sprocess.communicate()
         
-        # Execution time (real, user, sys)
-        real_time, user_time, sys_time = re.findall(
-            "\s+(.*)\sreal\s+(.*)\suser\s+(.*)\ssys",
-            stderr.decode("ascii"))[-1]
-
-        execution_time = {
-            'real': real_time,
-            'user': user_time,
-            'sys': sys_time
-        }
-
-        # print(stdout.decode("ascii"))
+        start = time.time()
+        stdout, stderr = sprocess.communicate()
+        end = time.time()
+        
+        elapsed_time = end - start
+        
         execution_result = re.findall(
             "\[PYGGI_RESULT\]\s*\{(.*?)\}\s",
             stdout.decode("ascii"))
 
         if len(execution_result) == 0:
             print("Build failed!")
-            self.test_result = TestResult(False, execution_time, None)
+            self.test_result = TestResult(False, elapsed_time, None)
         else:
             print("Build succeed!")
-            self.test_result = TestResult(True, execution_time, pyggi_result_parser(execution_result[0]))
+            self.test_result = TestResult(True, elapsed_time, pyggi_result_parser(execution_result[0]))
 
         return self.test_result
     
@@ -136,7 +130,7 @@ class Patch:
     def remove(self, index):
         del self.history[index]
 
-    def add_random_edit(self):
+    def add_random_edit(self, ignore_empty_line=True):
         if self.program.manipulation_level == 'physical_line':
             target_files = sorted(self.program.contents.keys())
             edit_type = random.choice(['delete', 'copy', 'move'])
@@ -157,8 +151,13 @@ class Patch:
                 # Choose files based on the probability distribution by number of the code lines
                 target_file = weighted_choice(list(map(lambda filename: (filename, len(self.program.contents[filename])),
                                                    target_files)))
-                target_line = random.randrange(
-                    0, len(self.program.contents[target_file]))
+                while True:
+                    target_line = random.randrange(
+                        0, len(self.program.contents[target_file]))
+                    if not ignore_empty_line:
+                        break
+                    if len(self.program.contents[target_file][target_line]) > 0:
+                        break
                 if not edit_type == 'delete' or (
                         target_file, target_line) not in deletions:
                     break

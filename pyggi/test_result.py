@@ -12,11 +12,9 @@ def pyggi_result_parser(raw_result):
     return result
 
 class TestResult:
-    def __init__(self, compiled, execution_time, pyggi_result):
+    def __init__(self, compiled, elapsed_time, pyggi_result):
         self.compiled = compiled
-        self.real_time = execution_time['real']
-        self.user_time = execution_time['user']
-        self.sys_time = execution_time['sys']
+        self.elapsed_time = elapsed_time
         self.custom = pyggi_result
 
     def __str__(self):
@@ -24,10 +22,7 @@ class TestResult:
             s = "compiled : True\n"
         else:
             s = "compiled : False\n"
-        s += "execution_time\n"
-        s += "- real_time : {}\n".format(self.real_time)
-        s += "- user_time : {}\n".format(self.user_time)
-        s += "- sys_time : {}\n".format(self.sys_time)
+        s += "elapsed_time : {}\n".format(self.elapsed_time)
         if self.custom:
             s += "custom\n"
             for k in self.custom:

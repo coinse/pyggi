@@ -4,7 +4,7 @@ import random
 from pyggi import *
 
 ITERATIONS = 100
-WARMUP_REPS = 1
+WARMUP_REPS = 10
 
 if __name__ == "__main__":
     project_path = sys.argv[1]
@@ -36,10 +36,6 @@ if __name__ == "__main__":
         print ("-------------------------------")
         print (patch.test_result)
         print ("-------------------------------")
-        #if best_patch.test_result.custom['passed'] > patch.test_result.custom['passed']:
-        #    continue
-        #if best_patch.test_result.real_time < patch.test_result.real_time:
-        #    continue
         if patch.test_result.custom['pass_all'] == 'false':
             continue
         if best_time < int(patch.test_result.custom['runtime']):

@@ -5,6 +5,7 @@ import sys
 import os
 import re
 import time
+import difflib
 from .program import Program
 from .test_result import TestResult
 from .test_result import pyggi_result_parser
@@ -39,12 +40,17 @@ class Patch:
     
     def get_diff(self):
         self.apply()
-        stdoutdata = ''
+        diffs = ''
         for i in range(len(self.program.target_files)):
             original_target_file = os.path.join(self.program.project_path, self.program.target_files[i])
-            modified_target_file = os.path.join(self.program.tmp_project_path, self.program.target_files[i])
-            stdoutdata += subprocess.getoutput("diff -u {} {}".format(original_target_file, modified_target_file))
-        return stdoutdata
+            modified_target_file = os.path.join(self.program.get_tmp_project_path(), self.program.target_files[i])
+            with open(original_target_file) as orig, open(modified_target_file) as modi:
+                for diff in difflib.context_diff(orig.readlines(),
+                                                modi.readlines(),
+                                                fromfile=original_target_file,
+                                                tofile=modified_target_file):
+                    diffs += diff
+        return diffs
    
     def clone(self):
         clone_patch = Patch(self.program)
@@ -54,16 +60,18 @@ class Patch:
 
     def run_test(self):
         contents = self.apply()
-        test_script_path = os.path.join(self.program.tmp_project_path, self.program.test_script_path)
+        cwd = os.getcwd()
+        
+        os.chdir(self.program.get_tmp_project_path())
         sprocess = subprocess.Popen(
-            ["./" + test_script_path, self.program.tmp_project_path],
+            ["./" + self.program.test_script_path],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
-        
         start = time.time()
         stdout, stderr = sprocess.communicate()
         end = time.time()
-        
+        os.chdir(cwd)
+
         elapsed_time = end - start
         
         execution_result = re.findall(
@@ -121,7 +129,7 @@ class Patch:
                         new_codeline_list.append(orig_codeline_list[i])
             
             for target_file in sorted(new_contents.keys()):
-                target_file_path = os.path.join(self.program.tmp_project_path, target_file)
+                target_file_path = os.path.join(self.program.get_tmp_project_path(), target_file)
                 with open(target_file_path, 'w') as f:
                     f.write('\n'.join(new_contents[target_file]) + '\n')
         else:

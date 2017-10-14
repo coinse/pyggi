@@ -18,7 +18,7 @@ if __name__ == "__main__":
     print ("orig_time: " + str(best_time))
 
     for i in range(ITERATIONS):
-        print()
+        print("")
         print("======== Iteration {} ========".format(i))
         patch = best_patch.clone()
         print ("current_best:\t" + str(best_patch))
@@ -45,7 +45,7 @@ if __name__ == "__main__":
         best_patch = patch
         best_time = int(patch.test_result.custom['runtime'])
 
-    print()
+    print("")
     print("============= BEST =============")
     print(best_patch)
     print(best_patch.get_diff())

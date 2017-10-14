@@ -25,9 +25,9 @@ class Program:
             config = json.load(f)
             self.test_script_path = config['test_script']
             self.target_files = config['target_files']
-        
-        self.tmp_project_path = os.path.join(Program.TMP_DIR, os.path.basename(self.project_path))
-        copy_tree(self.project_path, self.tmp_project_path)
+       
+        self.tmp_project_name = os.path.basename(self.project_path)
+        copy_tree(self.project_path, os.path.join(Program.TMP_DIR, self.tmp_project_name))
 
         self.contents = self.parse(self.project_path, self.target_files, manipulation_level)
 
@@ -43,6 +43,9 @@ class Program:
         else:
             return self.target_files
 
+    def get_tmp_project_path(self):
+        return os.path.join(Program.TMP_DIR, self.tmp_project_name)
+    
     def parse(self, project_path, target_files, manipulation_level):
         contents = {}
         if manipulation_level == 'physical_line':

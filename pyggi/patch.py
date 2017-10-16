@@ -135,7 +135,7 @@ class Patch:
         else:
             print("[Error] invalid manipulation level: {}".format(
                 self.program.manipulation_level))
-            sys.exit()
+            sys.exit(1)
 
     def remove(self, index):
         del self.history[index]
@@ -180,7 +180,7 @@ class Patch:
         else:
             print("[Error] invalid manipulation level: {}".format(
                 self.program.manipulation_level))
-            sys.exit()
+            sys.exit(1)
         return
 
     def delete(self, target_file, target_line):

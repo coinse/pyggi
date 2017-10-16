@@ -5,7 +5,7 @@ def pyggi_result_parser(raw_result):
     result = {}
     for c in raw_result.split(','):
         if len(c.split(':')) != 2:
-            print ("Result format is wrong!: {" + raw_result + "}")
+            print ("[Error] Result format is wrong!: {" + raw_result + "}")
             sys.exit(1)
         k, v = c.split(':')[0].strip(), c.split(':')[1].strip()
         result[k] = v

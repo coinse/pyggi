@@ -10,7 +10,9 @@ from .program import Program
 from .test_result import TestResult
 from .test_result import pyggi_result_parser
 
+
 class Patch:
+
     def __init__(self, program):
         self.program = program
         self.test_result = None
@@ -19,7 +21,7 @@ class Patch:
 
     def __str__(self):
         return ' | '.join(list(map(lambda e: str(e), self.history)))
-    
+
     def __len__(self):
         return len(self.history)
 
@@ -28,30 +30,37 @@ class Patch:
         deletions = []
         for edit in self.history:
             if edit.edit_type == "DELETE":
-                if not (edit.target_file, edit.target_line) in deletions: 
+                if not (edit.target_file, edit.target_line) in deletions:
                     deletions.append((edit.target_file, edit.target_line))
             elif edit.edit_type == "COPY":
-                insertions.append((edit.target_file, edit.target_line, edit.insertion_point))
+                insertions.append((edit.target_file, edit.target_line,
+                                   edit.insertion_point))
             elif edit.edit_type == "MOVE":
-                if not (edit.target_file, edit.target_line) in deletions: 
+                if not (edit.target_file, edit.target_line) in deletions:
                     deletions.append((edit.target_file, edit.target_line))
-                insertions.append((edit.target_file, edit.target_line, edit.insertion_point))
+                insertions.append((edit.target_file, edit.target_line,
+                                   edit.insertion_point))
         return (insertions, deletions)
-    
+
     def get_diff(self):
         self.apply()
         diffs = ''
         for i in range(len(self.program.target_files)):
-            original_target_file = os.path.join(self.program.project_path, self.program.target_files[i])
-            modified_target_file = os.path.join(self.program.get_tmp_project_path(), self.program.target_files[i])
-            with open(original_target_file) as orig, open(modified_target_file) as modi:
-                for diff in difflib.context_diff(orig.readlines(),
-                                                modi.readlines(),
-                                                fromfile=original_target_file,
-                                                tofile=modified_target_file):
+            original_target_file = os.path.join(self.program.project_path,
+                                                self.program.target_files[i])
+            modified_target_file = os.path.join(
+                self.program.get_tmp_project_path(),
+                self.program.target_files[i])
+            with open(original_target_file) as orig, open(
+                    modified_target_file) as modi:
+                for diff in difflib.context_diff(
+                        orig.readlines(),
+                        modi.readlines(),
+                        fromfile=original_target_file,
+                        tofile=modified_target_file):
                     diffs += diff
         return diffs
-   
+
     def clone(self):
         clone_patch = Patch(self.program)
         clone_patch.history = copy.deepcopy(self.history)
@@ -61,7 +70,7 @@ class Patch:
     def run_test(self):
         contents = self.apply()
         cwd = os.getcwd()
-        
+
         os.chdir(self.program.get_tmp_project_path())
         sprocess = subprocess.Popen(
             ["./" + self.program.test_script_path],
@@ -73,20 +82,20 @@ class Patch:
         os.chdir(cwd)
 
         elapsed_time = end - start
-        
-        execution_result = re.findall(
-            "\[PYGGI_RESULT\]\s*\{(.*?)\}\s",
-            stdout.decode("ascii"))
+
+        execution_result = re.findall("\[PYGGI_RESULT\]\s*\{(.*?)\}\s",
+                                      stdout.decode("ascii"))
 
         if len(execution_result) == 0:
             print("Build failed!")
             self.test_result = TestResult(False, elapsed_time, None)
         else:
             print("Build succeed!")
-            self.test_result = TestResult(True, elapsed_time, pyggi_result_parser(execution_result[0]))
+            self.test_result = TestResult(
+                True, elapsed_time, pyggi_result_parser(execution_result[0]))
 
         return self.test_result
-    
+
     def apply(self):
         if self.program.manipulation_level == 'physical_line':
             target_files = self.program.contents.keys()
@@ -127,9 +136,10 @@ class Patch:
                     if i < len(orig_codeline_list) and (
                             target_file, i) not in target_file_deletions:
                         new_codeline_list.append(orig_codeline_list[i])
-            
+
             for target_file in sorted(new_contents.keys()):
-                target_file_path = os.path.join(self.program.get_tmp_project_path(), target_file)
+                target_file_path = os.path.join(
+                    self.program.get_tmp_project_path(), target_file)
                 with open(target_file_path, 'w') as f:
                     f.write('\n'.join(new_contents[target_file]) + '\n')
         else:
@@ -160,8 +170,10 @@ class Patch:
                 # Choose files based on the probability distribution by number of the code lines
                 target_file = weighted_choice(list(map(lambda filename: (filename, len(self.program.contents[filename])),
                                                    target_files)))
-                target_line = random.randrange(0, len(self.program.contents[target_file]))
-                if ignore_empty_line and len(self.program.contents[target_file][target_line]) > 0:
+                target_line = random.randrange(
+                    0, len(self.program.contents[target_file]))
+                if ignore_empty_line and len(
+                        self.program.contents[target_file][target_line]) > 0:
                     break
 
             if edit_type == 'DELETE':
@@ -184,12 +196,16 @@ class Patch:
         self.history.append(Edit('DELETE', target_file, target_line, None))
 
     def copy(self, target_file, target_line, insertion_point):
-        self.history.append(Edit('COPY', target_file, target_line, insertion_point))
+        self.history.append(
+            Edit('COPY', target_file, target_line, insertion_point))
 
     def move(self, target_file, target_line, insertion_point):
-        self.history.append(Edit('MOVE', target_file, target_line, insertion_point))
+        self.history.append(
+            Edit('MOVE', target_file, target_line, insertion_point))
+
 
 class Edit:
+
     def __init__(self, edit_type, target_file, target_line, insertion_point):
         self.edit_type = edit_type
         self.target_file = target_file
@@ -200,11 +216,16 @@ class Edit:
         if self.edit_type == 'DELETE':
             return "DELETE {}:{}".format(self.target_file, self.target_line)
         elif self.edit_type == 'COPY':
-            return "COPY {}:{} -> {}:{}".format(self.target_file, self.target_line, self.target_file, self.insertion_point)
+            return "COPY {}:{} -> {}:{}".format(
+                self.target_file, self.target_line, self.target_file,
+                self.insertion_point)
         elif self.edit_type == 'MOVE':
-            return "MOVE {}:{} -> {}:{}".format(self.target_file, self.target_line, self.target_file, self.insertion_point)
+            return "MOVE {}:{} -> {}:{}".format(
+                self.target_file, self.target_line, self.target_file,
+                self.insertion_point)
         else:
             return ''
-    
+
     def __copy__(self):
-        return Edit(self.edit_type, self.target_file, self.target_line, self.insertion_point)
+        return Edit(self.edit_type, self.target_file, self.target_line,
+                    self.insertion_point)

@@ -95,6 +95,7 @@ class Patch:
                 empty_codeline_list.append([])
             new_contents = dict(zip(target_files, empty_codeline_list))
 
+            insertions, deletions = self.history_to_del_ins()
             for target_file in target_files:
                 orig_codeline_list = self.program.contents[target_file]
                 new_codeline_list = new_contents[target_file]
@@ -143,7 +144,6 @@ class Patch:
         if self.program.manipulation_level == 'physical_line':
             target_files = sorted(self.program.contents.keys())
             edit_type = random.choice(['DELETE', 'COPY', 'MOVE'])
-            insertions, deletions = self.history_to_del_ins()
             # line number starts from 0
             while True:
                 # Choice according to the probability distribution

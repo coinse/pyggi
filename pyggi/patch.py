@@ -95,7 +95,6 @@ class Patch:
                 empty_codeline_list.append([])
             new_contents = dict(zip(target_files, empty_codeline_list))
 
-            insertions, deletions = self.history_to_del_ins()
             for target_file in target_files:
                 orig_codeline_list = self.program.contents[target_file]
                 new_codeline_list = new_contents[target_file]
@@ -162,8 +161,6 @@ class Patch:
                 target_file = weighted_choice(list(map(lambda filename: (filename, len(self.program.contents[filename])),
                                                    target_files)))
                 target_line = random.randrange(0, len(self.program.contents[target_file]))
-                if (target_file, target_line) in deletions:
-                    continue
                 if ignore_empty_line and len(self.program.contents[target_file][target_line]) > 0:
                     break
 

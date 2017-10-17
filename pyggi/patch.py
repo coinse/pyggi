@@ -91,8 +91,9 @@ class Patch:
             self.test_result = TestResult(False, elapsed_time, None)
         else:
             print("Build succeed!")
-            self.test_result = TestResult(
-                True, elapsed_time, pyggi_result_parser(execution_result[0]))
+            self.test_result = TestResult(True, elapsed_time,
+                                          pyggi_result_parser(
+                                              execution_result[0]))
 
         return self.test_result
 
@@ -172,7 +173,7 @@ class Patch:
                                                    target_files)))
                 target_line = random.randrange(
                     0, len(self.program.contents[target_file]))
-                if ignore_empty_line and len(
+                if not ignore_empty_line or len(
                         self.program.contents[target_file][target_line]) > 0:
                     break
 

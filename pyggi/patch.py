@@ -6,7 +6,8 @@ import os
 import re
 import time
 import difflib
-from .program import Program
+from enum import Enum
+from .program import Program, MnplLevel
 from .test_result import TestResult
 from .test_result import pyggi_result_parser
 
@@ -29,13 +30,13 @@ class Patch:
         insertions = []
         deletions = []
         for edit in self.history:
-            if edit.edit_type == "DELETE":
+            if edit.edit_type == EditType.DELETE:
                 if not (edit.target_file, edit.target_line) in deletions:
                     deletions.append((edit.target_file, edit.target_line))
-            elif edit.edit_type == "COPY":
+            elif edit.edit_type == EditType.COPY:
                 insertions.append((edit.target_file, edit.target_line,
                                    edit.insertion_point))
-            elif edit.edit_type == "MOVE":
+            elif edit.edit_type == EditType.MOVE:
                 if not (edit.target_file, edit.target_line) in deletions:
                     deletions.append((edit.target_file, edit.target_line))
                 insertions.append((edit.target_file, edit.target_line,
@@ -98,7 +99,7 @@ class Patch:
         return self.test_result
 
     def apply(self):
-        if self.program.manipulation_level == 'physical_line':
+        if self.program.manipulation_level == MnplLevel.PHYSICAL_LINE:
             target_files = self.program.contents.keys()
             empty_codeline_list = []
             for i in range(len(target_files)):
@@ -143,18 +144,16 @@ class Patch:
                     self.program.get_tmp_project_path(), target_file)
                 with open(target_file_path, 'w') as f:
                     f.write('\n'.join(new_contents[target_file]) + '\n')
-        else:
-            print("[Error] invalid manipulation level: {}".format(
-                self.program.manipulation_level))
-            sys.exit(1)
+        return
 
     def remove(self, index):
         del self.history[index]
 
     def add_random_edit(self, ignore_empty_line=True):
-        if self.program.manipulation_level == 'physical_line':
+        if self.program.manipulation_level == MnplLevel.PHYSICAL_LINE:
             target_files = sorted(self.program.contents.keys())
-            edit_type = random.choice(['DELETE', 'COPY', 'MOVE'])
+            edit_type = random.choice(
+                [EditType.DELETE, EditType.COPY, EditType.MOVE])
             # line number starts from 0
             while True:
                 # Choice according to the probability distribution
@@ -177,32 +176,35 @@ class Patch:
                         self.program.contents[target_file][target_line]) > 0:
                     break
 
-            if edit_type == 'DELETE':
+            if edit_type == EditType.DELETE:
                 self.delete(target_file, target_line)
-            elif edit_type == 'COPY':
+            elif edit_type == EditType.COPY:
                 insertion_point = random.randrange(
                     0, len(self.program.contents[target_file]) + 1)
                 self.copy(target_file, target_line, insertion_point)
-            elif edit_type == 'MOVE':
+            elif edit_type == EditType.MOVE:
                 insertion_point = random.randrange(
                     0, len(self.program.contents[target_file]) + 1)
                 self.move(target_file, target_line, insertion_point)
-        else:
-            print("[Error] invalid manipulation level: {}".format(
-                self.program.manipulation_level))
-            sys.exit(1)
         return
 
     def delete(self, target_file, target_line):
-        self.history.append(Edit('DELETE', target_file, target_line, None))
+        self.history.append(
+            Edit(EditType.DELETE, target_file, target_line, None))
 
     def copy(self, target_file, target_line, insertion_point):
         self.history.append(
-            Edit('COPY', target_file, target_line, insertion_point))
+            Edit(EditType.COPY, target_file, target_line, insertion_point))
 
     def move(self, target_file, target_line, insertion_point):
         self.history.append(
-            Edit('MOVE', target_file, target_line, insertion_point))
+            Edit(EditType.MOVE, target_file, target_line, insertion_point))
+
+
+class EditType(Enum):
+    DELETE = 1
+    COPY = 2
+    MOVE = 3
 
 
 class Edit:
@@ -214,13 +216,13 @@ class Edit:
         self.insertion_point = insertion_point
 
     def __str__(self):
-        if self.edit_type == 'DELETE':
+        if self.edit_type == EditType.DELETE:
             return "DELETE {}:{}".format(self.target_file, self.target_line)
-        elif self.edit_type == 'COPY':
+        elif self.edit_type == EditType.COPY:
             return "COPY {}:{} -> {}:{}".format(
                 self.target_file, self.target_line, self.target_file,
                 self.insertion_point)
-        elif self.edit_type == 'MOVE':
+        elif self.edit_type == EditType.MOVE:
             return "MOVE {}:{} -> {}:{}".format(
                 self.target_file, self.target_line, self.target_file,
                 self.insertion_point)

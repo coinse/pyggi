@@ -26,21 +26,32 @@ class Patch:
     def __len__(self):
         return len(self.history)
 
+    def get_line_diff_count(self):
+        insertions, deletions = self.history_to_del_ins()
+        return len(insertions) - len(deletions)
+
     def history_to_del_ins(self):
         insertions = []
         deletions = []
+        replacements = {}
         for edit in self.history:
             if edit.edit_type == EditType.DELETE:
-                if not (edit.target_file, edit.target_line) in deletions:
-                    deletions.append((edit.target_file, edit.target_line))
+                deletions.append((edit.target_file, edit.target_line))
             elif edit.edit_type == EditType.COPY:
-                insertions.append((edit.target_file, edit.target_line,
+                insertions.append((edit.target_file, edit.source_line,
                                    edit.insertion_point))
             elif edit.edit_type == EditType.MOVE:
-                if not (edit.target_file, edit.target_line) in deletions:
-                    deletions.append((edit.target_file, edit.target_line))
-                insertions.append((edit.target_file, edit.target_line,
+                deletions.append((edit.target_file, edit.source_line))
+                insertions.append((edit.target_file, edit.source_line,
                                    edit.insertion_point))
+            elif edit.edit_type == EditType.REPLACE:
+                replacements[(edit.target_file,
+                              edit.target_line)] = edit.source_line
+        for key in replacements:
+            target_file, target_line = key
+            source_line = replacements[key]
+            deletions.append((target_file, target_line))
+            insertions.append((target_file, source_line, target_line))
         return (insertions, deletions)
 
     def print_diff(self):
@@ -146,69 +157,93 @@ class Patch:
     def remove(self, index):
         del self.history[index]
 
-    def add_random_edit(self, ignore_empty_line=True):
+    def get_random_line_index(self, target_file, ignore_empty_line=True):
+        while True:
+            index = random.randrange(0, len(self.program.contents[target_file]))
+            if not ignore_empty_line or len(
+                    self.program.contents[target_file][index]) > 0:
+                break
+        return index
+
+    def add_random_edit(self, operations, ignore_empty_line=True):
         if self.program.manipulation_level == MnplLevel.PHYSICAL_LINE:
             target_files = sorted(self.program.contents.keys())
-            edit_type = random.choice(
-                [EditType.DELETE, EditType.COPY, EditType.MOVE])
-            # line number starts from 0
-            while True:
-                # Choice according to the probability distribution
-                def weighted_choice(choice_weight_list):
-                    total = sum(weight for choice, weight in choice_weight_list)
-                    ridx = random.uniform(0, total)
-                    upto = 0
-                    for choice, weight in choice_weight_list:
-                        if upto + weight >= ridx:
-                            return choice
-                        upto += weight
-                    assert False, "weighted_choice error."
+            edit_type = random.choice(operations)
 
-                # Choose files based on the probability distribution by number of the code lines
-                target_file = weighted_choice(list(map(lambda filename: (filename, len(self.program.contents[filename])),
-                                                   target_files)))
-                target_line = random.randrange(
-                    0, len(self.program.contents[target_file]))
-                if not ignore_empty_line or len(
-                        self.program.contents[target_file][target_line]) > 0:
-                    break
+            # Choice according to the probability distribution
+            def weighted_choice(choice_weight_list):
+                total = sum(weight for choice, weight in choice_weight_list)
+                ridx = random.uniform(0, total)
+                upto = 0
+                for choice, weight in choice_weight_list:
+                    if upto + weight >= ridx:
+                        return choice
+                    upto += weight
+                assert False, "weighted_choice error."
+
+            # Choose files based on the probability distribution by number of the code lines
+            target_file = weighted_choice(
+                list(
+                    map(lambda filename: (filename, len(self.program.contents[filename])),
+                        target_files)))
 
             if edit_type == EditType.DELETE:
+                target_line = self.get_random_line_index(
+                    target_file, ignore_empty_line)
                 self.delete(target_file, target_line)
             elif edit_type == EditType.COPY:
+                source_line = self.get_random_line_index(
+                    target_file, ignore_empty_line)
                 insertion_point = random.randrange(
                     0, len(self.program.contents[target_file]) + 1)
-                self.copy(target_file, target_line, insertion_point)
+                self.copy(target_file, source_line, insertion_point)
             elif edit_type == EditType.MOVE:
+                source_line = self.get_random_line_index(
+                    target_file, ignore_empty_line)
                 insertion_point = random.randrange(
                     0, len(self.program.contents[target_file]) + 1)
-                self.move(target_file, target_line, insertion_point)
+                self.move(target_file, source_line, insertion_point)
+            elif edit_type == EditType.REPLACE:
+                source_line = self.get_random_line_index(target_file, False)
+                target_line = self.get_random_line_index(
+                    target_file, ignore_empty_line)
+                self.replace(target_file, source_line, target_line)
         return
 
     def delete(self, target_file, target_line):
         self.history.append(
-            Edit(EditType.DELETE, target_file, target_line, None))
+            Edit(EditType.DELETE, target_file, None, target_line, None))
 
-    def copy(self, target_file, target_line, insertion_point):
+    def copy(self, target_file, source_line, insertion_point):
         self.history.append(
-            Edit(EditType.COPY, target_file, target_line, insertion_point))
+            Edit(EditType.COPY, target_file, source_line, None,
+                 insertion_point))
 
-    def move(self, target_file, target_line, insertion_point):
+    def move(self, target_file, source_line, insertion_point):
         self.history.append(
-            Edit(EditType.MOVE, target_file, target_line, insertion_point))
+            Edit(EditType.MOVE, target_file, source_line, None,
+                 insertion_point))
+
+    def replace(self, target_file, source_line, target_line):
+        # Replace line #(target_line) with line #(source_line)
+        self.history.append(
+            Edit(EditType.REPLACE, target_file, source_line, target_line, None))
 
 
 class EditType(Enum):
     DELETE = 1
     COPY = 2
     MOVE = 3
+    REPLACE = 4
 
 
 class Edit:
 
-    def __init__(self, edit_type, target_file, target_line, insertion_point):
+    def __init__(self, edit_type, target_file, source_line, target_line,
+                 insertion_point):
         self.edit_type = edit_type
         self.target_file = target_file
+        self.source_line = source_line
         self.target_line = target_line
         self.insertion_point = insertion_point
 
@@ -217,15 +252,19 @@ class Edit:
             return "DELETE {}:{}".format(self.target_file, self.target_line)
         elif self.edit_type == EditType.COPY:
             return "COPY {}:{} -> {}:{}".format(
-                self.target_file, self.target_line, self.target_file,
+                self.target_file, self.source_line, self.target_file,
                 self.insertion_point)
         elif self.edit_type == EditType.MOVE:
             return "MOVE {}:{} -> {}:{}".format(
-                self.target_file, self.target_line, self.target_file,
+                self.target_file, self.source_line, self.target_file,
                 self.insertion_point)
+        elif self.edit_type == EditType.REPLACE:
+            return "REPLACE {}:{} -> {}:{}".format(
+                self.target_file, self.source_line, self.target_file,
+                self.target_line)
         else:
             return ''
 
     def __copy__(self):
-        return Edit(self.edit_type, self.target_file, self.target_line,
-                    self.insertion_point)
+        return Edit(self.edit_type, self.target_file, self.source_line,
+                    self.target_line, self.insertion_point)

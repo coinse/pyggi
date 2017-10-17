@@ -28,13 +28,14 @@ class Program:
             sys.exit(1)
 
         self.manipulation_level = MnplLevel(manipulation_level)
-        self.project_path = project_path
+        self.project_path = project_path.strip()
+        if self.project_path[-1] == '/':
+            self.project_path = self.project_path[:-1]
         with open(os.path.join(self.project_path,
                                Program.CONFIG_FILE_NAME)) as f:
             config = json.load(f)
             self.test_script_path = config['test_script']
             self.target_files = config['target_files']
-
         if not Program.clean_tmp_dir():
             sys.exit(1)
         self.tmp_project_name = os.path.basename(self.project_path)

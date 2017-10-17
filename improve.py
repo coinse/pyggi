@@ -1,4 +1,3 @@
-import os
 import sys
 import random
 from pyggi import *
@@ -28,9 +27,10 @@ if __name__ == "__main__":
                 index_to_remove = random.randrange(0, len(patch))
                 patch.remove(index_to_remove)
             else:
-                patch.add_random_edit()
+                patch.add_random_edit(
+                    [EditType.DELETE, EditType.COPY, EditType.MOVE])
             patch.run_test()
-            print("Try #{}\tIter #{}\t(compiled: {})\t{}".format(
+            print("Iter #{}-{}\t(compiled: {})\t{}".format(
                 t, i, patch.test_result.compiled, patch))
             if not patch.test_result.compiled:
                 continue

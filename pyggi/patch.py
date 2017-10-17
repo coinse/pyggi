@@ -43,9 +43,8 @@ class Patch:
                                    edit.insertion_point))
         return (insertions, deletions)
 
-    def get_diff(self):
+    def print_diff(self):
         self.apply()
-        diffs = ''
         for i in range(len(self.program.target_files)):
             original_target_file = os.path.join(self.program.project_path,
                                                 self.program.target_files[i])
@@ -59,8 +58,8 @@ class Patch:
                         modi.readlines(),
                         fromfile=original_target_file,
                         tofile=modified_target_file):
-                    diffs += diff
-        return diffs
+                    print(diff, end='')
+        return
 
     def clone(self):
         clone_patch = Patch(self.program)
@@ -88,10 +87,8 @@ class Patch:
                                       stdout.decode("ascii"))
 
         if len(execution_result) == 0:
-            print("Build failed!")
             self.test_result = TestResult(False, elapsed_time, None)
         else:
-            print("Build succeed!")
             self.test_result = TestResult(True, elapsed_time,
                                           pyggi_result_parser(
                                               execution_result[0]))

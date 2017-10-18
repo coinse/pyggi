@@ -17,14 +17,14 @@ class Patch:
     def __init__(self, program):
         self.program = program
         self.test_result = None
-        self.history = []
+        self.edit_list = []
         pass
 
     def __str__(self):
-        return ' | '.join(list(map(lambda e: str(e), self.history)))
+        return ' | '.join(list(map(lambda e: str(e), self.edit_list)))
 
     def __len__(self):
-        return len(self.history)
+        return len(self.edit_list)
 
     def get_line_diff_count(self):
         insertions, deletions = self.history_to_del_ins()
@@ -34,7 +34,7 @@ class Patch:
         insertions = []
         deletions = []
         replacements = {}
-        for edit in self.history:
+        for edit in self.edit_list:
             if edit.edit_type == EditType.DELETE:
                 deletions.append((edit.target_file, edit.target_line))
             elif edit.edit_type == EditType.COPY:
@@ -74,7 +74,7 @@ class Patch:
 
     def clone(self):
         clone_patch = Patch(self.program)
-        clone_patch.history = copy.deepcopy(self.history)
+        clone_patch.edit_list = copy.deepcopy(self.edit_list)
         clone_patch.test_result = None
         return clone_patch
 
@@ -155,7 +155,7 @@ class Patch:
         return
 
     def remove(self, index):
-        del self.history[index]
+        del self.edit_list[index]
 
     def add_random_edit(self, operations, ignore_empty_line=True):
         if self.program.manipulation_level == MnplLevel.PHYSICAL_LINE:
@@ -215,22 +215,22 @@ class Patch:
         return
 
     def delete(self, target_file, target_line):
-        self.history.append(
+        self.edit_list.append(
             Edit(EditType.DELETE, target_file, None, target_line, None))
 
     def copy(self, target_file, source_line, insertion_point):
-        self.history.append(
+        self.edit_list.append(
             Edit(EditType.COPY, target_file, source_line, None,
                  insertion_point))
 
     def move(self, target_file, source_line, insertion_point):
-        self.history.append(
+        self.edit_list.append(
             Edit(EditType.MOVE, target_file, source_line, None,
                  insertion_point))
 
     def replace(self, target_file, source_line, target_line):
         # Replace line #(target_line) with line #(source_line)
-        self.history.append(
+        self.edit_list.append(
             Edit(EditType.REPLACE, target_file, source_line, target_line, None))
 
 

@@ -11,7 +11,7 @@ public class TriangleTest {
 
     @org.junit.Test
     public void testInvalidTriangles() throws Exception {
-        int[][] invalidTriangles = {{1, 2, 9}, {-1, 1, 1}, {1, -1, 1}, {1, 1, -1}, {100, 80, 10000}};
+        int[][] invalidTriangles = {{1, 2, 9}, {-1, 1, 1}, {1, -1, 1}, {1, 1, -1}, {100, 80, 10000}, {2, 3, 1}, {1, 2, 1}};
         checkClassification(invalidTriangles, Triangle.TriangleType.INVALID);
     }
 
@@ -23,13 +23,13 @@ public class TriangleTest {
 
     @org.junit.Test
     public void testIsocelesTriangles() throws Exception {
-        int[][] isocelesTriangles = {{100, 90, 90}, {1000, 900, 900}, {2,2,3}, {30,16,16}, {16,16,28}};
+        int[][] isocelesTriangles = {{100, 90, 90}, {1000, 900, 900}, {2, 2, 3}, {30, 16, 16}, {16, 16, 28}, {20, 20, 10}, {2, 3, 2}, {1, 2, 2}};
         checkClassification(isocelesTriangles, Triangle.TriangleType.ISOCELES);
     }
 
     @org.junit.Test
     public void testScaleneTriangles() throws Exception {
-        int[][] scaleneTriangles = {{5, 4, 3}, {1000, 900, 101}, {3,20,21}, {999, 501, 600}};
+        int[][] scaleneTriangles = {{5, 4, 3}, {1000, 900, 101}, {3,20,21}, {999, 501, 600}, {100, 101, 50}, {3, 4, 2}};
         checkClassification(scaleneTriangles, Triangle.TriangleType.SCALENE);
     }
 

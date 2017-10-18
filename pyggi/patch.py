@@ -57,11 +57,10 @@ class Patch:
     def print_diff(self):
         self.apply()
         for i in range(len(self.program.target_files)):
-            original_target_file = os.path.join(self.program.project_path,
+            original_target_file = os.path.join(self.program.path,
                                                 self.program.target_files[i])
-            modified_target_file = os.path.join(
-                self.program.get_tmp_project_path(),
-                self.program.target_files[i])
+            modified_target_file = os.path.join(self.program.get_tmp_path(),
+                                                self.program.target_files[i])
             with open(original_target_file) as orig, open(
                     modified_target_file) as modi:
                 for diff in difflib.context_diff(
@@ -82,7 +81,7 @@ class Patch:
         contents = self.apply()
         cwd = os.getcwd()
 
-        os.chdir(self.program.get_tmp_project_path())
+        os.chdir(self.program.get_tmp_path())
         sprocess = subprocess.Popen(
             ["./" + self.program.test_script_path],
             stdout=subprocess.PIPE,
@@ -100,9 +99,8 @@ class Patch:
         if len(execution_result) == 0:
             self.test_result = TestResult(False, elapsed_time, None)
         else:
-            self.test_result = TestResult(True, elapsed_time,
-                                          pyggi_result_parser(
-                                              execution_result[0]))
+            self.test_result = TestResult(
+                True, elapsed_time, pyggi_result_parser(execution_result[0]))
 
         return self.test_result
 
@@ -148,8 +146,8 @@ class Patch:
                         new_codeline_list.append(orig_codeline_list[i])
 
             for target_file in sorted(new_contents.keys()):
-                target_file_path = os.path.join(
-                    self.program.get_tmp_project_path(), target_file)
+                target_file_path = os.path.join(self.program.get_tmp_path(),
+                                                target_file)
                 with open(target_file_path, 'w') as f:
                     f.write('\n'.join(new_contents[target_file]) + '\n')
         return

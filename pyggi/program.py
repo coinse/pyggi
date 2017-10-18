@@ -36,9 +36,9 @@ class Program:
             config = json.load(f)
             self.test_script_path = config['test_script']
             self.target_files = config['target_files']
-        if not Program.clean_tmp_dir():
-            sys.exit(1)
         self.tmp_project_name = os.path.basename(self.project_path)
+        if not Program.clean_tmp_dir(self.tmp_project_name):
+            sys.exit(1)
         copy_tree(self.project_path,
                   os.path.join(Program.TMP_DIR, self.tmp_project_name))
 
@@ -71,11 +71,12 @@ class Program:
         return contents
 
     @classmethod
-    def clean_tmp_dir(cls):
+    def clean_tmp_dir(cls, project_name):
         try:
-            if os.path.exists(cls.TMP_DIR):
-                shutil.rmtree(cls.TMP_DIR)
-            os.mkdir(cls.TMP_DIR)
+            tmp_project_path = os.path.join(cls.TMP_DIR, project_name)
+            if os.path.exists(tmp_project_path):
+                shutil.rmtree(tmp_project_path)
+            os.mkdir(tmp_project_path)
             return True
         except Exception as e:
             print(e)

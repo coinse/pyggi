@@ -25,7 +25,7 @@ if __name__ == "__main__":
                 patch.remove(index_to_remove)
             else:
                 patch.add_random_edit(
-                    [EditType.REPLACE, EditType.COPY], ignore_empty_line=False)
+                    [EditType.DELETE, EditType.REPLACE, EditType.COPY])
             patch.run_test()
             print("Iter #{}-{}\t(compiled: {})\t{}".format(
                 t, i, patch.test_result.compiled, patch))

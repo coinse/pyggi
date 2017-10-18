@@ -1,0 +1,56 @@
+plugins {
+  id 'com.github.johnrengelman.shadow' version '2.0.0'
+  id 'java'
+}
+
+apply plugin: 'java'
+apply plugin: 'application'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+mainClassName = "TestRunner"
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  compile group: 'commons-io', name: 'commons-io', version: '2.5'
+  compile group: 'com.google.guava', name: 'guava', version: '19.0'
+  compile group: 'junit', name: 'junit', version: '4.12'
+  compile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
+  compile group: 'com.github.javaparser', name: 'javaparser-core', version: '3.2.11'
+  compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
+}
+
+// This is handy to copy dependencies into a folder, for use in an IDE etc.
+task copyToLib(type: Copy) {
+  into "lib/"
+  from configurations.runtime
+}
+
+apply plugin: 'application'
+
+mainClassName = 'TestRunner'
+
+shadowJar {
+  destinationDir = buildDir
+  baseName = 'TestRunner'
+  classifier = null
+  version = null
+}
+
+test {
+  testLogging {
+    events "passed", "skipped", "failed", "standardOut", "standardError"
+    showExceptions true
+  }
+  afterSuite { desc, result ->
+    if (!desc.parent)
+        println("[PYGGI_RESULT] {" +
+            "tests: ${result.testCount}, " +
+            "passed: ${result.successfulTestCount}, " +
+            "failed: ${result.failedTestCount}, " +
+            "skipped: ${result.skippedTestCount}}")
+  }
+}

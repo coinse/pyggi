@@ -1,0 +1,6 @@
+{
+  "target_files": [
+    "src/main/java/Triangle.java"
+  ],
+  "test_script": "run.sh"
+}

@@ -5,7 +5,6 @@ public class Triangle {
     }
 
     public static TriangleType classifyTriangle(int a, int b, int c) {
-        // Sort the sides so that a <= b <= c
         if (a > b) {
             int tmp = a;
             a = b;
@@ -13,8 +12,7 @@ public class Triangle {
         }
 
         if (a > c) {
-            // int tmp = a;
-            int tmp = b;
+            int tmp = b; // original: int tmp = a;
             a = c;
             c = tmp;
         }
@@ -24,8 +22,6 @@ public class Triangle {
             b = c;
             c = tmp;
         }
-
-        // b = c;
 
         if (a + b <= c) {
             return TriangleType.INVALID;

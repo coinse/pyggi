@@ -23,7 +23,7 @@ public class TriangleTest {
 
     @org.junit.Test
     public void testIsocelesTriangles() throws Exception {
-        int[][] isocelesTriangles = {{100, 90, 90}, {1000, 900, 900}, {3,2,2}, {30,16,16}};
+        int[][] isocelesTriangles = {{100, 90, 90}, {1000, 900, 900}, {2,2,3}, {30,16,16}, {16,16,28}};
         checkClassification(isocelesTriangles, Triangle.TriangleType.ISOCELES);
     }
 

@@ -172,17 +172,19 @@ class Patch:
                         return choice
                     upto += weight
                 assert False, "weighted_choice error."
-            
+
             def get_random_line_index(target_file, ignore_empty_line=True):
                 while True:
-                    index = random.randrange(0, len(self.program.contents[target_file]))
+                    index = random.randrange(
+                        0, len(self.program.contents[target_file]))
                     if not ignore_empty_line or len(
                             self.program.contents[target_file][index]) > 0:
                         break
                 return index
 
             def get_random_insertion_point(target_file):
-                return random.randrange(0, len(self.program.contents[target_file]) + 1)
+                return random.randrange(
+                    0, len(self.program.contents[target_file]) + 1)
 
             # Choose files based on the probability distribution by number of the code lines
             target_file = weighted_choice(
@@ -191,22 +193,24 @@ class Patch:
                         target_files)))
 
             if edit_type == EditType.DELETE:
-                target_line = get_random_line_index(
-                    target_file, ignore_empty_line)
+                target_line = get_random_line_index(target_file,
+                                                    ignore_empty_line)
                 self.delete(target_file, target_line)
             elif edit_type == EditType.COPY:
-                source_line = get_random_line_index(
-                    target_file, ignore_empty_line)
+                source_line = get_random_line_index(target_file,
+                                                    ignore_empty_line)
                 insertion_point = get_random_insertion_point(target_file)
                 self.copy(target_file, source_line, insertion_point)
             elif edit_type == EditType.MOVE:
-                source_line = get_random_line_index(
-                    target_file, ignore_empty_line)
+                source_line = get_random_line_index(target_file,
+                                                    ignore_empty_line)
                 insertion_point = get_random_insertion_point(target_file)
                 self.move(target_file, source_line, insertion_point)
             elif edit_type == EditType.REPLACE:
-                source_line = get_random_line_index(target_file, ignore_empty_line)
-                target_line = get_random_line_index(target_file, ignore_empty_line)
+                source_line = get_random_line_index(target_file,
+                                                    ignore_empty_line)
+                target_line = get_random_line_index(target_file,
+                                                    ignore_empty_line)
                 self.replace(target_file, source_line, target_line)
         return
 

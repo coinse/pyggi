@@ -41,7 +41,7 @@ public class Triangle {
 
     private static void delay() {
         try {
-            Thread.sleep(100);
+            Thread.sleep(50);
         } catch (InterruptedException e) {
             // do nothing
         }

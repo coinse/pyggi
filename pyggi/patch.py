@@ -55,6 +55,7 @@ class Patch:
             source_line = replacements[key]
             deletions.append((target_file, target_line))
             insertions.append((target_file, source_line, target_line))
+        deletions = list(set(deletions))
         return (insertions, deletions)
 
     def print_diff(self):

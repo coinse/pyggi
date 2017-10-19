@@ -211,8 +211,11 @@ class Patch:
             elif edit_type == EditType.REPLACE:
                 source_line = get_random_line_index(target_file,
                                                     ignore_empty_line)
-                target_line = get_random_line_index(target_file,
-                                                    ignore_empty_line)
+                while True:
+                    target_line = get_random_line_index(target_file,
+                                                        ignore_empty_line)
+                    if source_line is not target_line:
+                        break
                 self.replace(target_file, source_line, target_line)
         return
 

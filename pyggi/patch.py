@@ -26,6 +26,9 @@ class Patch:
     def __len__(self):
         return len(self.edit_list)
 
+    def __eq__(self, other):
+        return self.edit_list == other.edit_list
+
     def get_line_diff_count(self):
         insertions, deletions = self.history_to_del_ins()
         return len(insertions) - len(deletions)
@@ -270,3 +273,10 @@ class Edit:
     def __copy__(self):
         return Edit(self.edit_type, self.target_file, self.source_line,
                     self.target_line, self.insertion_point)
+
+    def __eq__(self, other):
+        return (self.edit_type == other.edit_type and
+                self.target_file == other.target_file and
+                self.source_line == other.source_line and
+                self.target_line == other.target_line and
+                self.insertion_point == other.insertion_point)

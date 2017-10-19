@@ -103,8 +103,9 @@ class Patch:
         if len(execution_result) == 0:
             self.test_result = TestResult(False, elapsed_time, None)
         else:
-            self.test_result = TestResult(
-                True, elapsed_time, pyggi_result_parser(execution_result[0]))
+            self.test_result = TestResult(True, elapsed_time,
+                                          pyggi_result_parser(
+                                              execution_result[0]))
 
         return self.test_result
 

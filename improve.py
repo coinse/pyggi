@@ -17,6 +17,7 @@ if __name__ == "__main__":
     orig_time = float(sum(runtimes)) / len(runtimes)
     print("orig_time: " + str(orig_time))
 
+    compilation_failure_count = 0
     best_patches = []
     for t in range(1, TRY + 1):
         best_patch = empty_patch
@@ -33,6 +34,7 @@ if __name__ == "__main__":
             print("Iter #{}-{}\t(compiled: {})\t{}".format(
                 t, i, patch.test_result.compiled, patch))
             if not patch.test_result.compiled:
+                compilation_failure_count += 1
                 continue
             if patch.test_result.custom['pass_all'] == 'false':
                 continue
@@ -54,3 +56,7 @@ if __name__ == "__main__":
     print(best_patch)
     print(best_patch.test_result)
     best_patch.print_diff()
+    print("\n=========CFR==============")
+    print("{}%: {}/{}".format(
+        float(compilation_failure_count) / (TRY * ITERATIONS) * 100,
+        compilation_failure_count, TRY * ITERATIONS))

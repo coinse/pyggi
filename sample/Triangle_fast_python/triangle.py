@@ -1,3 +1,4 @@
+import time
 from enum import Enum
 
 
@@ -8,7 +9,15 @@ class TriangleType(Enum):
     SCALENE = 3
 
 
+def delay():
+    time.sleep(0.05)
+
+
 def classify_triangle(a, b, c):
+
+    delay()
+
+    # Sort the sides so that a <= b <= c
     if a > b:
         tmp = a
         a = b
@@ -32,7 +41,3 @@ def classify_triangle(a, b, c):
         return TriangleType.ISOCELES
     else:
         return TriangleType.SCALENE
-
-
-if __name__ == "__main__":
-    print(classify_triangle(1, 1, 1))

@@ -1,5 +1,6 @@
 import sys
 
+
 class TestResult:
 
     def __init__(self, compiled, elapsed_time, pyggi_result):

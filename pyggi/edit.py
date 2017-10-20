@@ -1,38 +1,59 @@
 from enum import Enum
 
+
 class EditType(Enum):
     DELETE = 1
     COPY = 2
     MOVE = 3
     REPLACE = 4
 
+
+class LocType(Enum):
+    INDEX = 'I'
+    INSERTION_POINT = 'P'
+
+
 class Edit(object):
-    def __init__(self, edit_type, target_file, source_line, target_line,
-                 insertion_point):
+
+    def __init__(self, edit_type, source=None, target=None):
+        '''
+         -------------------------------------------------
+        |         | DELETE  | MOVE    | COPY    | REPLACE |
+        | -------- --------- --------- --------- ---------|
+        | Source  |         | index   | index   | index   |
+        | Target  | index   | point   | point   | index   |
+         -------------------------------------------------
+        '''
+        if not isinstance(edit_type, EditType):
+            print("[Error] Invalid edit_type: {}".format(edit_type))
         self.edit_type = edit_type
-        self.target_file = target_file
-        self.source_line = source_line
-        self.target_line = target_line
-        self.insertion_point = insertion_point
+        self.source = source
+        self.target = target
 
     def __str__(self):
-        if self.edit_type == EditType.DELETE:
-            return "DELETE {}:{}".format(self.target_file, self.target_line)
-        elif self.edit_type == EditType.COPY:
-            return "COPY {}:{} -> {}:{}".format(
-                self.target_file, self.source_line, self.target_file,
-                self.insertion_point)
-        elif self.edit_type == EditType.MOVE:
-            return "MOVE {}:{} -> {}:{}".format(
-                self.target_file, self.source_line, self.target_file,
-                self.insertion_point)
-        elif self.edit_type == EditType.REPLACE:
-            return "REPLACE {}:{} -> {}:{}".format(
-                self.target_file, self.source_line, self.target_file,
-                self.target_line)
-        else:
-            return ''
+
+        def to_str(source, source_type, target, target_type):
+            s = "[{0}:{2}:{1}]".format(target[0], target[1], target_type.value)
+            if source:
+                s = "[{0}:{2}:{1}] -> ".format(source[0], source[1],
+                                               source_type.value) + s
+            return s
+
+        return "{} {}".format(self.edit_type.name,
+                              to_str(self.source, self.source_type, self.target,
+                                     self.target_type))
 
     def __copy__(self):
-        return Edit(self.edit_type, self.target_file, self.source_line,
-                    self.target_line, self.insertion_point)
+        return Edit(self.edit_type, self.source, self.target)
+
+    @property
+    def source_type(self):
+        if self.edit_type == EditType.DELETE:
+            return None
+        return LocType.INDEX
+
+    @property
+    def target_type(self):
+        if self.edit_type in (EditType.DELETE, EditType.REPLACE):
+            return LocType.INDEX
+        return LocType.INSERTION_POINT

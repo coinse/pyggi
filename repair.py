@@ -48,7 +48,8 @@ if __name__ == "__main__":
 
     repaired_patches = sorted(
         repaired_patches,
-        key=lambda patch: (int(patch.test_result.custom['failed']), patch.get_line_diff_count())
+        key=
+        lambda patch: (int(patch.test_result.custom['failed']), patch.edit_size)
     )
     print("\n=============ALL POSSIBLE PATCHES==============")
     for best_patch in repaired_patches:

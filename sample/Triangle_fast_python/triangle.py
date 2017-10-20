@@ -10,7 +10,7 @@ class TriangleType(Enum):
 
 
 def delay():
-    time.sleep(0.05)
+    time.sleep(0.01)
 
 
 def classify_triangle(a, b, c):

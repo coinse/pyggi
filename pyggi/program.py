@@ -6,7 +6,6 @@ from enum import Enum
 from distutils.dir_util import copy_tree
 from .test_result import TestResult
 
-
 class MnplLevel(Enum):
     PHYSICAL_LINE = 'physical_line'
     # AST = 'ast'
@@ -15,8 +14,7 @@ class MnplLevel(Enum):
     def is_valid(cls, value):
         return (any(value == item.value for item in cls))
 
-
-class Program:
+class Program(object):
     CONFIG_FILE_NAME = 'PYGGI_CONFIG'
     TMP_DIR = "pyggi_tmp/"
 

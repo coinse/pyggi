@@ -6,13 +6,11 @@ import os
 import re
 import time
 import difflib
-from enum import Enum
-from .program import Program, MnplLevel
-from .test_result import TestResult
-from .test_result import pyggi_result_parser
+from .program import *
+from .edit import *
+from .test_result import *
 
-
-class Patch:
+class Patch(object):
 
     def __init__(self, program):
         self.program = program
@@ -30,10 +28,10 @@ class Patch:
         return self.edit_list == other.edit_list
 
     def get_line_diff_count(self):
-        insertions, deletions = self.history_to_del_ins()
+        insertions, deletions = self.edit_list_to_del_ins()
         return len(insertions) - len(deletions)
 
-    def history_to_del_ins(self):
+    def edit_list_to_del_ins(self):
         insertions = []
         deletions = []
         replacements = {}
@@ -104,8 +102,7 @@ class Patch:
             self.test_result = TestResult(False, elapsed_time, None)
         else:
             self.test_result = TestResult(True, elapsed_time,
-                                          pyggi_result_parser(
-                                              execution_result[0]))
+                    TestResult.pyggi_result_parser(execution_result[0]))
 
         return self.test_result
 
@@ -117,7 +114,7 @@ class Patch:
                 empty_codeline_list.append([])
             new_contents = dict(zip(target_files, empty_codeline_list))
 
-            insertions, deletions = self.history_to_del_ins()
+            insertions, deletions = self.edit_list_to_del_ins()
             for target_file in target_files:
                 orig_codeline_list = self.program.contents[target_file]
                 new_codeline_list = new_contents[target_file]
@@ -238,50 +235,3 @@ class Patch:
         # Replace line #(target_line) with line #(source_line)
         self.edit_list.append(
             Edit(EditType.REPLACE, target_file, source_line, target_line, None))
-
-
-class EditType(Enum):
-    DELETE = 1
-    COPY = 2
-    MOVE = 3
-    REPLACE = 4
-
-
-class Edit:
-
-    def __init__(self, edit_type, target_file, source_line, target_line,
-                 insertion_point):
-        self.edit_type = edit_type
-        self.target_file = target_file
-        self.source_line = source_line
-        self.target_line = target_line
-        self.insertion_point = insertion_point
-
-    def __str__(self):
-        if self.edit_type == EditType.DELETE:
-            return "DELETE {}:{}".format(self.target_file, self.target_line)
-        elif self.edit_type == EditType.COPY:
-            return "COPY {}:{} -> {}:{}".format(
-                self.target_file, self.source_line, self.target_file,
-                self.insertion_point)
-        elif self.edit_type == EditType.MOVE:
-            return "MOVE {}:{} -> {}:{}".format(
-                self.target_file, self.source_line, self.target_file,
-                self.insertion_point)
-        elif self.edit_type == EditType.REPLACE:
-            return "REPLACE {}:{} -> {}:{}".format(
-                self.target_file, self.source_line, self.target_file,
-                self.target_line)
-        else:
-            return ''
-
-    def __copy__(self):
-        return Edit(self.edit_type, self.target_file, self.source_line,
-                    self.target_line, self.insertion_point)
-
-    def __eq__(self, other):
-        return (self.edit_type == other.edit_type and
-                self.target_file == other.target_file and
-                self.source_line == other.source_line and
-                self.target_line == other.target_line and
-                self.insertion_point == other.insertion_point)

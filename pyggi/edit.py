@@ -1,6 +1,5 @@
 from enum import Enum
 
-
 class EditType(Enum):
     DELETE = 1
     COPY = 2
@@ -11,7 +10,6 @@ class EditType(Enum):
 class LocType(Enum):
     INDEX = 'I'
     INSERTION_POINT = 'P'
-
 
 class Edit(object):
 
@@ -25,7 +23,7 @@ class Edit(object):
          -------------------------------------------------
         '''
         if not isinstance(edit_type, EditType):
-            print("[Error] Invalid edit_type: {}".format(edit_type))
+            exit(1)
         self.edit_type = edit_type
         self.source = source
         self.target = target

@@ -65,8 +65,9 @@ class Patch(object):
         clone_patch.test_result = None
         return clone_patch
 
-    def print_diff(self):
+    def get_diff(self):
         self.apply()
+        diffs = ''
         for i in range(len(self.program.target_files)):
             original_target_file = os.path.join(self.program.path,
                                                 self.program.target_files[i])
@@ -79,8 +80,8 @@ class Patch(object):
                         modi.readlines(),
                         fromfile=original_target_file,
                         tofile=modified_target_file):
-                    print(diff, end='')
-        return
+                    diffs += diff
+        return diffs
 
     def delete(self, target):
         self.edit_list.append(Edit(EditType.DELETE, target=target))

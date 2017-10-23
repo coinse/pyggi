@@ -43,14 +43,13 @@ if __name__ == "__main__":
         get_neighbours=get_neighbours,
         validity_check=validity_check,
         get_fitness=get_fitness,
-        compare_fitness=compare_fitness,
-        print_log=True)
+        compare_fitness=compare_fitness)
 
     patches = sorted(
         patches, key=lambda patch: (get_fitness(patch), patch.edit_size))
-    print("=============ALL POSSIBLE PATCHES==============")
+    program.logger.info("=============ALL POSSIBLE PATCHES==============")
     for best_patch in patches:
-        print(best_patch)
-        print(best_patch.test_result)
-        best_patch.print_diff()
-    print("CFR: {}%".format(cfr))
+        program.logger.info(best_patch)
+        program.logger.info(best_patch.test_result)
+        program.logger.info(best_patch.get_diff())
+    program.logger.info("CFR: {}%".format(cfr))

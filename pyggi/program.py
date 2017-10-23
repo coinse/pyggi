@@ -5,7 +5,7 @@ import json
 from enum import Enum
 from distutils.dir_util import copy_tree
 from .test_result import TestResult
-
+from .logger import Logger
 
 class MnplLevel(Enum):
     PHYSICAL_LINE = 'physical_line'
@@ -21,7 +21,6 @@ class Program(object):
     TMP_DIR = "pyggi_tmp/"
 
     def __init__(self, path, manipulation_level='physical_line'):
-
         def clean_tmp_dir(tmp_path):
             try:
                 if os.path.exists(tmp_path):
@@ -29,7 +28,7 @@ class Program(object):
                 os.mkdir(tmp_path)
                 return True
             except Exception as e:
-                print(e)
+                self.logger.error(e)
                 return False
 
         def parse(manipulation_level, path, target_files):
@@ -40,16 +39,17 @@ class Program(object):
                         contents[target_file] = list(
                             map(str.rstrip, f.readlines()))
             return contents
-
-        if not MnplLevel.is_valid(manipulation_level):
-            print("[Error] invalid manipulation level: {}".format(
-                manipulation_level))
-            sys.exit(1)
-        self.manipulation_level = MnplLevel(manipulation_level)
+        
         self.path = path.strip()
         if self.path[-1] == '/':
             self.path = self.path[:-1]
         self.name = os.path.basename(self.path)
+        self.logger = Logger(self.name)
+        if not MnplLevel.is_valid(manipulation_level):
+            self.logger.error("Invalid manipulation level: {}".format(
+                manipulation_level))
+            sys.exit(1)
+        self.manipulation_level = MnplLevel(manipulation_level)
         with open(os.path.join(self.path, Program.CONFIG_FILE_NAME)) as f:
             config = json.load(f)
             self.test_script_path = config['test_script']

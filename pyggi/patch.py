@@ -99,10 +99,10 @@ class Patch(object):
     def remove(self, index):
         del self.edit_list[index]
 
-    def add_random_edit(self, operations, ignore_empty_line=True):
+    def add_random_edit(self, edit_types=[EditType.DELETE, EditType.COPY, EditType.REPLACE], ignore_empty_line=True):
         if self.program.manipulation_level == MnplLevel.PHYSICAL_LINE:
             target_files = sorted(self.program.contents.keys())
-            edit_type = random.choice(operations)
+            edit_type = random.choice(edit_types)
 
             # Choice according to the probability distribution
             def weighted_choice(choice_weight_list):

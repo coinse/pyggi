@@ -7,11 +7,15 @@
 # Program instance
 program = Program(project_path, 'physical_line')
 
-# Patch instance
-patch = Patch(program)
-
-# Run test from Patch
-patch.run_test()
+# Run local search
+cfr, patches = local_search(
+    program,
+    total_try=TRY,
+    iterations=ITERATIONS,
+    get_neighbours=get_neighbours,
+    validity_check=validity_check,
+    get_fitness=get_fitness,
+    compare_fitness=compare_fitness)
 
 ...
 ```

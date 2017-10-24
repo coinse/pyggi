@@ -1,0 +1,6 @@
+{
+  "target_files": [
+    "triangle.py"
+  ],
+  "test_script": "run.sh"
+}

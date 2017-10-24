@@ -1,6 +1,8 @@
-from .program import Program
-from .patch import Patch
-from .patch import EditType
+from .program import *
+from .patch import *
+from .edit import *
+from .test_result import *
+from .algorithms import *
 
 
 def oink():

@@ -16,3 +16,5 @@
 .gradle
 **/build/
 
+# Log
+*.log

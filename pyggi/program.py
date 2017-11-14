@@ -7,6 +7,7 @@ from distutils.dir_util import copy_tree
 from .test_result import TestResult
 from .logger import Logger
 
+
 class MnplLevel(Enum):
     PHYSICAL_LINE = 'physical_line'
     # AST = 'ast'
@@ -21,6 +22,7 @@ class Program(object):
     TMP_DIR = "pyggi_tmp/"
 
     def __init__(self, path, manipulation_level='physical_line'):
+
         def clean_tmp_dir(tmp_path):
             try:
                 if os.path.exists(tmp_path):
@@ -39,15 +41,15 @@ class Program(object):
                         contents[target_file] = list(
                             map(str.rstrip, f.readlines()))
             return contents
-        
+
         self.path = path.strip()
         if self.path[-1] == '/':
             self.path = self.path[:-1]
         self.name = os.path.basename(self.path)
         self.logger = Logger(self.name)
         if not MnplLevel.is_valid(manipulation_level):
-            self.logger.error("Invalid manipulation level: {}".format(
-                manipulation_level))
+            self.logger.error(
+                "Invalid manipulation level: {}".format(manipulation_level))
             sys.exit(1)
         self.manipulation_level = MnplLevel(manipulation_level)
         with open(os.path.join(self.path, Program.CONFIG_FILE_NAME)) as f:

@@ -2,26 +2,25 @@ import sys
 import random
 from pyggi import *
 
-TRY = 50
-ITERATIONS = 100
+RUN = 50
+ITERATIONS = 10000
 
 if __name__ == "__main__":
     project_path = sys.argv[1]
     program = Program(project_path, 'physical_line')
-    visited = []
+    tabu = []
 
     def get_neighbours(patch):
-        cnt = 0
-        while True and cnt < 50:
-            cnt += 1
-            if len(patch) > 0 and random.random() < 0.5:
-                patch.remove(random.randrange(0, len(patch)))
+        while True:
+            c_patch = patch.clone()
+            if len(c_patch) > 0 and random.random() < 0.5:
+                c_patch.remove(random.randrange(0, len(c_patch)))
             else:
-                patch.add_random_edit()
-            if patch not in visited:
-                visited.append(patch)
+                c_patch.add_random_edit()
+            if not any(item == c_patch for item in tabu):
+                tabu.append(c_patch)
                 break
-        return patch
+        return c_patch
 
     def validity_check(patch):
         return patch.test_result.compiled and patch.test_result.custom['pass_all'] == 'true'
@@ -35,15 +34,23 @@ if __name__ == "__main__":
         # the best(min) fitness value
         return current < best
 
+    def stop(i, patch):
+        global tabu
+        if not int(patch.test_result.custom['failed']) == 0:
+            return False
+        tabu = []
+        return True
+
     cfr, patches = local_search(
         program,
         warmup_reps=1,
-        total_try=TRY,
+        total_run=RUN,
         iterations=ITERATIONS,
         get_neighbours=get_neighbours,
         validity_check=validity_check,
         get_fitness=get_fitness,
-        compare_fitness=compare_fitness)
+        compare_fitness=compare_fitness,
+        stop=stop)
 
     patches = sorted(
         patches, key=lambda patch: (get_fitness(patch), patch.edit_size))

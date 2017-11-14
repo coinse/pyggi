@@ -3,10 +3,7 @@ from enum import Enum
 
 
 class TriangleType(Enum):
-    INVALID = 0
-    EQUALATERAL = 1
-    ISOCELES = 2
-    SCALENE = 3
+    INVALID, EQUALATERAL, ISOCELES, SCALENE = 0, 1, 2, 3
 
 
 def delay():

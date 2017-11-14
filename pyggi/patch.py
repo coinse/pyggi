@@ -100,7 +100,10 @@ class Patch(object):
     def remove(self, index):
         del self.edit_list[index]
 
-    def add_random_edit(self, edit_types=[EditType.DELETE, EditType.COPY, EditType.REPLACE], ignore_empty_line=True):
+    def add_random_edit(
+            self,
+            edit_types=[EditType.DELETE, EditType.COPY, EditType.REPLACE],
+            ignore_empty_line=True):
         if self.program.manipulation_level == MnplLevel.PHYSICAL_LINE:
             target_files = sorted(self.program.contents.keys())
             edit_type = random.choice(edit_types)
@@ -208,7 +211,7 @@ class Patch(object):
                     f.write('\n'.join(new_contents[target_file]) + '\n')
         return
 
-    def run_test(self):
+    def run_test(self, timeout=15):
         contents = self.apply()
         cwd = os.getcwd()
 
@@ -217,19 +220,22 @@ class Patch(object):
             ["./" + self.program.test_script_path],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
-        start = time.time()
-        stdout, stderr = sprocess.communicate()
-        end = time.time()
-        os.chdir(cwd)
-        elapsed_time = end - start
-        execution_result = re.findall("\[PYGGI_RESULT\]\s*\{(.*?)\}\s",
-                                      stdout.decode("ascii"))
-
-        if len(execution_result) == 0:
+        try:
+            start = time.time()
+            stdout, stderr = sprocess.communicate(timeout=timeout)
+            end = time.time()
+            elapsed_time = end - start
+            execution_result = re.findall("\[PYGGI_RESULT\]\s*\{(.*?)\}\s",
+                                          stdout.decode("ascii"))
+            if len(execution_result) == 0:
+                self.test_result = TestResult(False, elapsed_time, None)
+            else:
+                self.test_result = TestResult(True, elapsed_time,
+                                              TestResult.pyggi_result_parser(
+                                                  execution_result[0]))
+        except subprocess.TimeoutExpired:
+            elapsed_time = timeout * 1000
             self.test_result = TestResult(False, elapsed_time, None)
-        else:
-            self.test_result = TestResult(
-                True, elapsed_time,
-                TestResult.pyggi_result_parser(execution_result[0]))
+        os.chdir(cwd)
 
         return self.test_result

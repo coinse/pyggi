@@ -1,4 +1,5 @@
 import sys
+import copy
 
 
 class TestResult:
@@ -7,6 +8,10 @@ class TestResult:
         self.compiled = compiled
         self.elapsed_time = elapsed_time
         self.custom = pyggi_result
+
+    def __copy__(self):
+        return TestResult(self.compiled, self.elapsed_time,
+                          copy.deepcopy(self.custom))
 
     def __str__(self):
         if self.compiled:

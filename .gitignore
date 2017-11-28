@@ -21,3 +21,13 @@
 
 #OS X
 .DS_Store
+
+#LaTeX
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.out
+*.synctex.gz
+

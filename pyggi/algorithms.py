@@ -1,9 +1,10 @@
-from .patch import Patch
-from .program import Program
-from .test_result import TestResult
-from .edit import EditType
-import time
+"""
 
+This module contains search algorithms.
+
+"""
+import time
+from .patch import Patch
 
 def local_search(program,
                  warmup_reps=10,
@@ -15,6 +16,12 @@ def local_search(program,
                  compare_fitness=lambda a, b: a <= b,
                  stop=lambda i, p: False,
                  timeout=15):
+    """
+    It starts from a randomly generated candidate solution
+    and iteratively moves to its neighbouring solution with
+    a better fitness value by making small local changes to
+    the candidate solution.
+    """
     base_fitnesses = list()
     empty_patch = Patch(program)
     for i in range(warmup_reps):
@@ -26,8 +33,8 @@ def local_search(program,
     cfc = 0  # Compilation failure count
     tic = 0  # Total iteration count
     best_patches = list()
-    for t in range(1, total_run + 1):
-        program.logger.info("===========TRY #{}==========".format(t))
+    for run in range(1, total_run + 1):
+        program.logger.info("===========TRY #{}==========".format(run))
         best_patch = empty_patch
         best_fitness = base_fitness
         start = time.time()
@@ -51,8 +58,8 @@ def local_search(program,
                 program.logger.info("- NPS: {}".format(i - 1))
                 break
         program.logger.info("- Duration Time: {}".format(time.time() - start))
-        if len(best_patch) > 0:
-            program.logger.info("- TRY #{}'s BEST patch: ".format(t))
+        if best_patch:
+            program.logger.info("- TRY #{}'s BEST patch: ".format(run))
             program.logger.info(best_patch)
             best_patches.append(best_patch)
     cfr = float(cfc) / tic * 100

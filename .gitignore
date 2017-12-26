@@ -31,3 +31,5 @@
 *.out
 *.synctex.gz
 
+# Document
+doc/_build/

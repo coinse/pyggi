@@ -50,13 +50,10 @@ class Patch(object):
         """
         Define the size of modifications made by this patch
 
-        Returns:
-            int:
-                0 if no change in the contents' size
-                < 0 if the size shrank
-                > 0 if the size increased
+        :return: Size info
+        :rtype: int
 
-        Examples:
+        .. note::
             1. If two lines are deleted, returns -2
             2. If two lines are inserted, returns 2
             3. If one line is replaced with other, returns 0 (no change in size but in contents)
@@ -129,8 +126,10 @@ class Patch(object):
         """
         Add an edit to the edit list
 
-        Args:
-            edit: an instance of a class which inherits AtomicOperator or Edit
+        :arg edit: An class instance
+        :type edit: :py:class:`.atomic_operator.AtomicOperator` or :py:class:`.Edit`
+
+        :return: None
         """
         assert isinstance(edit, (AtomicOperator, Edit))
         self.edit_list.append(edit)
@@ -152,8 +151,8 @@ class Patch(object):
         and a patch is a sequence of the edits.
         So this is a sort of flattening process.
 
-        Returns:
-            list: a list of the atomic operators
+        :return: A list of the atomic operators
+        :rtype: list
         """
         atomics = dict()
         for edit in self.edit_list:
@@ -210,10 +209,9 @@ class Patch(object):
         This method applies the patch to the target program.
         It does not directly modify the source code of the original program,
         but modifies the copied program within the temporary directory.
-        Returns:
-            dict:
-                key: a target file name(path) related to the program root path
-                value: patch-applied contents of the file
+
+        :return: A target file name(path) related to the program root path / patch-applied contents of the file
+        :rtype: dict
         """
         lrs = self.line_replacements.items()
         lis = self.line_insertions.items()

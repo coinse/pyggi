@@ -10,10 +10,8 @@ class Logger(object):
     Logger class is used to records execution information.
     It wraps the Logger object from logging module which
     have two handlers: file handler and stream handler.
-    5 logging levels are available: debug, info, warning, error, critial
-
-    .. See more
-        https://docs.python.org/3.6/library/logging.html
+    5 logging levels are available: debug, info, warning, error, critial.
+    For more information, see https://docs.python.org/3.6/library/logging.html .
     """
     LOG_DIR = './log'
 
@@ -40,39 +38,44 @@ class Logger(object):
     def debug(self, msg):
         """
         Logs a message with level DEBUG on this logger
-        Args:
-            msg: a message to record
+
+        :param msg: The message to record
+        :return: None
         """
         self._logger.debug(msg)
 
     def info(self, msg):
         """
         Logs a message with level INFO on this logger
-        Args:
-            msg: a message to record
+
+        :param msg: The message to record
+        :return: None
         """
         self._logger.info(msg)
 
     def warning(self, msg):
         """
         Logs a message with level WARNING on this logger
-        Args:
-            msg: a message to record
+
+        :param msg: The message to record
+        :return: None
         """
         self._logger.warning(msg)
 
     def error(self, msg):
         """
         Logs a message with level ERROR on this logger
-        Args:
-            msg: a message to record
+
+        :param msg: The message to record
+        :return: None
         """
         self._logger.error(msg)
 
     def critical(self, msg):
         """
         Logs a message with level CRITICAL on this logger
-        Args:
-            msg: a message to record
+
+        :param msg: The message to record
+        :return: None
         """
         self._logger.critical(msg)

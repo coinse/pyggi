@@ -8,34 +8,46 @@ from abc import ABCMeta, abstractmethod
 
 class AtomicOperator(metaclass=ABCMeta):
     """
-    PYGGI-defined Atomic Operator
-
+    PYGGI-defined Atomic Operator:
     User can generate the own edit operators
     which can be converted into a list of atomic operators.
-    For example, MOVE x -> y operator can be represented as
-    [ LineReplacement(x, None), LineInsertion(x, y) ]
+    For example, **MOVE x -> y** operator can be represented as
+    **[LineReplacement(x, None),LineInsertion(x, y)]**
 
-    - Available list
-    1. Line-based Edit Operators
-        | Point # | Line # | Code                 |
-        |    0    |        |                      |
-        |         |    0   | -------------------- |
-        |    1    |        |                      |
-        |         |    1   | -------------------- |
-        |    2    |        |                      |
-        |         |    2   | -------------------- |
-        |    3    |        |                      |
-        |         |    3   | -------------------- |
-        |    4    |        |                      |
-        |         |        |                      |
-        |    .    |    .   |           .          |
-        |    .    |    .   |           .          |
-        |    .    |    .   |           .          |
-        |    .
-    1.1 ``LineReplacement``
-    1.2 ``LineInsertion``
+    **Available List**
 
-    2. ...
+    * LineReplacement
+    * LineInsertion
+
+    .. hint::
+
+        +---------+---------+---------------------+
+        | Point # | Line #  | Code                |
+        +=========+=========+=====================+
+        |    0    |         |                     |
+        +---------+---------+---------------------+
+        |         |    0    | from math import *  |
+        +---------+---------+---------------------+
+        |    1    |         |                     |
+        +---------+---------+---------------------+
+        |         |    1    | for i in range(3):  |
+        +---------+---------+---------------------+
+        |    2    |         |                     |
+        +---------+---------+---------------------+
+        |         |    2    |   print(i)          |
+        +---------+---------+---------------------+
+        |    3    |         |                     |
+        +---------+---------+---------------------+
+        |         |    3    |   if (sqrt(i) > 2): |
+        +---------+---------+---------------------+
+        |    4    |         |                     |
+        +---------+---------+---------------------+
+        |         |    4    |       return        |
+        +---------+---------+---------------------+
+        |   ...   |   ...   | ..................  |
+        +---------+---------+---------------------+
+
+
     """
     def __eq__(self, other):
         if self.__class__.__name__ != other.__class__.__name__:
@@ -48,8 +60,8 @@ class AtomicOperator(metaclass=ABCMeta):
     @property
     def atomic_operators(self):
         """
-        Returns:
-            list: a list that only contains the current atomic operator instance.
+        :return: ``[self]``, the list that only contains the AtomicOperator instance itself.
+        :rtype: list(:py:class:`.atomic_operator.AtomicOperator`)
         """
         return [self]
 
@@ -65,33 +77,43 @@ class AtomicOperator(metaclass=ABCMeta):
     @abstractmethod
     def random(cls):
         """
-        Return the operator instance with randomly-selected properties.
+        :return: The operator instance with randomly-selected properties.
+        :rtype: :py:class:`.atomic_operator.AtomicOperator`
         """
         pass
 
 
 class LineReplacement(AtomicOperator):
-    """Line Replacement
+    """
 
-    - line: an index of line which should be replaced
-    - ingredient: an index of code line which is an ingredient.
-        when ingredient is None, it is the same as deletion.
+    * **line**: The index of line which should be replaced
+    * **ingredient**: The index of code line which is an ingredient.
+      When ingredient is None, it is the same as deletion.
 
-    Examples:
-        1) LineReplacement(3, 2)
-            <Before>    <After>
-                0           0
-                1           1
-                2           2
-                3     ->    2
-                4           4
-        2) LineReplacement(3, None)
-            <Before>    <After>
-                0           0
-                1           1
-                2           2
-                3           4
-                4
+    .. hint::
+        1. LineReplacement(3, 2)
+
+        ======== ========
+        Before   After
+        ======== ========
+        0        0
+        1        1
+        2        2
+        3        2
+        4        4
+        ======== ========
+
+        2. LineReplacement(3, None)
+
+        ======== ========
+        Before   After
+        ======== ========
+        0        0
+        1        1
+        2        2
+        3        4
+        4
+        ======== ========
     """
     def __init__(self, line, ingredient=None):
         super().__init__()
@@ -110,6 +132,19 @@ class LineReplacement(AtomicOperator):
 
     @classmethod
     def random(cls, program, line_file=None, ingr_file=None, del_rate=0):
+        """
+        :param program: The program instance to which the random edit will be applied.
+        :type program: :py:class:`.Program`
+        :param str line_file: Line is the target line to delete.
+          If line_file is specified, the target line will be chosen within the file.
+        :param str ingr_file: Ingredient is the line to be copied.
+          If ingr_file is specified, the target line will be chosen within the file.
+        :param float del_rate: The probability of that line is deleted
+          instead of replaced with another line
+        :return: The LineReplacement instance with the randomly-selected properties:
+          line and ingredient.
+        :rtype: :py:class:`.atomic_operator.LineReplacement`
+        """
         import random
         assert del_rate >= 0 and del_rate <= 1
         line_file = line_file or random.choice(program.target_files)
@@ -128,19 +163,24 @@ class LineReplacement(AtomicOperator):
 
 
 class LineInsertion(AtomicOperator):
-    """Line Insertion
-    - point: a point to which the code line should be inserted
-    - ingredient: an index of code line which is an ingredient
+    """
 
-    Examples:
-        1) LineInsertion(4, 2)
-            <Before>    <After>
-                0           0
-                1           1
-                2           2
-                3           3
-                4           2   <-  'Inserted'
-                            4
+    * **point**: The point to which the code line should be inserted
+    * **ingredient**: The index of code line which is an ingredient
+
+    .. hint::
+        1. LineInsertion(4, 2)
+
+        ======== ========
+        Before   After
+        ======== ========
+        0        0
+        1        1
+        2        2
+        3        3
+        4        2
+        ...      4
+        ======== ========
     """
 
     def __init__(self, point, ingredient):
@@ -159,6 +199,17 @@ class LineInsertion(AtomicOperator):
 
     @classmethod
     def random(cls, program, point_file=None, ingr_file=None):
+        """
+        :param program: The program instance to which the random edit will be applied.
+        :type program: :py:class:`.Program`
+        :param str point_file: Point means the insertion point to which the ingr will be inserted.
+          If point_file is specified, the point will be chosen within the file.
+        :param str ingr_file: Ingredient is the line to be copied.
+          If ingr_file is specified, the target line will be chosen within the file.
+        :return: The LineInsertion instance with the randomly-selected properties:
+          point and ingredient.
+        :rtype: :py:class:`.atomic_operator.LineInsertion`
+        """
         import random
         point_file = point_file or random.choice(program.target_files)
         ingr_file = ingr_file or random.choice(program.target_files)

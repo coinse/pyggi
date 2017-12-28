@@ -7,7 +7,7 @@ from .edit import Edit
 from .test_result import TestResult
 
 
-class Patch(object):
+class Patch:
     """
 
     Patch is a sequence of edits such as deletion, copying, and replacement.
@@ -36,8 +36,8 @@ class Patch(object):
         """
         Create a new patch which has the same sequence of edits with the current one.
 
-        Returns:
-            Patch: a created patch
+        :return: The created Patch
+        :rtype: :py:class:`.Patch`
         """
         import copy
         clone_patch = Patch(self.program)
@@ -50,7 +50,7 @@ class Patch(object):
         """
         Define the size of modifications made by this patch
 
-        :return: Size info
+        :return: The size value
         :rtype: int
 
         .. note::
@@ -66,8 +66,11 @@ class Patch(object):
     @property
     def diff(self) -> str:
         """
-        Returns:
-            str: file comparison result
+        Compare the source codes of original program and the patch-applied program
+        using *difflib* module(https://docs.python.org/3.6/library/difflib.html).
+
+        :return: The file comparison result
+        :rtype: str
         """
         import difflib
         self.apply()
@@ -92,11 +95,9 @@ class Patch(object):
         Run the test script provided by the user
         which is placed within the project directory.
 
-        Args:
-            timeout (int): time limit of test run (unit: seconds)
-
-        Returns:
-            TestResult: the parsed output of test script execution
+        :param int timeout: The time limit of test run (unit: seconds)
+        :return: The parsed output of test script execution
+        :rtype: :py:class:`.TestResult`
         """
         import time
         import subprocess
@@ -126,20 +127,18 @@ class Patch(object):
         """
         Add an edit to the edit list
 
-        :arg edit: An class instance
+        :param edit: The edit to be added
         :type edit: :py:class:`.atomic_operator.AtomicOperator` or :py:class:`.Edit`
-
         :return: None
         """
         assert isinstance(edit, (AtomicOperator, Edit))
         self.edit_list.append(edit)
 
-    def remove(self, index):
+    def remove(self, index: int):
         """
         Remove an edit from the edit list
 
-        Args:
-            index: an index of edit to delete
+        :param int index: The index of edit to delete
         """
         del self.edit_list[index]
 
@@ -151,8 +150,12 @@ class Patch(object):
         and a patch is a sequence of the edits.
         So this is a sort of flattening process.
 
-        :return: A list of the atomic operators
-        :rtype: list
+        :return: The atomic operators, see *Hint*.
+        :rtype: dict(str, list(:py:class:`.atomic_operator.AtomicOperator`))
+
+        .. hint::
+            - key: The name of the atomic operator(ex. 'LineReplacement')
+            - value: The list of the atomic operator instances
         """
         atomics = dict()
         for edit in self.edit_list:
@@ -165,17 +168,23 @@ class Patch(object):
     @property
     def line_replacements(self) -> dict:
         """
-        Atomic Operator #1 : Line Replacement
+        Extract only the line replacement information
+        from the edit_list of the patch.
+        For more information, see :py:class:`.atomic_operator.LineReplacement`
 
-        Returns:
-            dict:
-                key: an index of line which is supposed to be replaced
-                value: None or an index of ingredient line
+        :return: The line replacement information, see *Hint*.
+        :rtype: dict(int, int or None)
 
-        Example:
-            If self.atomics is [LineReplacement(8, None), LineInsertion(4, 10)],
-            >>> print(self.line_replacements)
-            { 8: None }
+        .. hint::
+            - key: the index of line which is supposed to be replaced
+            - value: None or the index of ingredient line
+
+        .. note::
+            If ``self.atomics`` is ``[LineReplacement(8, None), LineInsertion(4, 10)]``, ::
+
+                print(self.line_replacements)
+                >> { 8: None }
+
         """
         lrs = dict()
         for _lr in self.atomics.get('LineReplacement', list()):
@@ -186,17 +195,23 @@ class Patch(object):
     @property
     def line_insertions(self) -> dict:
         '''
-        Atomic Operator #2 : Line Insertion
+        Extract only the line insertion information
+        from the edit_list of the patch.
+        For more information, see :py:class:`.atomic_operator.LineInsertion`
 
-        Returns:
-            dict:
-                key: an index of insertion point
-                value: a list of indices of ingredient lines
+        :return: The line insertion information, see *Hint*.
+        :rtype: dict(int, list(int))
 
-        Example:
-            If self.atomics is [LineReplacement(8, None), LineInsertion(4, 10)],
-            >>> print(self.line_insertions)
-            { 4: [10] }
+        .. hint::
+            - key: The index of insertion point
+            - value: The list of indices of ingredient lines
+
+        .. note::
+            If ``self.atomics`` is ``[LineReplacement(8, None), LineInsertion(4, 10)]``, ::
+
+                print(self.line_insertions)
+                >> { 4: [10] }
+
         '''
         lis = dict()
         for _li in self.atomics.get('LineInsertion', list()):
@@ -210,8 +225,12 @@ class Patch(object):
         It does not directly modify the source code of the original program,
         but modifies the copied program within the temporary directory.
 
-        :return: A target file name(path) related to the program root path / patch-applied contents of the file
-        :rtype: dict
+        :return: The contents of the patch-applied program, See *Hint*.
+        :rtype: dict(str, list(str))
+
+        .. hint::
+            - key: The target file name(path) related to the program root path
+            - value: The contents of the file
         """
         lrs = self.line_replacements.items()
         lis = self.line_insertions.items()

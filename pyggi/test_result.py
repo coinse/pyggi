@@ -38,12 +38,11 @@ class TestResult:
 
     def get(self, name: str):
         """
-        Args:
-            name (str): a name of the custom result
-
-        Returns:
-            a value of the custom result
+        :param str name: The a name of the custom result
+        :return: The value of the custom result
+        :rtype: str
         """
+        assert name in self.custom
         return self.custom[name]
 
     @staticmethod
@@ -52,19 +51,20 @@ class TestResult:
         The test script should print output in the predefined,
         PYGGI-recognisable format. This method parses the results.
 
-        Args:
-            output (str): an output of the test script
+        :param str output: The output of the test script
 
-        Returns:
-            bool: True if the PYGGI output detected, otherwise False.
-            dict:
-                key: a name of custom result
-                value: a value of custom result
+        :return: Whether the PYGGI output detected or not,
+          and the custom results if detected. See `Hint`.
+        :rtype: tuple(bool, dict(str, str) or None)
 
-        Examples:
-            when output is
+        .. hint::
+            - key: The name of custom result
+            - value: The value of custom result
+
+        .. note::
+            When the output is
             `[PYGGI_RESULT] {runtime: 7,pass_all: true}`,
-            returns (True, {'runtime': 7, 'pass_all': 'true'})
+            returns ``(True, {'runtime': 7, 'pass_all': 'true'})``
         """
         import re
         matched = re.findall("\[PYGGI_RESULT\]\s*\{(.*?)\}\s", output)

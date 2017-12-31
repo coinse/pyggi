@@ -26,9 +26,9 @@ class Logger(object):
         if not os.path.exists(Logger.LOG_DIR):
             os.mkdir(Logger.LOG_DIR)
         # file handler
-        file_handler = logging.FileHandler(
-            os.path.join(Logger.LOG_DIR, "{}_{}.log".format(
-                name, int(time.time()))))
+        self.log_file_path = os.path.join(Logger.LOG_DIR,
+            "{}_{}.log".format(name, int(time.time())))
+        file_handler = logging.FileHandler(self.log_file_path)
         file_handler.setFormatter(formatter)
         file_handler.setLevel(logging.DEBUG)
         # stream handler

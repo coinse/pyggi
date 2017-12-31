@@ -90,12 +90,12 @@ class Patch:
                     diffs += diff
         return diffs
 
-    def run_test(self, timeout: int = 15):
+    def run_test(self, timeout=15):
         """
         Run the test script provided by the user
         which is placed within the project directory.
 
-        :param int timeout: The time limit of test run (unit: seconds)
+        :param float timeout: The time limit of test run (unit: seconds)
         :return: The parsed output of test script execution
         :rtype: :py:class:`.TestResult`
         """

@@ -35,4 +35,26 @@ public class Triangle {
 
     }
 
+    public static void main(String[] args) {
+      System.out.println("INV");
+      System.out.println(classifyTriangle(1,2,9));
+      System.out.println(classifyTriangle(-1,1,1));
+      System.out.println(classifyTriangle(1,-1,1));
+      System.out.println(classifyTriangle(1,1,-1));
+      System.out.println(classifyTriangle(100,80,10000));
+      System.out.println("EQU");
+      System.out.println(classifyTriangle(1,1,1));
+      System.out.println(classifyTriangle(100,100,100));
+      System.out.println(classifyTriangle(99,99,99));
+      System.out.println("ISO");
+      System.out.println(classifyTriangle(100,90,90));
+      System.out.println(classifyTriangle(1000,900,900));
+      System.out.println(classifyTriangle(3,2,2));
+      System.out.println(classifyTriangle(30,16,16));
+      System.out.println("SCA");
+      System.out.println(classifyTriangle(5,4,3));
+      System.out.println(classifyTriangle(1000,900,101));
+      System.out.println(classifyTriangle(3,20,21));
+      System.out.println(classifyTriangle(999,501,600));
+    }
 }

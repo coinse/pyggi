@@ -13,7 +13,7 @@ class Logger(object):
     5 logging levels are available: debug, info, warning, error, critial.
     For more information, see https://docs.python.org/3.6/library/logging.html .
     """
-    LOG_DIR = './log'
+    LOG_DIR = './pyggi_log'
 
     def __init__(self, name):
         import time
@@ -22,6 +22,9 @@ class Logger(object):
         self._logger = logging.getLogger(name)
         self._logger.setLevel(logging.DEBUG)
         formatter = logging.Formatter('[%(levelname)s]\t%(message)s')
+        # log directory
+        if not os.path.exists(Logger.LOG_DIR):
+            os.mkdir(Logger.LOG_DIR)
         # file handler
         file_handler = logging.FileHandler(
             os.path.join(Logger.LOG_DIR, "{}_{}.log".format(

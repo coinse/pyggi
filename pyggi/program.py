@@ -51,7 +51,7 @@ class Program(object):
 
     """
     CONFIG_FILE_NAME = 'PYGGI_CONFIG'
-    TMP_DIR = "pyggi_tmp/"
+    TMP_DIR = "./pyggi_tmp/"
 
     def __init__(self, path, manipulation_level=MnplLevel.PHYSICAL_LINE):
         assert isinstance(manipulation_level, MnplLevel)
@@ -98,6 +98,8 @@ class Program(object):
         """
         if os.path.exists(tmp_path):
             shutil.rmtree(tmp_path)
+        if not os.path.exists(Program.TMP_DIR):
+            os.mkdir(Program.TMP_DIR)
         os.mkdir(tmp_path)
 
     @classmethod

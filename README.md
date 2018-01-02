@@ -33,6 +33,13 @@ $ python setup.py install
 $ cd example
 $ python improve.py ../sample/Triangle_fast
 ```
+
+or
+
+```bash
+$ cd example
+$ python improve_python.py ../sample/Triangle_fast_python
+```
 ##### 2. Repairing the bug of Triangle
 ```bash
 $ cd example

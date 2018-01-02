@@ -53,7 +53,7 @@ ex) sample/Triangle_fast/PYGGI_CONFIG
   "target_files": [
     "Triangle.java"
   ],
-  "test_script": "run.sh"
+  "test_command": "./run.sh"
 }
 ```
 

@@ -63,7 +63,7 @@ class Program(object):
         self.manipulation_level = manipulation_level
         with open(os.path.join(self.path, Program.CONFIG_FILE_NAME)) as config_file:
             config = json.load(config_file)
-            self.test_script_path = config['test_script']
+            self.test_command = config['test_command']
             self.target_files = config['target_files']
         Program.clean_tmp_dir(self.tmp_path)
         copy_tree(self.path, self.tmp_path)

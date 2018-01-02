@@ -5,17 +5,14 @@ It helps one practice or experience GI with only few code lines
 by lightning the costs of implementing typical GI process
 such as source code manipulation and patch management.
 
-&nbsp;
 
 ## Prerequisites
 * [Python 3.5+](https://www.continuum.io/downloads)
 
-&nbsp;
 
 ## Documentation
 You can find the PYGGI's documentation [here](https://example.com)
 
-&nbsp;
 
 ## Getting Started
 

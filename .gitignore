@@ -7,7 +7,8 @@
 # Python egg metadata, regenerated from source files by setuptools.
 /*.egg-info
 
-/pyggi_tmp/*
+pyggi_tmp/*
+*/pyggi_tmp/*
 
 # Pyenv
 .python-version
@@ -31,3 +32,5 @@
 *.out
 *.synctex.gz
 
+# Document
+doc/_build/

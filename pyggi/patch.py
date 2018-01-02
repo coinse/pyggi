@@ -1,26 +1,30 @@
-import random
-import copy
-import subprocess
-import sys
+"""
+This module contains Patch class.
+"""
 import os
-import re
-import time
-import difflib
-from .program import *
-from .edit import *
-from .test_result import *
+from .atomic_operator import AtomicOperator
+from .edit import Edit
+from .test_result import TestResult
 
 
-class Patch(object):
+class Patch:
+    """
+
+    Patch is a sequence of edits such as deletion, copying, and replacement.
+    During search iteration, PYGGI modifies the source code of the target program
+    by applying a candidate patch. Subsequently, it runs the test script to collect
+    dynamic information, such as the execution time or any other user-provided
+    properties, via the predefined format that PYGGI recognises.
+
+    """
 
     def __init__(self, program):
         self.program = program
         self.test_result = None
         self.edit_list = []
-        pass
 
     def __str__(self):
-        return ' | '.join(list(map(lambda e: str(e), self.edit_list)))
+        return ' | '.join(list(map(str, self.edit_list)))
 
     def __len__(self):
         return len(self.edit_list)
@@ -28,53 +32,56 @@ class Patch(object):
     def __eq__(self, other):
         return self.edit_list == other.edit_list
 
-    @property
-    def _deletions(self):
-        deletions = list()
-        for edit in self.edit_list:
-            if edit.edit_type == EditType.DELETE:
-                deletions.append(edit.target)
-            elif edit.edit_type == EditType.MOVE:
-                deletions.append(edit.source)
-            elif edit.edit_type == EditType.REPLACE:
-                deletions.append(edit.target)
-        return list(set(deletions))
-
-    @property
-    def _insertions(self):
-        insertions, replacements = list(), dict()
-        for edit in self.edit_list:
-            if edit.edit_type == EditType.COPY:
-                insertions.append((edit.source, edit.target))
-            elif edit.edit_type == EditType.MOVE:
-                insertions.append((edit.source, edit.target))
-            elif edit.edit_type == EditType.REPLACE:
-                replacements[edit.target] = edit.source
-        for target in replacements:
-            source = replacements[target]
-            insertions.append((source, target))
-        return insertions
-
-    @property
-    def edit_size(self):
-        return len(self._insertions) - len(self._deletions)
-
     def clone(self):
+        """
+        Create a new patch which has the same sequence of edits with the current one.
+
+        :return: The created Patch
+        :rtype: :py:class:`.Patch`
+        """
+        import copy
         clone_patch = Patch(self.program)
         clone_patch.edit_list = copy.deepcopy(self.edit_list)
         clone_patch.test_result = None
         return clone_patch
 
-    def get_diff(self):
+    @property
+    def edit_size(self) -> int:
+        """
+        Define the size of modifications made by this patch
+
+        :return: The size value
+        :rtype: int
+
+        .. note::
+            1. If two lines are deleted, returns -2
+            2. If two lines are inserted, returns 2
+            3. If one line is replaced with other, returns 0 (no change in size but in contents)
+        """
+        lrs = self.line_replacements.items()
+        lis = self.line_insertions.items()
+        return sum(map(lambda x: len(x[1]), lis)) - len(
+            list(filter(lambda x: x[1] is None, lrs)))
+
+    @property
+    def diff(self) -> str:
+        """
+        Compare the source codes of original program and the patch-applied program
+        using *difflib* module(https://docs.python.org/3.6/library/difflib.html).
+
+        :return: The file comparison result
+        :rtype: str
+        """
+        import difflib
         self.apply()
         diffs = ''
         for i in range(len(self.program.target_files)):
             original_target_file = os.path.join(self.program.path,
                                                 self.program.target_files[i])
-            modified_target_file = os.path.join(self.program.get_tmp_path(),
+            modified_target_file = os.path.join(self.program.tmp_path,
                                                 self.program.target_files[i])
             with open(original_target_file) as orig, open(
-                    modified_target_file) as modi:
+                modified_target_file) as modi:
                 for diff in difflib.context_diff(
                         orig.readlines(),
                         modi.readlines(),
@@ -83,159 +90,179 @@ class Patch(object):
                     diffs += diff
         return diffs
 
-    def delete(self, target):
-        self.edit_list.append(Edit(EditType.DELETE, target=target))
-
-    def copy(self, source, target):
-        self.edit_list.append(Edit(EditType.COPY, source=source, target=target))
-
-    def move(self, source, target):
-        self.edit_list.append(Edit(EditType.MOVE, source=source, target=target))
-
-    def replace(self, source, target):
-        # Replace line #(target) with line #(source)
-        self.edit_list.append(
-            Edit(EditType.REPLACE, source=source, target=target))
-
-    def remove(self, index):
-        del self.edit_list[index]
-
-    def add_random_edit(
-            self,
-            edit_types=[EditType.DELETE, EditType.COPY, EditType.REPLACE],
-            ignore_empty_line=True):
-        if self.program.manipulation_level == MnplLevel.PHYSICAL_LINE:
-            target_files = sorted(self.program.contents.keys())
-            edit_type = random.choice(edit_types)
-
-            # Choice according to the probability distribution
-            def weighted_choice(choice_weight_list):
-                total = sum(weight for choice, weight in choice_weight_list)
-                ridx = random.uniform(0, total)
-                upto = 0
-                for choice, weight in choice_weight_list:
-                    if upto + weight >= ridx:
-                        return choice
-                    upto += weight
-                assert False, "weighted_choice error."
-
-            def get_random_line_index(target_file, ignore_empty_line=True):
-                while True:
-                    index = random.randrange(
-                        0, len(self.program.contents[target_file]))
-                    if not ignore_empty_line or len(
-                            self.program.contents[target_file][index]) > 0:
-                        break
-                return index
-
-            def get_random_insertion_point(target_file):
-                return random.randrange(
-                    0, len(self.program.contents[target_file]) + 1)
-
-            # Choose files based on the probability distribution by number of the code lines
-            source_file = weighted_choice(
-                list(
-                    map(lambda filename: (filename, len(self.program.contents[filename])),
-                        target_files)))
-            target_file = weighted_choice(
-                list(
-                    map(lambda filename: (filename, len(self.program.contents[filename])),
-                        target_files)))
-
-            source, target = None, None
-            if edit_type == EditType.DELETE:
-                target = (target_file, get_random_line_index(
-                    target_file, ignore_empty_line))
-                self.delete(target)
-            elif edit_type == EditType.COPY:
-                source = (source_file, get_random_line_index(
-                    source_file, ignore_empty_line))
-                target = (target_file, get_random_insertion_point(target_file))
-                self.copy(source, target)
-            elif edit_type == EditType.MOVE:
-                source = (source_file, get_random_line_index(
-                    source_file, ignore_empty_line))
-                target = (target_file, get_random_insertion_point(target_file))
-                self.move(source, target)
-            elif edit_type == EditType.REPLACE:
-                source = (source_file, get_random_line_index(
-                    source_file, ignore_empty_line))
-                while not target or source == target:
-                    target = (target_file, get_random_line_index(
-                        target_file, ignore_empty_line))
-                self.replace(source, target)
-        return
-
-    def apply(self):
-        if self.program.manipulation_level == MnplLevel.PHYSICAL_LINE:
-            target_files = self.program.contents.keys()
-            new_contents = dict()
-
-            for target_file in target_files:
-                new_contents[target_file] = list()
-                orig_codeline_list = self.program.contents[target_file]
-                new_codeline_list = new_contents[target_file]
-
-                # Create deletions set for target file: (target_file, target_index)
-                target_file_deletions = set(
-                    filter(lambda x: x[0] == target_file, self._deletions))
-                # Create insertions dict for target file: insertion_point => [target_index*]
-                target_file_insertions = list(
-                    filter(lambda x: x[1][0] == target_file, self._insertions))
-                insertion_points = list(
-                    set(map(lambda x: x[1][1], target_file_insertions)))
-                target_file_insertions = dict(zip(
-                    insertion_points,
-                    list(map(lambda key: list(map(lambda x: x[0],
-                                                  list(filter(lambda y: y[1][1] == key,
-                                                              target_file_insertions)))),
-                             insertion_points))
-                ))
-
-                # Gathers the codelines along with applying the patches
-                for i in range(len(orig_codeline_list) + 1):
-                    # Handle insertions
-                    if i in target_file_insertions.keys():
-                        for source in target_file_insertions[i]:
-                            new_codeline_list.append(
-                                self.program.contents[source[0]][source[1]])
-                    # Handle deletions
-                    if i < len(orig_codeline_list) and (
-                            target_file, i) not in target_file_deletions:
-                        new_codeline_list.append(orig_codeline_list[i])
-
-            for target_file in sorted(new_contents.keys()):
-                target_file_path = os.path.join(self.program.get_tmp_path(),
-                                                target_file)
-                with open(target_file_path, 'w') as f:
-                    f.write('\n'.join(new_contents[target_file]) + '\n')
-        return
-
     def run_test(self, timeout=15):
-        contents = self.apply()
+        """
+        Run the test script provided by the user
+        which is placed within the project directory.
+
+        :param float timeout: The time limit of test run (unit: seconds)
+        :return: The parsed output of test script execution
+        :rtype: :py:class:`.TestResult`
+        """
+        import time
+        import subprocess
+        self.apply()
         cwd = os.getcwd()
 
-        os.chdir(self.program.get_tmp_path())
+        os.chdir(self.program.tmp_path)
         sprocess = subprocess.Popen(
             ["./" + self.program.test_script_path],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
         try:
             start = time.time()
-            stdout, stderr = sprocess.communicate(timeout=timeout)
+            stdout, _ = sprocess.communicate(timeout=timeout)
             end = time.time()
             elapsed_time = end - start
-            execution_result = re.findall("\[PYGGI_RESULT\]\s*\{(.*?)\}\s",
-                                          stdout.decode("ascii"))
-            if len(execution_result) == 0:
-                self.test_result = TestResult(False, elapsed_time, None)
-            else:
-                self.test_result = TestResult(True, elapsed_time,
-                                              TestResult.pyggi_result_parser(
-                                                  execution_result[0]))
+            compiled, custom_result = TestResult.pyggi_result_parser(stdout.decode("ascii"))
+            self.test_result = TestResult(compiled, elapsed_time, custom_result)
         except subprocess.TimeoutExpired:
             elapsed_time = timeout * 1000
             self.test_result = TestResult(False, elapsed_time, None)
         os.chdir(cwd)
 
         return self.test_result
+
+    def add_edit(self, edit):
+        """
+        Add an edit to the edit list
+
+        :param edit: The edit to be added
+        :type edit: :py:class:`.atomic_operator.AtomicOperator` or :py:class:`.Edit`
+        :return: None
+        """
+        assert isinstance(edit, (AtomicOperator, Edit))
+        self.edit_list.append(edit)
+
+    def remove(self, index: int):
+        """
+        Remove an edit from the edit list
+
+        :param int index: The index of edit to delete
+        """
+        del self.edit_list[index]
+
+    @property
+    def atomics(self):
+        """
+        Combine all the atomic operators of the edits.
+        An edit is originally a sequence of atomic operators,
+        and a patch is a sequence of the edits.
+        So this is a sort of flattening process.
+
+        :return: The atomic operators, see *Hint*.
+        :rtype: dict(str, list(:py:class:`.atomic_operator.AtomicOperator`))
+
+        .. hint::
+            - key: The name of the atomic operator(ex. 'LineReplacement')
+            - value: The list of the atomic operator instances
+        """
+        atomics = dict()
+        for edit in self.edit_list:
+            for atomic in edit.atomic_operators:
+                atomic_class = atomic.__class__.__name__
+                atomics[atomic_class] = atomics.get(atomic_class, list())
+                atomics[atomic_class].append(atomic)
+        return atomics
+
+    @property
+    def line_replacements(self) -> dict:
+        """
+        Extract only the line replacement information
+        from the edit_list of the patch.
+        For more information, see :py:class:`.atomic_operator.LineReplacement`
+
+        :return: The line replacement information, see *Hint*.
+        :rtype: dict(int, int or None)
+
+        .. hint::
+            - key: the index of line which is supposed to be replaced
+            - value: None or the index of ingredient line
+
+        .. note::
+            If ``self.atomics`` is ``[LineReplacement(8, None), LineInsertion(4, 10)]``, ::
+
+                print(self.line_replacements)
+                >> { 8: None }
+
+        """
+        lrs = dict()
+        for _lr in self.atomics.get('LineReplacement', list()):
+            if _lr.line not in lrs or lrs[_lr.line] is not None:
+                lrs[_lr.line] = _lr.ingredient
+        return lrs
+
+    @property
+    def line_insertions(self) -> dict:
+        '''
+        Extract only the line insertion information
+        from the edit_list of the patch.
+        For more information, see :py:class:`.atomic_operator.LineInsertion`
+
+        :return: The line insertion information, see *Hint*.
+        :rtype: dict(int, list(int))
+
+        .. hint::
+            - key: The index of insertion point
+            - value: The list of indices of ingredient lines
+
+        .. note::
+            If ``self.atomics`` is ``[LineReplacement(8, None), LineInsertion(4, 10)]``, ::
+
+                print(self.line_insertions)
+                >> { 4: [10] }
+
+        '''
+        lis = dict()
+        for _li in self.atomics.get('LineInsertion', list()):
+            lis[_li.point] = lis.get(_li.point, list())
+            lis[_li.point].append(_li.ingredient)
+        return lis
+
+    def apply(self):
+        """
+        This method applies the patch to the target program.
+        It does not directly modify the source code of the original program,
+        but modifies the copied program within the temporary directory.
+
+        :return: The contents of the patch-applied program, See *Hint*.
+        :rtype: dict(str, list(str))
+
+        .. hint::
+            - key: The target file name(path) related to the program root path
+            - value: The contents of the file
+        """
+        lrs = self.line_replacements.items()
+        lis = self.line_insertions.items()
+
+        target_files = self.program.contents.keys()
+        new_contents = dict()
+        for target_file in target_files:
+            new_contents[target_file] = list()
+            orig_codeline_list = self.program.contents[target_file]
+            new_codeline_list = new_contents[target_file]
+
+            replacements = dict(filter(lambda x: x[0][0] == target_file, lrs))
+            insertions = dict(filter(lambda x: x[0][0] == target_file, lis))
+
+            # Gathers the codelines along with applying the patches
+            for i in range(len(orig_codeline_list) + 1):
+                if (target_file, i) in insertions:
+                    for ingredient in insertions[(target_file, i)]:
+                        new_codeline_list.append(
+                            self.program.contents[ingredient[0]][ingredient[1]])
+                if i < len(orig_codeline_list):
+                    if (target_file, i) in replacements:
+                        ingredient = replacements[(target_file, i)]
+                        if ingredient is not None:
+                            new_codeline_list.append(self.program.contents[
+                                ingredient[0]][ingredient[1]])
+                    else:
+                        new_codeline_list.append(orig_codeline_list[i])
+        for target_file_path in sorted(new_contents.keys()):
+            with open(
+                os.path.join(self.program.tmp_path, target_file_path),
+                'w') as target_file:
+                target_file.write('\n'.join(new_contents[target_file_path]) +
+                                  '\n')
+        return new_contents

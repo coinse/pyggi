@@ -26,14 +26,12 @@ $ python setup.py install
 ```
 
 #### 3. Run the example
-- Improving runtime of Triangle by deleting delay() function call
-
+##### 1. Improving runtime of Triangle by deleting delay() function call
 ```bash
 $ cd example
 $ python improve.py ../sample/Triangle_fast
 ```
-
-- Repairing the bug of Triangle
+##### 2. Repairing the bug of Triangle
 ```bash
 $ cd example
 $ python repair.py ../sample/Triangle_bug

@@ -5,6 +5,7 @@ This module contains meta-heuristic search algorithms.
 """
 import time
 from .patch import Patch
+from .test_result import TestResult
 from abc import ABCMeta, abstractmethod
 
 class LocalSearch(metaclass=ABCMeta):
@@ -115,7 +116,7 @@ class LocalSearch(metaclass=ABCMeta):
         """
         return patch.test_result.elapsed_time
 
-    def run(self, warmup_reps=1, epoch=5, max_iter=100, timeout=15):
+    def run(self, warmup_reps=1, epoch=5, max_iter=100, timeout=15, result_parser=TestResult.pyggi_result_parser):
         """
         It starts from a randomly generated candidate solution
         and iteratively moves to its neighbouring solution with
@@ -130,7 +131,9 @@ class LocalSearch(metaclass=ABCMeta):
         :param int epoch: The total epoch
         :param int max_iter: The maximum iterations per epoch
         :param float timeout: The time limit of test run (unit: seconds)
-
+        :param result_parser: The parser of test output
+          (default: :py:meth:`.TestResult.pyggi_result_parser`)
+        :type result_parser: None or callable((str), :py:class:`.TestResult`)
         :return: The result of searching(Time, Success, FitnessEval, CompileFailed, BestPatch)
         :rtype: dict(int, dict(str, ))
         """
@@ -138,7 +141,7 @@ class LocalSearch(metaclass=ABCMeta):
         warmup = list()
         empty_patch = Patch(self.program)
         for i in range(warmup_reps):
-            empty_patch.run_test()
+            empty_patch.run_test(result_parser=result_parser)
             warmup.append(self.get_fitness(empty_patch))
         original_fitness = float(sum(warmup)) / len(warmup)
 
@@ -161,7 +164,7 @@ class LocalSearch(metaclass=ABCMeta):
             start = time.time()
             for cur_iter in range(1, max_iter + 1):
                 patch = self.get_neighbour(best_patch.clone())
-                patch.run_test(timeout)
+                patch.run_test(timeout=timeout, result_parser=result_parser)
                 result[cur_epoch]['FitnessEval'] += 1
                 if not patch.test_result.compiled:
                     result[cur_epoch]['CompileFailed'] += 1

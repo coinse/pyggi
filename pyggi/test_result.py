@@ -15,10 +15,10 @@ class TestResult:
     as well as any other user-defined test results.
 
     """
-    def __init__(self, compiled, elapsed_time, pyggi_result):
+    def __init__(self, compiled, pyggi_result, elapsed_time=None):
         self.compiled = compiled
-        self.elapsed_time = elapsed_time
         self.custom = pyggi_result
+        self.elapsed_time = elapsed_time
 
     def __copy__(self):
         return TestResult(self.compiled, self.elapsed_time,
@@ -45,26 +45,24 @@ class TestResult:
         assert name in self.custom
         return self.custom[name]
 
-    @staticmethod
-    def pyggi_result_parser(output: str):
+    @classmethod
+    def pyggi_result_parser(cls, output: str):
         """
         The test script should print output in the predefined,
         PYGGI-recognisable format. This method parses the results.
 
         :param str output: The output of the test script
 
-        :return: Whether the PYGGI output detected or not,
-          and the custom results if detected. See `Hint`.
-        :rtype: tuple(bool, dict(str, str) or None)
-
-        .. hint::
-            - key: The name of custom result
-            - value: The value of custom result
+        :return: The TestResult instance. If the PYGGI output are
+          not detected, it is regarded as compile(execution) failure.
+        :rtype: :py:class:`.TestResult`
 
         .. note::
             When the output is
-            `[PYGGI_RESULT] {runtime: 7,pass_all: true}`,
-            returns ``(True, {'runtime': 7, 'pass_all': 'true'})``
+
+                [PYGGI_RESULT] {runtime: 7,pass_all: true}
+
+            , returns ``TestResult(True, {'runtime': 7, 'pass_all': 'true'})``
         """
         import re
         matched = re.findall("\[PYGGI_RESULT\]\s*\{(.*?)\}\s", output)
@@ -73,9 +71,8 @@ class TestResult:
         if compiled:
             custom = dict()
             for result in matched[0].split(','):
-                if len(result.split(':')) != 2:
-                    print("[Error] Result format is wrong!: {" + matched[0] + "}")
-                    sys.exit(1)
+                assert len(result.split(':')) == 2
+                # print("[Error] Result format is wrong!: {" + matched[0] + "}")
                 key, value = result.split(':')[0].strip(), result.split(':')[1].strip()
                 custom[key] = value
-        return (compiled, custom)
+        return cls(compiled, custom)

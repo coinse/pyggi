@@ -35,6 +35,6 @@ def starter(request):
     start_time = time.time()
 
     def finalizer():
-        print("elapsed_time: {}".format(str(time.time() - start_time)))
+        print("runtime: {}".format(str(time.time() - start_time)))
 
     request.addfinalizer(finalizer)

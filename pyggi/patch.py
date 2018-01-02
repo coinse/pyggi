@@ -90,12 +90,15 @@ class Patch:
                     diffs += diff
         return diffs
 
-    def run_test(self, timeout=15):
+    def run_test(self, timeout=15, result_parser=TestResult.pyggi_result_parser):
         """
         Run the test script provided by the user
         which is placed within the project directory.
 
         :param float timeout: The time limit of test run (unit: seconds)
+        :param result_parser: The parser of test output
+          (default: :py:meth:`.TestResult.pyggi_result_parser`)
+        :type result_parser: None or callable((str), :py:class:`.TestResult`)
         :return: The parsed output of test script execution
         :rtype: :py:class:`.TestResult`
         """
@@ -115,8 +118,8 @@ class Patch:
             stdout, _ = sprocess.communicate(timeout=timeout)
             end = time.time()
             elapsed_time = end - start
-            compiled, custom_result = TestResult.pyggi_result_parser(stdout.decode("ascii"))
-            self.test_result = TestResult(compiled, elapsed_time, custom_result)
+            self.test_result = result_parser(stdout.decode("ascii"))
+            self.test_result.elapsed_time = elapsed_time
         except subprocess.TimeoutExpired:
             elapsed_time = timeout * 1000
             self.test_result = TestResult(False, elapsed_time, None)

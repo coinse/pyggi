@@ -34,7 +34,7 @@ $ python improve.py ../sample/Triangle_fast
 ```
 
 - Repairing the bug of Triangle
-```
+```bash
 $ cd example
 $ python repair.py ../sample/Triangle_bug
 ```

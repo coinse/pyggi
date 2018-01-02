@@ -1,12 +1,12 @@
 from setuptools import setup
 
 def readme():
-    with open('README.rst') as f:
+    with open('README.md') as f:
         return f.read()
 
 setup(
     name='pyggi',
-    version='0.1',
+    version='1.0',
     description='Python General Framework for Genetic Improvement',
     long_description=readme(),
     classifiers=[],

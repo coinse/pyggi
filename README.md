@@ -2,7 +2,7 @@
 
 PYGGI is the lightweight and simple framework for Genetic Improvement.
 It helps one practice or experience GI with only few code lines
-by lightneing the costs of implementing typical GI process
+by lightning the costs of implementing typical GI process
 such as source code manipulation and patch management.
 
 &nbsp;
@@ -26,16 +26,26 @@ $ python setup.py install
 ```
 
 #### 3. Run the example
-An example of improving runtime of Triangle by deleting delay() function call.
+- Improving runtime of Triangle by deleting delay() function call
 ```bash
 $ cd example
 $ python improve.py ../sample/Triangle_fast
 ```
+- Repairing the bug of Triangle
+```
+$ cd example
+$ python repair.py ../sample/Triangle_bug
+```
 
-## New program setup
+## Program setup convention
+
+Two files should be provided: a configuration file and a test script.
+You can refer the sample programs in the sample directory.
 
 #### 1. Config file
 {target_dir_path}/PYGGI_CONFIG
+
+ex) sample/Triangle_fast/PYGGI_CONFIG
 ```
 {
   "target_files": [
@@ -47,6 +57,8 @@ $ python improve.py ../sample/Triangle_fast
 
 #### 2. Test script file
 {target_dir_path}/run.sh
+
+ex) sample/Triangle_fast/run.sh
 ```sh
 #!/bin/sh
 set -e

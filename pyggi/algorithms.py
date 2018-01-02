@@ -13,11 +13,11 @@ class LocalSearch(metaclass=ABCMeta):
 
     All children classes need to override
 
-    * :py:meth:`get_neighbours`
+    * :py:meth:`get_neighbour`
     * :py:meth:`get_fitness`
 
     .. hint::
-        Example of using LocalSearch class.
+        Example of LocalSearch class.
         ::
             from pyggi import Program, Patch, MnplLevel
             from pyggi.algorithms import LocalSearch
@@ -27,7 +27,7 @@ class LocalSearch(metaclass=ABCMeta):
             program = Program("<PROGRAM_ROOT_PATH>", MnplLevel.PHYSICAL_LINE)
 
             class MyLocalSearch(LocalSearch):
-                def get_neighbours(self, patch):
+                def get_neighbour(self, patch):
                     import random
                     if len(patch) > 0 and random.random() < 0.5:
                         patch.remove(random.randrange(0, len(patch)))
@@ -46,7 +46,7 @@ class LocalSearch(metaclass=ABCMeta):
                     return float(patch.test_result.custom['runtime']) < 100
 
             local_search = MyLocalSearch(program)
-            cfr, patches = local_search.run(warmup_reps=5, epoch=3, max_iter=100, timeout=15)
+            results = local_search.run(warmup_reps=5, epoch=3, max_iter=100, timeout=15)
     """
     def __init__(self, program):
         """
@@ -57,20 +57,62 @@ class LocalSearch(metaclass=ABCMeta):
         self.best_fitness = None
 
     def is_valid_patch(self, patch):
+        """
+        :param patch: The Patch instance whose validity should be checked.
+        :type patch: :py:class:`.Patch`
+        :return: The validity of the patch
+        :rtype: bool
+        """
         return patch.test_result.compiled
 
     def is_better_than_the_best(self, fitness, best_fitness):
+        """
+        :param fitness: The fitness value of the current patch
+        :param best_fitness: The best fitness value ever in the current epoch
+        :return: If the current fitness are better than the best one, return True.
+          False otherwise.
+        :rtype: bool
+        """
         return fitness <= best_fitness
 
     def stopping_criterion(self, iter, patch):
+        """
+        :param int iter: The current iteration number in the epoch
+        :param patch: The patch visited in the current iteration
+        :type patch: :py:class:`.Patch`
+        :return: If the satisfying patch is found or the budget is out of run,
+          return True to stop the current epoch. False otherwise.
+        :rtype: bool
+        """
         return False
 
     @abstractmethod
-    def get_neighbours(self, patch):
+    def get_neighbour(self, patch):
+        """
+        :param patch: The patch that the search is visiting now
+        :type patch: :py:class:`.Patch`
+        :return: The next(neighbour) patch
+        :rtype: :py:class:`.Patch`
+
+        .. hint::
+            An example:
+            ::
+                return patch.add_edit(LineDeletion.random(program))
+        """
         pass
 
     @abstractmethod
     def get_fitness(self, patch):
+        """
+        Define the fitness value of the patch
+
+        If you want to use original one(elapsed_time),
+        simply call ``super()``.
+
+        :param patch: The patch instacne
+        :type patch: :py:class:`.Patch`
+        :return: The fitness value
+        """
         return patch.test_result.elapsed_time
 
     def run(self, warmup_reps=1, epoch=5, max_iter=100, timeout=15):
@@ -118,7 +160,7 @@ class LocalSearch(metaclass=ABCMeta):
 
             start = time.time()
             for cur_iter in range(1, max_iter + 1):
-                patch = self.get_neighbours(best_patch.clone())
+                patch = self.get_neighbour(best_patch.clone())
                 patch.run_test(timeout)
                 result[cur_epoch]['FitnessEval'] += 1
                 if not patch.test_result.compiled:

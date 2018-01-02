@@ -18,7 +18,7 @@ if __name__ == "__main__":
     program = Program(args.project_path, MnplLevel.PHYSICAL_LINE)
    
     class MyLocalSearch(LocalSearch):
-        def get_neighbours(self, patch):
+        def get_neighbour(self, patch):
             if len(patch) > 0 and random.random() < 0.5:
                 patch.remove(random.randrange(0, len(patch)))
             else:

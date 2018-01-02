@@ -6,11 +6,14 @@
 Welcome to pyggi's documentation!
 =================================
 
+What's inside?
+--------------
+
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 3
 
-
+   PYGGI package <pyggi>
+   examples <example>
 
 Indices and tables
 ==================

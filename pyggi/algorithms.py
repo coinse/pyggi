@@ -17,8 +17,8 @@ class LocalSearch(metaclass=ABCMeta):
     * :py:meth:`get_fitness`
 
     .. hint::
-        Example of LocalSearch class.
-        ::
+        Example of LocalSearch class. ::
+
             from pyggi import Program, Patch, MnplLevel
             from pyggi.algorithms import LocalSearch
             from pyggi.atomic_operator import LineReplacement, LineInsertion
@@ -95,8 +95,8 @@ class LocalSearch(metaclass=ABCMeta):
         :rtype: :py:class:`.Patch`
 
         .. hint::
-            An example:
-            ::
+            An example::
+
                 return patch.add_edit(LineDeletion.random(program))
         """
         pass

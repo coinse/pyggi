@@ -1,5 +1,5 @@
-PYGGI
-=====
+modules
+=======
 
 .. toctree::
    :maxdepth: 4

@@ -42,8 +42,7 @@ templates_path = ['_templates']
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-# source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = ['.rst', '.md']
 
 # The master toctree document.
 master_doc = 'index'
@@ -58,7 +57,7 @@ author = 'COINSE'
 # built documents.
 #
 # The short X.Y version.
-version = ''
+version = '1.0'
 # The full version, including alpha/beta/rc tags.
 release = ''
 

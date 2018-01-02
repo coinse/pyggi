@@ -1,11 +1,10 @@
-pyggi package
-=============
+pyggi
+=====
 
 Submodules
 ----------
 
 .. toctree::
-
    pyggi.algorithms
    pyggi.atomic_operator
    pyggi.edit

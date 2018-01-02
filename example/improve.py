@@ -1,3 +1,8 @@
+"""
+Improving non-functional properties ::
+
+    python improve.py ../sample/Triangle_fast
+"""
 import sys
 import random
 import argparse

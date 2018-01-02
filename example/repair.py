@@ -1,3 +1,8 @@
+"""
+Automated program repair ::
+
+    python repair.py ../sample/Triangle_bug
+"""
 import sys
 import random
 import argparse
@@ -8,7 +13,7 @@ from pyggi.edit import LineDeletion
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='PYGGI Bug Repair Example')
-    parser.add_argument('project_path', type=str, default='sample/Triangle_bug')
+    parser.add_argument('project_path', type=str, default='../sample/Triangle_bug')
     parser.add_argument('--epoch', type=int, default=30,
         help='total epoch(default: 30)')
     parser.add_argument('--iter', type=int, default=10000,

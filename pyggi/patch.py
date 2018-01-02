@@ -101,12 +101,13 @@ class Patch:
         """
         import time
         import subprocess
+        import shlex
         self.apply()
         cwd = os.getcwd()
 
         os.chdir(self.program.tmp_path)
         sprocess = subprocess.Popen(
-            [self.program.test_command],
+            shlex.split(self.program.test_command),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
         try:

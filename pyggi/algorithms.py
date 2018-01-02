@@ -4,9 +4,9 @@ This module contains meta-heuristic search algorithms.
 
 """
 import time
+from abc import ABCMeta, abstractmethod
 from .patch import Patch
 from .test_result import TestResult
-from abc import ABCMeta, abstractmethod
 
 class LocalSearch(metaclass=ABCMeta):
     """
@@ -116,7 +116,8 @@ class LocalSearch(metaclass=ABCMeta):
         """
         return patch.test_result.elapsed_time
 
-    def run(self, warmup_reps=1, epoch=5, max_iter=100, timeout=15, result_parser=TestResult.pyggi_result_parser):
+    def run(self, warmup_reps=1, epoch=5, max_iter=100, timeout=15,
+            result_parser=TestResult.pyggi_result_parser):
         """
         It starts from a randomly generated candidate solution
         and iteratively moves to its neighbouring solution with
@@ -124,7 +125,7 @@ class LocalSearch(metaclass=ABCMeta):
         the candidate solution.
 
         :param int warmup_reps: The number of warming-up test runs to get
-          the base fitness value. For some properties, non-functional 
+          the base fitness value. For some properties, non-functional
           properties in particular, fitness value cannot be fixed. In that
           case, the base fitness value should be acquired by averaging the
           fitness values of original program.
@@ -148,7 +149,7 @@ class LocalSearch(metaclass=ABCMeta):
         self.program.logger.info(
             "The fitness value of original program: {}".format(original_fitness))
 
-        result = { ep: dict() for ep in range(1, epoch + 1) }
+        result = {ep: dict() for ep in range(1, epoch + 1)}
 
         self.program.logger.info("Epoch\tIter\tFitness\tPatch")
         for cur_epoch in range(1, epoch + 1):

@@ -27,7 +27,7 @@ class Logger(object):
             os.mkdir(Logger.LOG_DIR)
         # file handler
         self.log_file_path = os.path.join(Logger.LOG_DIR,
-            "{}_{}.log".format(name, int(time.time())))
+                                          "{}_{}.log".format(name, int(time.time())))
         file_handler = logging.FileHandler(self.log_file_path)
         file_handler.setFormatter(formatter)
         file_handler.setLevel(logging.DEBUG)

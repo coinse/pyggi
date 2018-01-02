@@ -3,8 +3,6 @@
 This module contains TestResult class.
 
 """
-import sys
-import copy
 
 class TestResult:
     """
@@ -21,6 +19,7 @@ class TestResult:
         self.elapsed_time = elapsed_time
 
     def __copy__(self):
+        import copy
         return TestResult(self.compiled, self.elapsed_time,
                           copy.deepcopy(self.custom))
 

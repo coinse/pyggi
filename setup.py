@@ -16,6 +16,6 @@ setup(
     author_email='',
     license='MIT',
     packages=['pyggi'],
-    install_requires=[],
+    install_requires=['argparse'],
     dependency_links=[],
     zip_safe=False)

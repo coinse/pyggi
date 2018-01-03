@@ -42,6 +42,7 @@ if __name__ == "__main__":
 
     local_search = MyLocalSearch(program)
     result = local_search.run(warmup_reps=5, epoch=args.epoch, max_iter=args.iter, timeout=15)
+
     for epoch in result:
         print ("Epoch #{}".format(epoch))
         for key in result[epoch]:

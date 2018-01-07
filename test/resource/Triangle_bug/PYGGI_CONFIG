@@ -1,0 +1,6 @@
+{
+  "target_files": [
+    "Triangle.java"
+  ],
+  "test_command": "./run.sh"
+}

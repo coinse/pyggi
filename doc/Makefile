@@ -5,7 +5,7 @@ SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 SPHINXPROJ    = pyggi
 SOURCEDIR     = .
-BUILDDIR      = _build
+BUILDDIR      = ../../pyggi-docs
 
 html: Makefile
 	$(SPHINXBUILD) -b html "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)

@@ -3,8 +3,15 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to pyggi's documentation!
-=================================
+PYGGI
+=====
+
+PYGGI stands for Python General framework for Genetic Improvement(GI).
+
+Written & maintained by COINSE KAIST.
+
+* Github: <https://github.com/coinse/pyggi>
+* COINSE Lab: <https://coinse.kaist.ac.kr>
 
 What's inside?
 --------------
@@ -12,11 +19,11 @@ What's inside?
 .. toctree::
    :maxdepth: 3
 
-   PYGGI package <pyggi>
+   pyggi package <pyggi>
    examples <example>
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`

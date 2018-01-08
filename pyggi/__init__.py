@@ -1,10 +1,5 @@
 """
-PYGGI stands for Python General framework for Genetic Improvement(GI).
-This module has developed to be used as an toolkit for practicing GI.
-
-Written & maintained by `COINSE KAIST`_.
-
-.. _COINSE KAIST: http://coinse.kaist.ac.kr/
+PYGGI: Python General framework for Genetic Improvement
 """
 
 from . import algorithms, atomic_operator, edit

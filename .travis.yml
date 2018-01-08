@@ -1,7 +1,7 @@
 language: python
 python:
-  - "3.5"
-  - "3.6"
+  - '3.5'
+  - '3.6'
 
 install:
   - python setup.py install
@@ -14,3 +14,7 @@ before_script:
 script:
   - pytest --cov=pyggi
   - coveralls
+
+notification:
+  slack:
+    secure: KtBqqrQORDqrqd25/NqDSLXtVQt3MU2rdTS9q0TOiv9HKkGtMwWhJWIcQguxjsC+ZoKjSsos4Grgp21/wKZ+ao08q2MIOl7KXJDKGMyxc6rW7/gTIZRPnvBSE1xDTGKGh0rftlelitth/y37ulkMitPrYQzaFe78FZJXH/i+GIwh23yZW0ZySE0agwWF6BB+G861lyFh06A3AY39GJ9Nf6l6NnSoLeTMnu8SDxf+KEUWwiBQ0mpen0XagB5FyMQUyeR+Dea5UTYeFjHimQ/jMAHbOIK/bxN+ZkqAaYj0IvmSuWH2DPJuiwXz7rL7NBIgeERkFQkfVFqCaIYpKF+hTuHJ5790fdLPBcTCkBrhUvHUgHkDyYG4zc5MRvGEWGXr4Ll5SuP9Ib8ZzIlCDOfSTNGrZjQlbvV1GLFVokZ5Vzcn2CVyg+cFPHHsA6GDmV4tha62Jc/kjs9C7iiCsB6BfhUcb17QoBkiNWlaTC1lWlUL79/OWNUaEJOcYDdNgY7LSXclt/DpOpl5uBqAtOUQgQt2YVgLuGTX4IHTsHymQjwKyD+dB1ehuXzfLU++Hz4V2UjuPZtPs06Mm1LzrmWTymfVHkoJbzfu+98cTbUQqsyKvXuen+O7Mge/ZswVJLMBTKOrpRQrrlvjvmcxsFf0wxXspr6DggRB887wRif5VVg=

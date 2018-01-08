@@ -1,0 +1,448 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyggi.algorithms module &mdash; pyggi  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="pyggi  documentation" href="index.html"/>
+        <link rel="up" title="pyggi" href="pyggi.html"/>
+        <link rel="next" title="pyggi.atomic_operator module" href="pyggi.atomic_operator.html"/>
+        <link rel="prev" title="pyggi" href="pyggi.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> pyggi
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="pyggi.html">PYGGI package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pyggi.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">pyggi.algorithms module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyggi.atomic_operator.html">pyggi.atomic_operator module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyggi.edit.html">pyggi.edit module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyggi.logger.html">pyggi.logger module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyggi.patch.html">pyggi.patch module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyggi.program.html">pyggi.program module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyggi.test_result.html">pyggi.test_result module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyggi.html#module-pyggi">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="example.html">examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pyggi</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="pyggi.html">pyggi</a> &raquo;</li>
+        
+      <li>pyggi.algorithms module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/pyggi.algorithms.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-pyggi.algorithms">
+<span id="pyggi-algorithms-module"></span><h1>pyggi.algorithms module<a class="headerlink" href="#module-pyggi.algorithms" title="Permalink to this headline">¶</a></h1>
+<p>This module contains meta-heuristic search algorithms.</p>
+<dl class="class">
+<dt id="pyggi.algorithms.LocalSearch">
+<em class="property">class </em><code class="descclassname">pyggi.algorithms.</code><code class="descname">LocalSearch</code><span class="sig-paren">(</span><em>program</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyggi/algorithms.html#LocalSearch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyggi.algorithms.LocalSearch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Local Search (Abstact Class)</p>
+<p>All children classes need to override</p>
+<ul class="simple">
+<li><a class="reference internal" href="#pyggi.algorithms.LocalSearch.get_neighbour" title="pyggi.algorithms.LocalSearch.get_neighbour"><code class="xref py py-meth docutils literal"><span class="pre">get_neighbour()</span></code></a></li>
+<li><a class="reference internal" href="#pyggi.algorithms.LocalSearch.get_fitness" title="pyggi.algorithms.LocalSearch.get_fitness"><code class="xref py py-meth docutils literal"><span class="pre">get_fitness()</span></code></a></li>
+</ul>
+<div class="admonition hint">
+<p class="first admonition-title">Hint</p>
+<p>Example of LocalSearch class.</p>
+<div class="last highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyggi</span> <span class="k">import</span> <span class="n">Program</span><span class="p">,</span> <span class="n">Patch</span><span class="p">,</span> <span class="n">MnplLevel</span>
+<span class="kn">from</span> <span class="nn">pyggi.algorithms</span> <span class="k">import</span> <span class="n">LocalSearch</span>
+<span class="kn">from</span> <span class="nn">pyggi.atomic_operator</span> <span class="k">import</span> <span class="n">LineReplacement</span><span class="p">,</span> <span class="n">LineInsertion</span>
+<span class="kn">from</span> <span class="nn">pyggi.edit</span> <span class="k">import</span> <span class="n">LineDeletion</span>
+
+<span class="n">program</span> <span class="o">=</span> <span class="n">Program</span><span class="p">(</span><span class="s2">&quot;&lt;PROGRAM_ROOT_PATH&gt;&quot;</span><span class="p">,</span> <span class="n">MnplLevel</span><span class="o">.</span><span class="n">PHYSICAL_LINE</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">MyLocalSearch</span><span class="p">(</span><span class="n">LocalSearch</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_neighbour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">patch</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">random</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">patch</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">:</span>
+            <span class="n">patch</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">patch</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">edit_operator</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="n">LineDeletion</span><span class="p">,</span> <span class="n">LineInsertion</span><span class="p">,</span> <span class="n">LineReplacement</span><span class="p">])</span>
+            <span class="n">patch</span><span class="o">.</span><span class="n">add_edit</span><span class="p">(</span><span class="n">edit_operator</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">program</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">patch</span>
+
+    <span class="k">def</span> <span class="nf">get_fitness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">patch</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">patch</span><span class="o">.</span><span class="n">test_result</span><span class="o">.</span><span class="n">custom</span><span class="p">[</span><span class="s1">&#39;runtime&#39;</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">is_valid_patch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">patch</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">patch</span><span class="o">.</span><span class="n">test_result</span><span class="o">.</span><span class="n">compiled</span> <span class="ow">and</span> <span class="n">patch</span><span class="o">.</span><span class="n">test_result</span><span class="o">.</span><span class="n">custom</span><span class="p">[</span><span class="s1">&#39;pass_all&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span>
+
+    <span class="k">def</span> <span class="nf">stopping_criterion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">iter</span><span class="p">,</span> <span class="n">patch</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">patch</span><span class="o">.</span><span class="n">test_result</span><span class="o">.</span><span class="n">custom</span><span class="p">[</span><span class="s1">&#39;runtime&#39;</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">100</span>
+
+<span class="n">local_search</span> <span class="o">=</span> <span class="n">MyLocalSearch</span><span class="p">(</span><span class="n">program</span><span class="p">)</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">local_search</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">warmup_reps</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">epoch</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>program</strong> (<a class="reference internal" href="pyggi.program.html#pyggi.program.Program" title="pyggi.program.Program"><code class="xref py py-class docutils literal"><span class="pre">Program</span></code></a>) – The Program instance to optimize.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="pyggi.algorithms.LocalSearch.get_fitness">
+<code class="descname">get_fitness</code><span class="sig-paren">(</span><em>patch</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyggi/algorithms.html#LocalSearch.get_fitness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyggi.algorithms.LocalSearch.get_fitness" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define the fitness value of the patch</p>
+<p>If you want to use original one(elapsed_time),
+simply call <code class="docutils literal"><span class="pre">super()</span></code>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>patch</strong> (<a class="reference internal" href="pyggi.patch.html#pyggi.patch.Patch" title="pyggi.patch.Patch"><code class="xref py py-class docutils literal"><span class="pre">Patch</span></code></a>) – The patch instacne</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The fitness value</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyggi.algorithms.LocalSearch.get_neighbour">
+<code class="descname">get_neighbour</code><span class="sig-paren">(</span><em>patch</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyggi/algorithms.html#LocalSearch.get_neighbour"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyggi.algorithms.LocalSearch.get_neighbour" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>patch</strong> (<a class="reference internal" href="pyggi.patch.html#pyggi.patch.Patch" title="pyggi.patch.Patch"><code class="xref py py-class docutils literal"><span class="pre">Patch</span></code></a>) – The patch that the search is visiting now</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The next(neighbour) patch</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="pyggi.patch.html#pyggi.patch.Patch" title="pyggi.patch.Patch"><code class="xref py py-class docutils literal"><span class="pre">Patch</span></code></a></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition hint">
+<p class="first admonition-title">Hint</p>
+<p>An example:</p>
+<div class="last highlight-default"><div class="highlight"><pre><span></span><span class="k">return</span> <span class="n">patch</span><span class="o">.</span><span class="n">add_edit</span><span class="p">(</span><span class="n">LineDeletion</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">program</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyggi.algorithms.LocalSearch.is_better_than_the_best">
+<code class="descname">is_better_than_the_best</code><span class="sig-paren">(</span><em>fitness</em>, <em>best_fitness</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyggi/algorithms.html#LocalSearch.is_better_than_the_best"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyggi.algorithms.LocalSearch.is_better_than_the_best" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>fitness</strong> – The fitness value of the current patch</li>
+<li><strong>best_fitness</strong> – The best fitness value ever in the current epoch</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">If the current fitness are better than the best one, return True.
+False otherwise.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyggi.algorithms.LocalSearch.is_valid_patch">
+<code class="descname">is_valid_patch</code><span class="sig-paren">(</span><em>patch</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyggi/algorithms.html#LocalSearch.is_valid_patch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyggi.algorithms.LocalSearch.is_valid_patch" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>patch</strong> (<a class="reference internal" href="pyggi.patch.html#pyggi.patch.Patch" title="pyggi.patch.Patch"><code class="xref py py-class docutils literal"><span class="pre">Patch</span></code></a>) – The Patch instance whose validity should be checked.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The validity of the patch</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyggi.algorithms.LocalSearch.run">
+<code class="descname">run</code><span class="sig-paren">(</span><em>warmup_reps=1</em>, <em>epoch=5</em>, <em>max_iter=100</em>, <em>timeout=15</em>, <em>result_parser=&lt;bound method TestResult.pyggi_result_parser of &lt;class 'pyggi.test_result.TestResult'&gt;&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyggi/algorithms.html#LocalSearch.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyggi.algorithms.LocalSearch.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>It starts from a randomly generated candidate solution
+and iteratively moves to its neighbouring solution with
+a better fitness value by making small local changes to
+the candidate solution.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>warmup_reps</strong> (<em>int</em>) – The number of warming-up test runs to get
+the base fitness value. For some properties, non-functional
+properties in particular, fitness value cannot be fixed. In that
+case, the base fitness value should be acquired by averaging the
+fitness values of original program.</li>
+<li><strong>epoch</strong> (<em>int</em>) – The total epoch</li>
+<li><strong>max_iter</strong> (<em>int</em>) – The maximum iterations per epoch</li>
+<li><strong>timeout</strong> (<em>float</em>) – The time limit of test run (unit: seconds)</li>
+<li><strong>result_parser</strong> (None or callable((str), <a class="reference internal" href="pyggi.test_result.html#pyggi.test_result.TestResult" title="pyggi.test_result.TestResult"><code class="xref py py-class docutils literal"><span class="pre">TestResult</span></code></a>)) – The parser of test output
+(default: <a class="reference internal" href="pyggi.test_result.html#pyggi.test_result.TestResult.pyggi_result_parser" title="pyggi.test_result.TestResult.pyggi_result_parser"><code class="xref py py-meth docutils literal"><span class="pre">TestResult.pyggi_result_parser()</span></code></a>)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The result of searching(Time, Success, FitnessEval, CompileFailed, BestPatch)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict(int, dict(str, ))</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyggi.algorithms.LocalSearch.stopping_criterion">
+<code class="descname">stopping_criterion</code><span class="sig-paren">(</span><em>iter</em>, <em>patch</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyggi/algorithms.html#LocalSearch.stopping_criterion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyggi.algorithms.LocalSearch.stopping_criterion" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>iter</strong> (<em>int</em>) – The current iteration number in the epoch</li>
+<li><strong>patch</strong> (<a class="reference internal" href="pyggi.patch.html#pyggi.patch.Patch" title="pyggi.patch.Patch"><code class="xref py py-class docutils literal"><span class="pre">Patch</span></code></a>) – The patch visited in the current iteration</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">If the satisfying patch is found or the budget is out of run,
+return True to stop the current epoch. False otherwise.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="pyggi.atomic_operator.html" class="btn btn-neutral float-right" title="pyggi.atomic_operator module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="pyggi.html" class="btn btn-neutral" title="pyggi" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, COINSE.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

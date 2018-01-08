@@ -1,0 +1,419 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyggi.edit &mdash; pyggi  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="pyggi  documentation" href="../../index.html"/>
+        <link rel="up" title="pyggi" href="../pyggi.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> pyggi
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../pyggi.html">PYGGI package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example.html">examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pyggi</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../pyggi.html">pyggi</a> &raquo;</li>
+        
+      <li>pyggi.edit</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyggi.edit</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">This module contains Edit class which is an abstact base class,</span>
+<span class="sd">and several classes inherit the Edit class.</span>
+<span class="sd">The classes are provided as examples of custom edit operator.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">.atomic_operator</span> <span class="k">import</span> <span class="n">AtomicOperator</span>
+
+<div class="viewcode-block" id="Edit"><a class="viewcode-back" href="../../pyggi.edit.html#pyggi.edit.Edit">[docs]</a><span class="k">class</span> <span class="nc">Edit</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Edit is an abstact class which is designed to be used</span>
+<span class="sd">    as a basic structure of custom edit operators.</span>
+
+<span class="sd">    Every class that inherits Edit class must override the</span>
+<span class="sd">    methods marked with ``@abstractmethod`` to create instances.</span>
+
+<span class="sd">    * :py:meth:`__str__`</span>
+<span class="sd">    * :py:meth:`length_of_args`</span>
+<span class="sd">    * :py:meth:`atomic_operators`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length_of_args</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> takes </span><span class="si">{}</span><span class="s2"> positional argument but </span><span class="si">{}</span><span class="s2"> were given.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">length_of_args</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atomic_operators</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">AtomicOperator</span><span class="p">)</span> <span class="k">for</span> <span class="n">op</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomic_operators</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomic_operators</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">atomic_operators</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">detail</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: The detail of this custom edit</span>
+<span class="sd">        :rtype: str</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            If the edit is ``LineMoving((&#39;Triangle.java&#39;, 4), (&#39;Triangle.java&#39;, 10))``</span>
+
+<span class="sd">            returns::</span>
+
+<span class="sd">                1) Insert (&#39;Triangle.java&#39;, 4) into (&#39;Triangle.java&#39;, 10)</span>
+<span class="sd">                2) Replace (&#39;Triangle.java&#39;, 4) with None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="nb">list</span><span class="p">(</span>
+                <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">) </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                    <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">atomic_operators</span><span class="p">))))</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">length_of_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: The length of args the edit operator should take</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">atomic_operators</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: The list of instances of AtomicOperator.</span>
+<span class="sd">        :rtype: list(:py:class:`.atomic_operator.AtomicOperator`)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="LineDeletion"><a class="viewcode-back" href="../../pyggi.edit.html#pyggi.edit.LineDeletion">[docs]</a><span class="k">class</span> <span class="nc">LineDeletion</span><span class="p">(</span><span class="n">Edit</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    LineDeletion: Delete x</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;Delete </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">x</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Delete **x**</span>
+
+<span class="sd">        :return: The file path and the index of target line to be deleted.</span>
+<span class="sd">        :rtype: tuple(str, int)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">length_of_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: ``1``</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">atomic_operators</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: ``[LineReplacement(self.x, None)]``</span>
+<span class="sd">        :rtype: list(:py:class:`.atomic_operator.AtomicOperator`)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">.atomic_operator</span> <span class="k">import</span> <span class="n">LineReplacement</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">LineReplacement</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="kc">None</span><span class="p">)]</span>
+
+<div class="viewcode-block" id="LineDeletion.random"><a class="viewcode-back" href="../../pyggi.edit.html#pyggi.edit.LineDeletion.random">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">random</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">program</span><span class="p">,</span> <span class="n">line_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param program: The program instance to which the random edit will be applied.</span>
+<span class="sd">        :type program: :py:class:`.Program`</span>
+<span class="sd">        :param str line_file: Line is the target line to delete.</span>
+<span class="sd">          If line_file is specified, the target line will be chosen within the file.</span>
+<span class="sd">        :return: The LineDeletion instance with the randomly-selected line index.</span>
+<span class="sd">        :rtype: :py:class:`.edit.LineDeletion`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">random</span>
+        <span class="n">line_file</span> <span class="o">=</span> <span class="n">line_file</span> <span class="ow">or</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">target_files</span><span class="p">)</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">line_file</span><span class="p">,</span>
+            <span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="n">line_file</span><span class="p">]))</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">line</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="LineMoving"><a class="viewcode-back" href="../../pyggi.edit.html#pyggi.edit.LineMoving">[docs]</a><span class="k">class</span> <span class="nc">LineMoving</span><span class="p">(</span><span class="n">Edit</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    LineMoving: Move x -&gt; y</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;Move </span><span class="si">{}</span><span class="s2"> -&gt; </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">x</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Move **x** -&gt; y</span>
+
+<span class="sd">        :return: The file path and the index of target line to be moved.</span>
+<span class="sd">        :rtype: tuple(str, int)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">y</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Move x -&gt; **y**</span>
+
+<span class="sd">        :return: The file path and the index of the point to which line x is inserted.</span>
+<span class="sd">        :rtype: tuple(str, int)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">length_of_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: ``2``</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">2</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">atomic_operators</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: ``[LineInsertion(self.y, self.x), LineReplacement(self.x, None)]``</span>
+<span class="sd">        :rtype: list(:py:class:`.atomic_operator.AtomicOperator`)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">.atomic_operator</span> <span class="k">import</span> <span class="n">LineInsertion</span><span class="p">,</span> <span class="n">LineReplacement</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">LineInsertion</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="n">LineReplacement</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="kc">None</span><span class="p">)]</span>
+
+<div class="viewcode-block" id="LineMoving.random"><a class="viewcode-back" href="../../pyggi.edit.html#pyggi.edit.LineMoving.random">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">random</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">program</span><span class="p">,</span> <span class="n">point_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ingr_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param program: The program instance to which the random edit will be applied.</span>
+<span class="sd">        :type program: :py:class:`.Program`</span>
+<span class="sd">        :param str point_file: Point means the insertion point to which the ingr will be inserted.</span>
+<span class="sd">          If point_file is specified, the point will be chosen within the file.</span>
+<span class="sd">        :param str ingr_file: Ingredient is the line to be copied.</span>
+<span class="sd">          If ingr_file is specified, the target line will be chosen within the file.</span>
+<span class="sd">        :return: The LineMoving instance with the randomly-selected point &amp; ingr indices.</span>
+<span class="sd">        :rtype: :py:class:`.edit.LineMoving`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">random</span>
+        <span class="n">point_file</span> <span class="o">=</span> <span class="n">point_file</span> <span class="ow">or</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">target_files</span><span class="p">)</span>
+        <span class="n">ingr_file</span> <span class="o">=</span> <span class="n">ingr_file</span> <span class="ow">or</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">target_files</span><span class="p">)</span>
+        <span class="n">point</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">point_file</span><span class="p">,</span>
+            <span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="n">point_file</span><span class="p">])</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">ingredient</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">ingr_file</span><span class="p">,</span>
+            <span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="n">ingr_file</span><span class="p">]))</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">ingredient</span><span class="p">,</span> <span class="n">point</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, COINSE.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

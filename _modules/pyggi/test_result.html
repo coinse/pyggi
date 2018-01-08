@@ -1,0 +1,302 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyggi.test_result &mdash; pyggi  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="pyggi  documentation" href="../../index.html"/>
+        <link rel="up" title="pyggi" href="../pyggi.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> pyggi
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../pyggi.html">PYGGI package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example.html">examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pyggi</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../pyggi.html">pyggi</a> &raquo;</li>
+        
+      <li>pyggi.test_result</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyggi.test_result</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">This module contains TestResult class.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TestResult"><a class="viewcode-back" href="../../pyggi.test_result.html#pyggi.test_result.TestResult">[docs]</a><span class="k">class</span> <span class="nc">TestResult</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    TestResult stores the result of the test suite executions</span>
+<span class="sd">    on the original or patched source code. It records whether</span>
+<span class="sd">    compilation succeeded, the elapsed execution time,</span>
+<span class="sd">    as well as any other user-defined test results.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">compiled</span><span class="p">,</span> <span class="n">custom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">elapsed_time</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compiled</span> <span class="o">=</span> <span class="n">compiled</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">custom</span> <span class="o">=</span> <span class="n">custom</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">elapsed_time</span> <span class="o">=</span> <span class="n">elapsed_time</span>
+
+    <span class="k">def</span> <span class="nf">__copy__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">copy</span>
+        <span class="k">return</span> <span class="n">TestResult</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compiled</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">,</span>
+                          <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">custom</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">compiled</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="s2">&quot;compiled : True</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="s2">&quot;compiled : False</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">result</span> <span class="o">+=</span> <span class="s2">&quot;elapsed_time : </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">elapsed_time</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">+=</span> <span class="s2">&quot;custom</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">+=</span> <span class="s2">&quot;- </span><span class="si">{}</span><span class="s2"> : </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+
+<div class="viewcode-block" id="TestResult.get"><a class="viewcode-back" href="../../pyggi.test_result.html#pyggi.test_result.TestResult.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param str name: The a name of the custom result</span>
+<span class="sd">        :return: The value of the custom result</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom</span><span class="p">[</span><span class="n">name</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="TestResult.pyggi_result_parser"><a class="viewcode-back" href="../../pyggi.test_result.html#pyggi.test_result.TestResult.pyggi_result_parser">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">pyggi_result_parser</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The test script should print output in the predefined,</span>
+<span class="sd">        PYGGI-recognisable format. This method parses the results.</span>
+
+<span class="sd">        :param str output: The output of the test script</span>
+
+<span class="sd">        :return: The TestResult instance. If the PYGGI output are</span>
+<span class="sd">          not detected, it is regarded as compile(execution) failure.</span>
+<span class="sd">        :rtype: :py:class:`.TestResult`</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            When the output is</span>
+
+<span class="sd">                [PYGGI_RESULT] {runtime: 7,pass_all: true}</span>
+
+<span class="sd">            , returns ``TestResult(True, {&#39;runtime&#39;: 7, &#39;pass_all&#39;: &#39;true&#39;})``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">re</span>
+        <span class="n">matched</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;\[PYGGI_RESULT\]\s*\{(.*?)\}\s&quot;</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+        <span class="n">compiled</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">matched</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span>
+        <span class="n">custom</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">compiled</span><span class="p">:</span>
+            <span class="n">custom</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">matched</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">):</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">))</span> <span class="o">==</span> <span class="mi">2</span>
+                <span class="c1"># print(&quot;[Error] Result format is wrong!: {&quot; + matched[0] + &quot;}&quot;)</span>
+                <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">result</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="n">custom</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">compiled</span><span class="p">,</span> <span class="n">custom</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, COINSE.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

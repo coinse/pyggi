@@ -1,0 +1,413 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyggi.algorithms &mdash; pyggi  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="pyggi  documentation" href="../../index.html"/>
+        <link rel="up" title="pyggi" href="../pyggi.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> pyggi
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../pyggi.html">PYGGI package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example.html">examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pyggi</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../pyggi.html">pyggi</a> &raquo;</li>
+        
+      <li>pyggi.algorithms</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyggi.algorithms</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">This module contains meta-heuristic search algorithms.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">.patch</span> <span class="k">import</span> <span class="n">Patch</span>
+<span class="kn">from</span> <span class="nn">.test_result</span> <span class="k">import</span> <span class="n">TestResult</span>
+
+<div class="viewcode-block" id="LocalSearch"><a class="viewcode-back" href="../../pyggi.algorithms.html#pyggi.algorithms.LocalSearch">[docs]</a><span class="k">class</span> <span class="nc">LocalSearch</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Local Search (Abstact Class)</span>
+
+<span class="sd">    All children classes need to override</span>
+
+<span class="sd">    * :py:meth:`get_neighbour`</span>
+<span class="sd">    * :py:meth:`get_fitness`</span>
+
+<span class="sd">    .. hint::</span>
+<span class="sd">        Example of LocalSearch class. ::</span>
+
+<span class="sd">            from pyggi import Program, Patch, MnplLevel</span>
+<span class="sd">            from pyggi.algorithms import LocalSearch</span>
+<span class="sd">            from pyggi.atomic_operator import LineReplacement, LineInsertion</span>
+<span class="sd">            from pyggi.edit import LineDeletion</span>
+
+<span class="sd">            program = Program(&quot;&lt;PROGRAM_ROOT_PATH&gt;&quot;, MnplLevel.PHYSICAL_LINE)</span>
+
+<span class="sd">            class MyLocalSearch(LocalSearch):</span>
+<span class="sd">                def get_neighbour(self, patch):</span>
+<span class="sd">                    import random</span>
+<span class="sd">                    if len(patch) &gt; 0 and random.random() &lt; 0.5:</span>
+<span class="sd">                        patch.remove(random.randrange(0, len(patch)))</span>
+<span class="sd">                    else:</span>
+<span class="sd">                        edit_operator = random.choice([LineDeletion, LineInsertion, LineReplacement])</span>
+<span class="sd">                        patch.add_edit(edit_operator.random(program))</span>
+<span class="sd">                    return patch</span>
+
+<span class="sd">                def get_fitness(self, patch):</span>
+<span class="sd">                    return float(patch.test_result.custom[&#39;runtime&#39;])</span>
+
+<span class="sd">                def is_valid_patch(self, patch):</span>
+<span class="sd">                    return patch.test_result.compiled and patch.test_result.custom[&#39;pass_all&#39;] == &#39;true&#39;</span>
+
+<span class="sd">                def stopping_criterion(self, iter, patch):</span>
+<span class="sd">                    return float(patch.test_result.custom[&#39;runtime&#39;]) &lt; 100</span>
+
+<span class="sd">            local_search = MyLocalSearch(program)</span>
+<span class="sd">            results = local_search.run(warmup_reps=5, epoch=3, max_iter=100, timeout=15)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">program</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param program: The Program instance to optimize.</span>
+<span class="sd">        :type program: :py:class:`.Program`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">program</span> <span class="o">=</span> <span class="n">program</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">best_fitness</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="LocalSearch.is_valid_patch"><a class="viewcode-back" href="../../pyggi.algorithms.html#pyggi.algorithms.LocalSearch.is_valid_patch">[docs]</a>    <span class="k">def</span> <span class="nf">is_valid_patch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">patch</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param patch: The Patch instance whose validity should be checked.</span>
+<span class="sd">        :type patch: :py:class:`.Patch`</span>
+<span class="sd">        :return: The validity of the patch</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">patch</span><span class="o">.</span><span class="n">test_result</span><span class="o">.</span><span class="n">compiled</span></div>
+
+<div class="viewcode-block" id="LocalSearch.is_better_than_the_best"><a class="viewcode-back" href="../../pyggi.algorithms.html#pyggi.algorithms.LocalSearch.is_better_than_the_best">[docs]</a>    <span class="k">def</span> <span class="nf">is_better_than_the_best</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fitness</span><span class="p">,</span> <span class="n">best_fitness</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param fitness: The fitness value of the current patch</span>
+<span class="sd">        :param best_fitness: The best fitness value ever in the current epoch</span>
+<span class="sd">        :return: If the current fitness are better than the best one, return True.</span>
+<span class="sd">          False otherwise.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">fitness</span> <span class="o">&lt;=</span> <span class="n">best_fitness</span></div>
+
+<div class="viewcode-block" id="LocalSearch.stopping_criterion"><a class="viewcode-back" href="../../pyggi.algorithms.html#pyggi.algorithms.LocalSearch.stopping_criterion">[docs]</a>    <span class="k">def</span> <span class="nf">stopping_criterion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">iter</span><span class="p">,</span> <span class="n">patch</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param int iter: The current iteration number in the epoch</span>
+<span class="sd">        :param patch: The patch visited in the current iteration</span>
+<span class="sd">        :type patch: :py:class:`.Patch`</span>
+<span class="sd">        :return: If the satisfying patch is found or the budget is out of run,</span>
+<span class="sd">          return True to stop the current epoch. False otherwise.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="LocalSearch.get_neighbour"><a class="viewcode-back" href="../../pyggi.algorithms.html#pyggi.algorithms.LocalSearch.get_neighbour">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">get_neighbour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">patch</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param patch: The patch that the search is visiting now</span>
+<span class="sd">        :type patch: :py:class:`.Patch`</span>
+<span class="sd">        :return: The next(neighbour) patch</span>
+<span class="sd">        :rtype: :py:class:`.Patch`</span>
+
+<span class="sd">        .. hint::</span>
+<span class="sd">            An example::</span>
+
+<span class="sd">                return patch.add_edit(LineDeletion.random(program))</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="LocalSearch.get_fitness"><a class="viewcode-back" href="../../pyggi.algorithms.html#pyggi.algorithms.LocalSearch.get_fitness">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">get_fitness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">patch</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Define the fitness value of the patch</span>
+
+<span class="sd">        If you want to use original one(elapsed_time),</span>
+<span class="sd">        simply call ``super()``.</span>
+
+<span class="sd">        :param patch: The patch instacne</span>
+<span class="sd">        :type patch: :py:class:`.Patch`</span>
+<span class="sd">        :return: The fitness value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">patch</span><span class="o">.</span><span class="n">test_result</span><span class="o">.</span><span class="n">elapsed_time</span></div>
+
+<div class="viewcode-block" id="LocalSearch.run"><a class="viewcode-back" href="../../pyggi.algorithms.html#pyggi.algorithms.LocalSearch.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">warmup_reps</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">epoch</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
+            <span class="n">result_parser</span><span class="o">=</span><span class="n">TestResult</span><span class="o">.</span><span class="n">pyggi_result_parser</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        It starts from a randomly generated candidate solution</span>
+<span class="sd">        and iteratively moves to its neighbouring solution with</span>
+<span class="sd">        a better fitness value by making small local changes to</span>
+<span class="sd">        the candidate solution.</span>
+
+<span class="sd">        :param int warmup_reps: The number of warming-up test runs to get</span>
+<span class="sd">          the base fitness value. For some properties, non-functional</span>
+<span class="sd">          properties in particular, fitness value cannot be fixed. In that</span>
+<span class="sd">          case, the base fitness value should be acquired by averaging the</span>
+<span class="sd">          fitness values of original program.</span>
+<span class="sd">        :param int epoch: The total epoch</span>
+<span class="sd">        :param int max_iter: The maximum iterations per epoch</span>
+<span class="sd">        :param float timeout: The time limit of test run (unit: seconds)</span>
+<span class="sd">        :param result_parser: The parser of test output</span>
+<span class="sd">          (default: :py:meth:`.TestResult.pyggi_result_parser`)</span>
+<span class="sd">        :type result_parser: None or callable((str), :py:class:`.TestResult`)</span>
+<span class="sd">        :return: The result of searching(Time, Success, FitnessEval, CompileFailed, BestPatch)</span>
+<span class="sd">        :rtype: dict(int, dict(str, ))</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log_file_path</span><span class="p">)</span>
+        <span class="n">warmup</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">empty_patch</span> <span class="o">=</span> <span class="n">Patch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">warmup_reps</span><span class="p">):</span>
+            <span class="n">empty_patch</span><span class="o">.</span><span class="n">run_test</span><span class="p">(</span><span class="n">result_parser</span><span class="o">=</span><span class="n">result_parser</span><span class="p">)</span>
+            <span class="n">warmup</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_fitness</span><span class="p">(</span><span class="n">empty_patch</span><span class="p">))</span>
+        <span class="n">original_fitness</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">warmup</span><span class="p">))</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">warmup</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;The fitness value of original program: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">original_fitness</span><span class="p">))</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="n">ep</span><span class="p">:</span> <span class="nb">dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">ep</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">epoch</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Epoch</span><span class="se">\t</span><span class="s2">Iter</span><span class="se">\t</span><span class="s2">Fitness</span><span class="se">\t</span><span class="s2">Patch&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">cur_epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">epoch</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">best_patch</span> <span class="o">=</span> <span class="n">empty_patch</span>
+            <span class="n">best_fitness</span> <span class="o">=</span> <span class="n">original_fitness</span>
+
+            <span class="c1"># Result Initilization</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">cur_epoch</span><span class="p">][</span><span class="s1">&#39;BestPatch&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">cur_epoch</span><span class="p">][</span><span class="s1">&#39;Success&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">cur_epoch</span><span class="p">][</span><span class="s1">&#39;FitnessEval&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">cur_epoch</span><span class="p">][</span><span class="s1">&#39;CompileFailed&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">cur_iter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_iter</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">patch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_neighbour</span><span class="p">(</span><span class="n">best_patch</span><span class="o">.</span><span class="n">clone</span><span class="p">())</span>
+                <span class="n">patch</span><span class="o">.</span><span class="n">run_test</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span> <span class="n">result_parser</span><span class="o">=</span><span class="n">result_parser</span><span class="p">)</span>
+                <span class="n">result</span><span class="p">[</span><span class="n">cur_epoch</span><span class="p">][</span><span class="s1">&#39;FitnessEval&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">patch</span><span class="o">.</span><span class="n">test_result</span><span class="o">.</span><span class="n">compiled</span><span class="p">:</span>
+                    <span class="n">result</span><span class="p">[</span><span class="n">cur_epoch</span><span class="p">][</span><span class="s1">&#39;CompileFailed&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">patch</span><span class="o">.</span><span class="n">test_result</span><span class="o">.</span><span class="n">compiled</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_valid_patch</span><span class="p">(</span><span class="n">patch</span><span class="p">)):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="se">\t</span><span class="s2">null</span><span class="se">\t</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cur_epoch</span><span class="p">,</span> <span class="n">cur_iter</span><span class="p">,</span> <span class="n">patch</span><span class="p">))</span>
+                    <span class="k">continue</span>
+                <span class="n">fitness</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_fitness</span><span class="p">(</span><span class="n">patch</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_better_than_the_best</span><span class="p">(</span><span class="n">fitness</span><span class="p">,</span> <span class="n">best_fitness</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cur_epoch</span><span class="p">,</span> <span class="n">cur_iter</span><span class="p">,</span> <span class="n">fitness</span><span class="p">,</span> <span class="n">patch</span><span class="p">))</span>
+                    <span class="k">continue</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="se">\t</span><span class="s2">*</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cur_epoch</span><span class="p">,</span> <span class="n">cur_iter</span><span class="p">,</span> <span class="n">fitness</span><span class="p">,</span> <span class="n">patch</span><span class="p">))</span>
+                <span class="n">best_fitness</span><span class="p">,</span> <span class="n">best_patch</span> <span class="o">=</span> <span class="n">fitness</span><span class="p">,</span> <span class="n">patch</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopping_criterion</span><span class="p">(</span><span class="n">cur_iter</span><span class="p">,</span> <span class="n">patch</span><span class="p">):</span>
+                    <span class="n">result</span><span class="p">[</span><span class="n">cur_epoch</span><span class="p">][</span><span class="s1">&#39;Success&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">break</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">cur_epoch</span><span class="p">][</span><span class="s1">&#39;Time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+            <span class="k">if</span> <span class="n">best_patch</span><span class="p">:</span>
+                <span class="n">result</span><span class="p">[</span><span class="n">cur_epoch</span><span class="p">][</span><span class="s1">&#39;BestPatch&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_patch</span>
+                <span class="n">result</span><span class="p">[</span><span class="n">cur_epoch</span><span class="p">][</span><span class="s1">&#39;BestFitness&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_fitness</span>
+        <span class="k">return</span> <span class="n">result</span></div></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, COINSE.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

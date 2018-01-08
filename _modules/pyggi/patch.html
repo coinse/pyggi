@@ -1,0 +1,496 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyggi.patch &mdash; pyggi  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="pyggi  documentation" href="../../index.html"/>
+        <link rel="up" title="pyggi" href="../pyggi.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> pyggi
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../pyggi.html">PYGGI package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example.html">examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pyggi</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../pyggi.html">pyggi</a> &raquo;</li>
+        
+      <li>pyggi.patch</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyggi.patch</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module contains Patch class.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">.atomic_operator</span> <span class="k">import</span> <span class="n">AtomicOperator</span>
+<span class="kn">from</span> <span class="nn">.edit</span> <span class="k">import</span> <span class="n">Edit</span>
+<span class="kn">from</span> <span class="nn">.test_result</span> <span class="k">import</span> <span class="n">TestResult</span>
+
+
+<div class="viewcode-block" id="Patch"><a class="viewcode-back" href="../../pyggi.patch.html#pyggi.patch.Patch">[docs]</a><span class="k">class</span> <span class="nc">Patch</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Patch is a sequence of edits such as deletion, copying, and replacement.</span>
+<span class="sd">    During search iteration, PYGGI modifies the source code of the target program</span>
+<span class="sd">    by applying a candidate patch. Subsequently, it runs the test script to collect</span>
+<span class="sd">    dynamic information, such as the execution time or any other user-provided</span>
+<span class="sd">    properties, via the predefined format that PYGGI recognises.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">program</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">program</span> <span class="o">=</span> <span class="n">program</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_result</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">edit_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39; | &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">edit_list</span><span class="p">)))</span>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">edit_list</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">edit_list</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">edit_list</span>
+
+<div class="viewcode-block" id="Patch.clone"><a class="viewcode-back" href="../../pyggi.patch.html#pyggi.patch.Patch.clone">[docs]</a>    <span class="k">def</span> <span class="nf">clone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a new patch which has the same sequence of edits with the current one.</span>
+
+<span class="sd">        :return: The created Patch</span>
+<span class="sd">        :rtype: :py:class:`.Patch`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">copy</span>
+        <span class="n">clone_patch</span> <span class="o">=</span> <span class="n">Patch</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="p">)</span>
+        <span class="n">clone_patch</span><span class="o">.</span><span class="n">edit_list</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">edit_list</span><span class="p">)</span>
+        <span class="n">clone_patch</span><span class="o">.</span><span class="n">test_result</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">clone_patch</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">edit_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Define the size of modifications made by this patch</span>
+
+<span class="sd">        :return: The size value</span>
+<span class="sd">        :rtype: int</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            1. If two lines are deleted, returns -2</span>
+<span class="sd">            2. If two lines are inserted, returns 2</span>
+<span class="sd">            3. If one line is replaced with other, returns 0 (no change in size but in contents)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lrs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">line_replacements</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="n">lis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">line_insertions</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">lis</span><span class="p">))</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span>
+            <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="n">lrs</span><span class="p">)))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">diff</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compare the source codes of original program and the patch-applied program</span>
+<span class="sd">        using *difflib* module(https://docs.python.org/3.6/library/difflib.html).</span>
+
+<span class="sd">        :return: The file comparison result</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">difflib</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply</span><span class="p">()</span>
+        <span class="n">diffs</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="o">.</span><span class="n">target_files</span><span class="p">)):</span>
+            <span class="n">original_target_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+                                                <span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="o">.</span><span class="n">target_files</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">modified_target_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="o">.</span><span class="n">tmp_path</span><span class="p">,</span>
+                                                <span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="o">.</span><span class="n">target_files</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">original_target_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">orig</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span>
+                <span class="n">modified_target_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">modi</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">diff</span> <span class="ow">in</span> <span class="n">difflib</span><span class="o">.</span><span class="n">context_diff</span><span class="p">(</span>
+                        <span class="n">orig</span><span class="o">.</span><span class="n">readlines</span><span class="p">(),</span>
+                        <span class="n">modi</span><span class="o">.</span><span class="n">readlines</span><span class="p">(),</span>
+                        <span class="n">fromfile</span><span class="o">=</span><span class="n">original_target_file</span><span class="p">,</span>
+                        <span class="n">tofile</span><span class="o">=</span><span class="n">modified_target_file</span><span class="p">):</span>
+                    <span class="n">diffs</span> <span class="o">+=</span> <span class="n">diff</span>
+        <span class="k">return</span> <span class="n">diffs</span>
+
+<div class="viewcode-block" id="Patch.run_test"><a class="viewcode-back" href="../../pyggi.patch.html#pyggi.patch.Patch.run_test">[docs]</a>    <span class="k">def</span> <span class="nf">run_test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">result_parser</span><span class="o">=</span><span class="n">TestResult</span><span class="o">.</span><span class="n">pyggi_result_parser</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Run the test script provided by the user</span>
+<span class="sd">        which is placed within the project directory.</span>
+
+<span class="sd">        :param float timeout: The time limit of test run (unit: seconds)</span>
+<span class="sd">        :param result_parser: The parser of test output</span>
+<span class="sd">          (default: :py:meth:`.TestResult.pyggi_result_parser`)</span>
+<span class="sd">        :type result_parser: None or callable((str), :py:class:`.TestResult`)</span>
+<span class="sd">        :return: The parsed output of test script execution</span>
+<span class="sd">        :rtype: :py:class:`.TestResult`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">time</span>
+        <span class="kn">import</span> <span class="nn">subprocess</span>
+        <span class="kn">import</span> <span class="nn">shlex</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply</span><span class="p">()</span>
+        <span class="n">cwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+
+        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="o">.</span><span class="n">tmp_path</span><span class="p">)</span>
+        <span class="n">sprocess</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+            <span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="o">.</span><span class="n">test_command</span><span class="p">),</span>
+            <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+            <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+            <span class="n">stdout</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">sprocess</span><span class="o">.</span><span class="n">communicate</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+            <span class="n">elapsed_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">test_result</span> <span class="o">=</span> <span class="n">result_parser</span><span class="p">(</span><span class="n">stdout</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">test_result</span><span class="o">.</span><span class="n">elapsed_time</span> <span class="o">=</span> <span class="n">elapsed_time</span>
+        <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">TimeoutExpired</span><span class="p">:</span>
+            <span class="n">elapsed_time</span> <span class="o">=</span> <span class="n">timeout</span> <span class="o">*</span> <span class="mi">1000</span> <span class="c1"># seconds to milliseconds</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">test_result</span> <span class="o">=</span> <span class="n">TestResult</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">custom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">elapsed_time</span><span class="o">=</span><span class="n">elapsed_time</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">cwd</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_result</span></div>
+
+<div class="viewcode-block" id="Patch.add_edit"><a class="viewcode-back" href="../../pyggi.patch.html#pyggi.patch.Patch.add_edit">[docs]</a>    <span class="k">def</span> <span class="nf">add_edit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edit</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add an edit to the edit list</span>
+
+<span class="sd">        :param edit: The edit to be added</span>
+<span class="sd">        :type edit: :py:class:`.atomic_operator.AtomicOperator` or :py:class:`.Edit`</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">edit</span><span class="p">,</span> <span class="p">(</span><span class="n">AtomicOperator</span><span class="p">,</span> <span class="n">Edit</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">edit_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">edit</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Patch.remove"><a class="viewcode-back" href="../../pyggi.patch.html#pyggi.patch.Patch.remove">[docs]</a>    <span class="k">def</span> <span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove an edit from the edit list</span>
+
+<span class="sd">        :param int index: The index of edit to delete</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">edit_list</span><span class="p">[</span><span class="n">index</span><span class="p">]</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">atomics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Combine all the atomic operators of the edits.</span>
+<span class="sd">        An edit is originally a sequence of atomic operators,</span>
+<span class="sd">        and a patch is a sequence of the edits.</span>
+<span class="sd">        So this is a sort of flattening process.</span>
+
+<span class="sd">        :return: The atomic operators, see *Hint*.</span>
+<span class="sd">        :rtype: dict(str, list(:py:class:`.atomic_operator.AtomicOperator`))</span>
+
+<span class="sd">        .. hint::</span>
+<span class="sd">            - key: The name of the atomic operator(ex. &#39;LineReplacement&#39;)</span>
+<span class="sd">            - value: The list of the atomic operator instances</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">atomics</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">edit</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">edit_list</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">atomic</span> <span class="ow">in</span> <span class="n">edit</span><span class="o">.</span><span class="n">atomic_operators</span><span class="p">:</span>
+                <span class="n">atomic_class</span> <span class="o">=</span> <span class="n">atomic</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+                <span class="n">atomics</span><span class="p">[</span><span class="n">atomic_class</span><span class="p">]</span> <span class="o">=</span> <span class="n">atomics</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">atomic_class</span><span class="p">,</span> <span class="nb">list</span><span class="p">())</span>
+                <span class="n">atomics</span><span class="p">[</span><span class="n">atomic_class</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atomic</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">atomics</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">line_replacements</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extract only the line replacement information</span>
+<span class="sd">        from the edit_list of the patch.</span>
+<span class="sd">        For more information, see :py:class:`.atomic_operator.LineReplacement`</span>
+
+<span class="sd">        :return: The line replacement information, see *Hint*.</span>
+<span class="sd">        :rtype: dict(int, int or None)</span>
+
+<span class="sd">        .. hint::</span>
+<span class="sd">            - key: the index of line which is supposed to be replaced</span>
+<span class="sd">            - value: None or the index of ingredient line</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            If ``self.atomics`` is ``[LineReplacement(8, None), LineInsertion(4, 10)]``, ::</span>
+
+<span class="sd">                print(self.line_replacements)</span>
+<span class="sd">                &gt;&gt; { 8: None }</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lrs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">_lr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomics</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;LineReplacement&#39;</span><span class="p">,</span> <span class="nb">list</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="n">_lr</span><span class="o">.</span><span class="n">line</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">lrs</span> <span class="ow">or</span> <span class="n">lrs</span><span class="p">[</span><span class="n">_lr</span><span class="o">.</span><span class="n">line</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">lrs</span><span class="p">[</span><span class="n">_lr</span><span class="o">.</span><span class="n">line</span><span class="p">]</span> <span class="o">=</span> <span class="n">_lr</span><span class="o">.</span><span class="n">ingredient</span>
+        <span class="k">return</span> <span class="n">lrs</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">line_insertions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Extract only the line insertion information</span>
+<span class="sd">        from the edit_list of the patch.</span>
+<span class="sd">        For more information, see :py:class:`.atomic_operator.LineInsertion`</span>
+
+<span class="sd">        :return: The line insertion information, see *Hint*.</span>
+<span class="sd">        :rtype: dict(int, list(int))</span>
+
+<span class="sd">        .. hint::</span>
+<span class="sd">            - key: The index of insertion point</span>
+<span class="sd">            - value: The list of indices of ingredient lines</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            If ``self.atomics`` is ``[LineReplacement(8, None), LineInsertion(4, 10)]``, ::</span>
+
+<span class="sd">                print(self.line_insertions)</span>
+<span class="sd">                &gt;&gt; { 4: [10] }</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">lis</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">_li</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomics</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;LineInsertion&#39;</span><span class="p">,</span> <span class="nb">list</span><span class="p">()):</span>
+            <span class="n">lis</span><span class="p">[</span><span class="n">_li</span><span class="o">.</span><span class="n">point</span><span class="p">]</span> <span class="o">=</span> <span class="n">lis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_li</span><span class="o">.</span><span class="n">point</span><span class="p">,</span> <span class="nb">list</span><span class="p">())</span>
+            <span class="n">lis</span><span class="p">[</span><span class="n">_li</span><span class="o">.</span><span class="n">point</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_li</span><span class="o">.</span><span class="n">ingredient</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">lis</span>
+
+<div class="viewcode-block" id="Patch.apply"><a class="viewcode-back" href="../../pyggi.patch.html#pyggi.patch.Patch.apply">[docs]</a>    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method applies the patch to the target program.</span>
+<span class="sd">        It does not directly modify the source code of the original program,</span>
+<span class="sd">        but modifies the copied program within the temporary directory.</span>
+
+<span class="sd">        :return: The contents of the patch-applied program, See *Hint*.</span>
+<span class="sd">        :rtype: dict(str, list(str))</span>
+
+<span class="sd">        .. hint::</span>
+<span class="sd">            - key: The target file name(path) related to the program root path</span>
+<span class="sd">            - value: The contents of the file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lrs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">line_replacements</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="n">lis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">line_insertions</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+
+        <span class="n">target_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="o">.</span><span class="n">contents</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="n">new_contents</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">target_file</span> <span class="ow">in</span> <span class="n">target_files</span><span class="p">:</span>
+            <span class="n">new_contents</span><span class="p">[</span><span class="n">target_file</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="n">orig_codeline_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="n">target_file</span><span class="p">]</span>
+            <span class="n">new_codeline_list</span> <span class="o">=</span> <span class="n">new_contents</span><span class="p">[</span><span class="n">target_file</span><span class="p">]</span>
+
+            <span class="n">replacements</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">target_file</span><span class="p">,</span> <span class="n">lrs</span><span class="p">))</span>
+            <span class="n">insertions</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">target_file</span><span class="p">,</span> <span class="n">lis</span><span class="p">))</span>
+
+            <span class="c1"># Gathers the codelines along with applying the patches</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">orig_codeline_list</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">target_file</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="ow">in</span> <span class="n">insertions</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">ingredient</span> <span class="ow">in</span> <span class="n">insertions</span><span class="p">[(</span><span class="n">target_file</span><span class="p">,</span> <span class="n">i</span><span class="p">)]:</span>
+                        <span class="n">new_codeline_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="n">ingredient</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="n">ingredient</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">orig_codeline_list</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">target_file</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="ow">in</span> <span class="n">replacements</span><span class="p">:</span>
+                        <span class="n">ingredient</span> <span class="o">=</span> <span class="n">replacements</span><span class="p">[(</span><span class="n">target_file</span><span class="p">,</span> <span class="n">i</span><span class="p">)]</span>
+                        <span class="k">if</span> <span class="n">ingredient</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">new_codeline_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span>
+                                <span class="n">ingredient</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="n">ingredient</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">new_codeline_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">orig_codeline_list</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">target_file_path</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">new_contents</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="o">.</span><span class="n">tmp_path</span><span class="p">,</span> <span class="n">target_file_path</span><span class="p">),</span>
+                <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">target_file</span><span class="p">:</span>
+                <span class="n">target_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">new_contents</span><span class="p">[</span><span class="n">target_file_path</span><span class="p">])</span> <span class="o">+</span>
+                                  <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_contents</span></div></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, COINSE.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

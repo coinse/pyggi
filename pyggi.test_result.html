@@ -1,0 +1,306 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyggi.test_result module &mdash; pyggi  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="pyggi  documentation" href="index.html"/>
+        <link rel="up" title="pyggi" href="pyggi.html"/>
+        <link rel="next" title="examples" href="example.html"/>
+        <link rel="prev" title="pyggi.program module" href="pyggi.program.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> pyggi
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="pyggi.html">PYGGI package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pyggi.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="pyggi.algorithms.html">pyggi.algorithms module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyggi.atomic_operator.html">pyggi.atomic_operator module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyggi.edit.html">pyggi.edit module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyggi.logger.html">pyggi.logger module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyggi.patch.html">pyggi.patch module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pyggi.program.html">pyggi.program module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">pyggi.test_result module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pyggi.html#module-pyggi">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="example.html">examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pyggi</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="pyggi.html">pyggi</a> &raquo;</li>
+        
+      <li>pyggi.test_result module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/pyggi.test_result.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-pyggi.test_result">
+<span id="pyggi-test-result-module"></span><h1>pyggi.test_result module<a class="headerlink" href="#module-pyggi.test_result" title="Permalink to this headline">¶</a></h1>
+<p>This module contains TestResult class.</p>
+<dl class="class">
+<dt id="pyggi.test_result.TestResult">
+<em class="property">class </em><code class="descclassname">pyggi.test_result.</code><code class="descname">TestResult</code><span class="sig-paren">(</span><em>compiled</em>, <em>custom=None</em>, <em>elapsed_time=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyggi/test_result.html#TestResult"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyggi.test_result.TestResult" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>TestResult stores the result of the test suite executions
+on the original or patched source code. It records whether
+compilation succeeded, the elapsed execution time,
+as well as any other user-defined test results.</p>
+<dl class="method">
+<dt id="pyggi.test_result.TestResult.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>name: str</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyggi/test_result.html#TestResult.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyggi.test_result.TestResult.get" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<em>str</em>) – The a name of the custom result</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The value of the custom result</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="pyggi.test_result.TestResult.pyggi_result_parser">
+<em class="property">classmethod </em><code class="descname">pyggi_result_parser</code><span class="sig-paren">(</span><em>output: str</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyggi/test_result.html#TestResult.pyggi_result_parser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyggi.test_result.TestResult.pyggi_result_parser" title="Permalink to this definition">¶</a></dt>
+<dd><p>The test script should print output in the predefined,
+PYGGI-recognisable format. This method parses the results.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>output</strong> (<em>str</em>) – The output of the test script</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The TestResult instance. If the PYGGI output are
+not detected, it is regarded as compile(execution) failure.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#pyggi.test_result.TestResult" title="pyggi.test_result.TestResult"><code class="xref py py-class docutils literal"><span class="pre">TestResult</span></code></a></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>When the output is</p>
+<blockquote>
+<div>[PYGGI_RESULT] {runtime: 7,pass_all: true}</div></blockquote>
+<p class="last">, returns <code class="docutils literal"><span class="pre">TestResult(True,</span> <span class="pre">{'runtime':</span> <span class="pre">7,</span> <span class="pre">'pass_all':</span> <span class="pre">'true'})</span></code></p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="example.html" class="btn btn-neutral float-right" title="examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="pyggi.program.html" class="btn btn-neutral" title="pyggi.program module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, COINSE.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

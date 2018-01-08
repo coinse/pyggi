@@ -1,0 +1,457 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pyggi.atomic_operator &mdash; pyggi  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="pyggi  documentation" href="../../index.html"/>
+        <link rel="up" title="pyggi" href="../pyggi.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> pyggi
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../pyggi.html">PYGGI package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example.html">examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">pyggi</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../pyggi.html">pyggi</a> &raquo;</li>
+        
+      <li>pyggi.atomic_operator</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pyggi.atomic_operator</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">This module contains AtomicOperator class which is an abstact base class,</span>
+<span class="sd">and several classes inherit the AtomicOperator class.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span>
+
+<div class="viewcode-block" id="AtomicOperator"><a class="viewcode-back" href="../../pyggi.atomic_operator.html#pyggi.atomic_operator.AtomicOperator">[docs]</a><span class="k">class</span> <span class="nc">AtomicOperator</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    PYGGI-defined Atomic Operator:</span>
+<span class="sd">    User can generate the own edit operators</span>
+<span class="sd">    which can be converted into a list of atomic operators.</span>
+<span class="sd">    For example, **MOVE x -&gt; y** operator can be represented as</span>
+<span class="sd">    **[LineReplacement(x, None),LineInsertion(x, y)]**</span>
+
+<span class="sd">    **Available List**</span>
+
+<span class="sd">    * LineReplacement</span>
+<span class="sd">    * LineInsertion</span>
+
+<span class="sd">    .. hint::</span>
+
+<span class="sd">        +---------+---------+---------------------+</span>
+<span class="sd">        | Point # | Line #  | Code                |</span>
+<span class="sd">        +=========+=========+=====================+</span>
+<span class="sd">        |    0    |         |                     |</span>
+<span class="sd">        +---------+---------+---------------------+</span>
+<span class="sd">        |         |    0    | from math import *  |</span>
+<span class="sd">        +---------+---------+---------------------+</span>
+<span class="sd">        |    1    |         |                     |</span>
+<span class="sd">        +---------+---------+---------------------+</span>
+<span class="sd">        |         |    1    | for i in range(3):  |</span>
+<span class="sd">        +---------+---------+---------------------+</span>
+<span class="sd">        |    2    |         |                     |</span>
+<span class="sd">        +---------+---------+---------------------+</span>
+<span class="sd">        |         |    2    |   print(i)          |</span>
+<span class="sd">        +---------+---------+---------------------+</span>
+<span class="sd">        |    3    |         |                     |</span>
+<span class="sd">        +---------+---------+---------------------+</span>
+<span class="sd">        |         |    3    |   if (sqrt(i) &gt; 2): |</span>
+<span class="sd">        +---------+---------+---------------------+</span>
+<span class="sd">        |    4    |         |                     |</span>
+<span class="sd">        +---------+---------+---------------------+</span>
+<span class="sd">        |         |    4    |       return        |</span>
+<span class="sd">        +---------+---------+---------------------+</span>
+<span class="sd">        |   ...   |   ...   | ..................  |</span>
+<span class="sd">        +---------+---------+---------------------+</span>
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">prop</span><span class="p">]</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">prop</span><span class="p">]:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">atomic_operators</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: ``[self]``, the list that only contains the AtomicOperator instance itself.</span>
+<span class="sd">        :rtype: list(:py:class:`.atomic_operator.AtomicOperator`)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="p">]</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="AtomicOperator.random"><a class="viewcode-back" href="../../pyggi.atomic_operator.html#pyggi.atomic_operator.AtomicOperator.random">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">random</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: The operator instance with randomly-selected properties.</span>
+<span class="sd">        :rtype: :py:class:`.atomic_operator.AtomicOperator`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div></div>
+
+
+<div class="viewcode-block" id="LineReplacement"><a class="viewcode-back" href="../../pyggi.atomic_operator.html#pyggi.atomic_operator.LineReplacement">[docs]</a><span class="k">class</span> <span class="nc">LineReplacement</span><span class="p">(</span><span class="n">AtomicOperator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    .. note::</span>
+<span class="sd">        1. LineReplacement((*[file_path]*, 3), (*[file_path]*, 2))</span>
+
+<span class="sd">        ======== ========</span>
+<span class="sd">        Before   After</span>
+<span class="sd">        ======== ========</span>
+<span class="sd">        0        0</span>
+<span class="sd">        1        1</span>
+<span class="sd">        2        2</span>
+<span class="sd">        3        2</span>
+<span class="sd">        4        4</span>
+<span class="sd">        ======== ========</span>
+
+<span class="sd">        2. LineReplacement((*[file_path]*, 3), None)</span>
+
+<span class="sd">        ======== ========</span>
+<span class="sd">        Before   After</span>
+<span class="sd">        ======== ========</span>
+<span class="sd">        0        0</span>
+<span class="sd">        1        1</span>
+<span class="sd">        2        2</span>
+<span class="sd">        3        4</span>
+<span class="sd">        4</span>
+<span class="sd">        ======== ========</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param line: The file path and the index of line which should be replaced</span>
+<span class="sd">        :type line: tuple(str, int)</span>
+<span class="sd">        :param ingredient: The file path and the index of code line which is an ingredient</span>
+<span class="sd">        :type ingredient: None or tuple(str, int)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">int</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">ingredient</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ingredient</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ingredient</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">int</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">ingredient</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">line</span> <span class="o">=</span> <span class="n">line</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ingredient</span> <span class="o">=</span> <span class="n">ingredient</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: ``Replace [line] with [ingredient]``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;Replace </span><span class="si">{}</span><span class="s2"> with </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">line</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ingredient</span><span class="p">)</span>
+
+<div class="viewcode-block" id="LineReplacement.random"><a class="viewcode-back" href="../../pyggi.atomic_operator.html#pyggi.atomic_operator.LineReplacement.random">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">random</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">program</span><span class="p">,</span> <span class="n">line_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ingr_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">del_rate</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param program: The program instance to which the random edit will be applied.</span>
+<span class="sd">        :type program: :py:class:`.Program`</span>
+<span class="sd">        :param str line_file: Line is the target line to delete.</span>
+<span class="sd">          If line_file is specified, the target line will be chosen within the file.</span>
+<span class="sd">        :param str ingr_file: Ingredient is the line to be copied.</span>
+<span class="sd">          If ingr_file is specified, the target line will be chosen within the file.</span>
+<span class="sd">        :param float del_rate: The probability of that line is deleted</span>
+<span class="sd">          instead of replaced with another line</span>
+<span class="sd">        :return: The LineReplacement instance with the randomly-selected properties:</span>
+<span class="sd">          line and ingredient.</span>
+<span class="sd">        :rtype: :py:class:`.atomic_operator.LineReplacement`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">random</span>
+        <span class="k">assert</span> <span class="n">del_rate</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">del_rate</span> <span class="o">&lt;=</span> <span class="mi">1</span>
+        <span class="n">line_file</span> <span class="o">=</span> <span class="n">line_file</span> <span class="ow">or</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">target_files</span><span class="p">)</span>
+        <span class="n">ingr_file</span> <span class="o">=</span> <span class="n">ingr_file</span> <span class="ow">or</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">target_files</span><span class="p">)</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">line_file</span><span class="p">,</span>
+            <span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="n">line_file</span><span class="p">]))</span>
+        <span class="p">)</span>
+        <span class="n">ingredient</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">ingr_file</span><span class="p">,</span>
+            <span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="n">ingr_file</span><span class="p">]))</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">del_rate</span><span class="p">:</span>
+            <span class="n">ingredient</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">ingredient</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="LineInsertion"><a class="viewcode-back" href="../../pyggi.atomic_operator.html#pyggi.atomic_operator.LineInsertion">[docs]</a><span class="k">class</span> <span class="nc">LineInsertion</span><span class="p">(</span><span class="n">AtomicOperator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    .. note::</span>
+<span class="sd">        1. LineInsertion((*[file_path]*, 4), (*[file_path]*, 2))</span>
+
+<span class="sd">        ======== ========</span>
+<span class="sd">        Before   After</span>
+<span class="sd">        ======== ========</span>
+<span class="sd">        0        0</span>
+<span class="sd">        1        1</span>
+<span class="sd">        2        2</span>
+<span class="sd">        3        3</span>
+<span class="sd">        4        2</span>
+<span class="sd">        ...      4</span>
+<span class="sd">        ======== ========</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span> <span class="n">ingredient</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param point: The file path and the point to which the code</span>
+<span class="sd">          line should be inserted</span>
+<span class="sd">        :type point: tuple(str, int)</span>
+<span class="sd">        :param ingredient: The file path and the index of code line</span>
+<span class="sd">          which is an ingredient</span>
+<span class="sd">        :type ingredient: tuple(str, int)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">int</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ingredient</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ingredient</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">int</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">ingredient</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">point</span> <span class="o">=</span> <span class="n">point</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ingredient</span> <span class="o">=</span> <span class="n">ingredient</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;Insert </span><span class="si">{}</span><span class="s2"> into </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ingredient</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="p">)</span>
+
+<div class="viewcode-block" id="LineInsertion.random"><a class="viewcode-back" href="../../pyggi.atomic_operator.html#pyggi.atomic_operator.LineInsertion.random">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">random</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">program</span><span class="p">,</span> <span class="n">point_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ingr_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param program: The program instance to which the random edit will be applied.</span>
+<span class="sd">        :type program: :py:class:`.Program`</span>
+<span class="sd">        :param str point_file: Point means the insertion point to which the ingr will be inserted.</span>
+<span class="sd">          If point_file is specified, the point will be chosen within the file.</span>
+<span class="sd">        :param str ingr_file: Ingredient is the line to be copied.</span>
+<span class="sd">          If ingr_file is specified, the target line will be chosen within the file.</span>
+<span class="sd">        :return: The LineInsertion instance with the randomly-selected properties:</span>
+<span class="sd">          point and ingredient.</span>
+<span class="sd">        :rtype: :py:class:`.atomic_operator.LineInsertion`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">random</span>
+        <span class="n">point_file</span> <span class="o">=</span> <span class="n">point_file</span> <span class="ow">or</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">target_files</span><span class="p">)</span>
+        <span class="n">ingr_file</span> <span class="o">=</span> <span class="n">ingr_file</span> <span class="ow">or</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">target_files</span><span class="p">)</span>
+        <span class="n">point</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">point_file</span><span class="p">,</span>
+            <span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="n">point_file</span><span class="p">])</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">ingredient</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">ingr_file</span><span class="p">,</span>
+            <span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="n">ingr_file</span><span class="p">]))</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">ingredient</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, COINSE.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

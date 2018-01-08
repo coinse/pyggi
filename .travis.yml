@@ -1,0 +1,14 @@
+language: python
+python:
+  - "3.5"
+  - "3.6"
+
+install:
+  - python setup.py install
+  - pip install pytest
+
+before_script:
+  - cd test
+
+script:
+  - pytest

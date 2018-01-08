@@ -85,13 +85,8 @@ class AtomicOperator(metaclass=ABCMeta):
 
 class LineReplacement(AtomicOperator):
     """
-
-    * **line**: The index of line which should be replaced
-    * **ingredient**: The index of code line which is an ingredient.
-      When ingredient is None, it is the same as deletion.
-
-    .. hint::
-        1. LineReplacement(3, 2)
+    .. note::
+        1. LineReplacement((*[file_path]*, 3), (*[file_path]*, 2))
 
         ======== ========
         Before   After
@@ -103,7 +98,7 @@ class LineReplacement(AtomicOperator):
         4        4
         ======== ========
 
-        2. LineReplacement(3, None)
+        2. LineReplacement((*[file_path]*, 3), None)
 
         ======== ========
         Before   After
@@ -116,6 +111,12 @@ class LineReplacement(AtomicOperator):
         ======== ========
     """
     def __init__(self, line, ingredient=None):
+        """
+        :param line: The file path and the index of line which should be replaced
+        :type line: tuple(str, int)
+        :param ingredient: The file path and the index of code line which is an ingredient
+        :type ingredient: None or tuple(str, int)
+        """
         super().__init__()
         assert isinstance(line[0], str)
         assert isinstance(line[1], int)
@@ -128,6 +129,9 @@ class LineReplacement(AtomicOperator):
         self.ingredient = ingredient
 
     def __str__(self):
+        """
+        :return: ``Replace [line] with [ingredient]``
+        """
         return "Replace {} with {}".format(self.line, self.ingredient)
 
     @classmethod
@@ -164,12 +168,8 @@ class LineReplacement(AtomicOperator):
 
 class LineInsertion(AtomicOperator):
     """
-
-    * **point**: The point to which the code line should be inserted
-    * **ingredient**: The index of code line which is an ingredient
-
-    .. hint::
-        1. LineInsertion(4, 2)
+    .. note::
+        1. LineInsertion((*[file_path]*, 4), (*[file_path]*, 2))
 
         ======== ========
         Before   After
@@ -184,6 +184,14 @@ class LineInsertion(AtomicOperator):
     """
 
     def __init__(self, point, ingredient):
+        """
+        :param point: The file path and the point to which the code
+          line should be inserted
+        :type point: tuple(str, int)
+        :param ingredient: The file path and the index of code line
+          which is an ingredient
+        :type ingredient: tuple(str, int)
+        """
         super().__init__()
         assert isinstance(point[0], str)
         assert isinstance(point[1], int)

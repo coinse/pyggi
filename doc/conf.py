@@ -158,3 +158,5 @@ texinfo_documents = [
      author, 'pyggi', 'One line description of project.',
      'Miscellaneous'),
 ]
+
+autoclass_content = 'both'

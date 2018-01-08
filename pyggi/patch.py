@@ -116,13 +116,12 @@ class Patch:
         try:
             start = time.time()
             stdout, _ = sprocess.communicate(timeout=timeout)
-            end = time.time()
-            elapsed_time = end - start
+            elapsed_time = time.time() - start
             self.test_result = result_parser(stdout.decode("ascii"))
             self.test_result.elapsed_time = elapsed_time
         except subprocess.TimeoutExpired:
-            elapsed_time = timeout * 1000
-            self.test_result = TestResult(False, elapsed_time, None)
+            elapsed_time = timeout * 1000 # seconds to milliseconds
+            self.test_result = TestResult(False, custom=None, elapsed_time=elapsed_time)
         os.chdir(cwd)
 
         return self.test_result

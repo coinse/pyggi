@@ -13,9 +13,9 @@ class TestResult:
     as well as any other user-defined test results.
 
     """
-    def __init__(self, compiled, pyggi_result, elapsed_time=None):
+    def __init__(self, compiled, custom=None, elapsed_time=None):
         self.compiled = compiled
-        self.custom = pyggi_result
+        self.custom = custom
         self.elapsed_time = elapsed_time
 
     def __copy__(self):

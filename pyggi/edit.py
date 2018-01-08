@@ -15,9 +15,10 @@ class Edit(metaclass=ABCMeta):
 
     Every class that inherits Edit class must override the
     methods marked with ``@abstractmethod`` to create instances.
-        * :py:meth:`__str__`
-        * :py:meth:`length_of_args`
-        * :py:meth:`atomic_operators`
+
+    * :py:meth:`__str__`
+    * :py:meth:`length_of_args`
+    * :py:meth:`atomic_operators`
     """
     def __init__(self, *args):
         if len(args) != self.length_of_args:
@@ -38,7 +39,9 @@ class Edit(metaclass=ABCMeta):
 
         .. note::
             If the edit is ``LineMoving(('Triangle.java', 4), ('Triangle.java', 10))``
+
             returns::
+
                 1) Insert ('Triangle.java', 4) into ('Triangle.java', 10)
                 2) Replace ('Triangle.java', 4) with None
         """
@@ -81,7 +84,8 @@ class LineDeletion(Edit):
         """
         Delete **x**
 
-        The index of target line to be deleted.
+        :return: The file path and the index of target line to be deleted.
+        :rtype: tuple(str, int)
         """
         return self.args[0]
 
@@ -132,7 +136,8 @@ class LineMoving(Edit):
         """
         Move **x** -> y
 
-        The index of target line to be moved.
+        :return: The file path and the index of target line to be moved.
+        :rtype: tuple(str, int)
         """
         return self.args[0]
 
@@ -141,7 +146,8 @@ class LineMoving(Edit):
         """
         Move x -> **y**
 
-        The index of the point to which line x is inserted.
+        :return: The file path and the index of the point to which line x is inserted.
+        :rtype: tuple(str, int)
         """
         return self.args[1]
 

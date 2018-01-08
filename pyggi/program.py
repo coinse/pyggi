@@ -53,7 +53,8 @@ class Program(object):
     CONFIG_FILE_NAME = 'PYGGI_CONFIG'
     TMP_DIR = "./pyggi_tmp/"
 
-    def __init__(self, path, manipulation_level=MnplLevel.PHYSICAL_LINE):
+    def __init__(self, path, manipulation_level=MnplLevel.PHYSICAL_LINE,
+                 config_file_name=CONFIG_FILE_NAME):
         assert isinstance(manipulation_level, MnplLevel)
         self.path = path.strip()
         if self.path.endswith('/'):
@@ -61,7 +62,7 @@ class Program(object):
         self.name = os.path.basename(self.path)
         self.logger = Logger(self.name)
         self.manipulation_level = manipulation_level
-        with open(os.path.join(self.path, Program.CONFIG_FILE_NAME)) as config_file:
+        with open(os.path.join(self.path, config_file_name)) as config_file:
             config = json.load(config_file)
             self.test_command = config['test_command']
             self.target_files = config['target_files']

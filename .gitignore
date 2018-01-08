@@ -1,6 +1,8 @@
 # Compiled python modules.
 *.pyc
 
+paper/
+
 # Setuptools distribution folder.
 /dist/
 

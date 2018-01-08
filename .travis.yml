@@ -5,10 +5,12 @@ python:
 
 install:
   - python setup.py install
-  - pip install pytest
+  - pip install coveralls
+  - pip install pytest-cov
 
 before_script:
   - cd test
 
 script:
-  - pytest
+  - pytest --cov=pyggi
+  - coveralls

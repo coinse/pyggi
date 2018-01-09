@@ -66,9 +66,10 @@ class TestEdit(object):
 
         def test_atomic_operators(self, setup_moving):
             line_moving, _, _ = setup_moving
-            return [
-                LineInsertion(line_moving.y, line_moving.x), LineReplacement(
-                    line_moving.x, None)
+
+            assert [
+                LineInsertion(line_moving.y, line_moving.x),
+                LineReplacement(line_moving.x, None)
             ] == line_moving.atomic_operators
 
         def test_random(self):

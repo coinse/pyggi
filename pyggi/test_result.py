@@ -41,7 +41,10 @@ class TestResult:
         :return: The value of the custom result
         :rtype: str
         """
-        assert name in self.custom
+        if not custom:
+            return None
+        if not name in self.custom:
+            return None
         return self.custom[name]
 
     @classmethod

@@ -41,7 +41,7 @@ class TestResult:
         :return: The value of the custom result
         :rtype: str
         """
-        if not custom:
+        if not self.custom:
             return None
         if not name in self.custom:
             return None

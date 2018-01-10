@@ -127,7 +127,7 @@ class Patch:
 
         return self.test_result
 
-    def add_edit(self, edit):
+    def add(self, edit):
         """
         Add an edit to the edit list
 

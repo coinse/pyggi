@@ -47,18 +47,18 @@ class TestPatch(object):
         assert cloned_patch == patch
         assert cloned_patch.test_result == None
 
-    def test_add_edit(self, setup):
+    def test_add(self, setup):
         patch, program = setup
         deletion_operator = LineDeletion
         deletion_instance = deletion_operator.random(program)
-        patch.add_edit(deletion_instance)
+        patch.add(deletion_instance)
 
         assert len(patch) == 1
         assert patch.edit_list[0] == deletion_instance
 
         moving_operator = LineMoving
         moving_instance = moving_operator.random(program)
-        patch.add_edit(moving_instance)
+        patch.add(moving_instance)
 
         assert len(patch) == 2
         assert patch.edit_list[1] == moving_instance

@@ -34,7 +34,7 @@ class LocalSearch(metaclass=ABCMeta):
                         patch.remove(random.randrange(0, len(patch)))
                     else:
                         edit_operator = random.choice([LineDeletion, LineInsertion, LineReplacement])
-                        patch.add_edit(edit_operator.random(program))
+                        patch.add(edit_operator.random(program))
                     return patch
 
                 def get_fitness(self, patch):
@@ -98,7 +98,7 @@ class LocalSearch(metaclass=ABCMeta):
         .. hint::
             An example::
 
-                return patch.add_edit(LineDeletion.random(program))
+                return patch.add(LineDeletion.random(program))
         """
         pass
 

@@ -28,7 +28,7 @@ if __name__ == "__main__":
                 patch.remove(random.randrange(0, len(patch)))
             else:
                 edit_operator = random.choice([LineDeletion, LineInsertion, LineReplacement])
-                patch.add_edit(edit_operator.random(program))
+                patch.add(edit_operator.random(program))
             return patch
 
         def get_fitness(self, patch):

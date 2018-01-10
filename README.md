@@ -1,5 +1,10 @@
 # PYGGI(Python General Framework for Genetic Improvement) [![Build Status](https://travis-ci.org/coinse/pyggi.svg?branch=master)](https://travis-ci.org/coinse/pyggi) [![Coverage Status](https://coveralls.io/repos/github/coinse/pyggi/badge.svg?branch=master)](https://coveralls.io/github/coinse/pyggi?branch=master)
 
+<p align="center">
+  <img alt="PYGGI logo" src="/images/pyggi_logo.png" />
+</p>
+
+
 PYGGI is the lightweight and simple framework for Genetic Improvement.
 It helps one practice or experience GI with only few code lines
 by lightning the costs of implementing typical GI process

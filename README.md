@@ -7,7 +7,7 @@
 
 PYGGI is the lightweight and simple framework for Genetic Improvement.
 It helps one practice or experience GI with only few code lines
-by lightning the costs of implementing typical GI process
+by reducing the costs of implementing typical GI process
 such as source code manipulation and patch management.
 
 

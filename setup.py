@@ -16,6 +16,6 @@ setup(
     author_email='',
     license='MIT',
     packages=['pyggi'],
-    install_requires=['argparse'],
+    install_requires=['argparse', 'astor'],
     dependency_links=[],
     zip_safe=False)

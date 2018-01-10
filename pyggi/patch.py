@@ -2,6 +2,7 @@
 This module contains Patch class.
 """
 import os
+from .program import MnplLevel
 from .atomic_operator import AtomicOperator
 from .edit import Edit
 from .test_result import TestResult
@@ -235,37 +236,45 @@ class Patch:
             - key: The target file name(path) related to the program root path
             - value: The contents of the file
         """
-        lrs = self.line_replacements.items()
-        lis = self.line_insertions.items()
-
         target_files = self.program.contents.keys()
-        new_contents = dict()
-        for target_file in target_files:
-            new_contents[target_file] = list()
-            orig_codeline_list = self.program.contents[target_file]
-            new_codeline_list = new_contents[target_file]
+        if self.program.manipulation_level == MnplLevel.PHYSICAL_LINE:
+            new_contents = dict()
+            lrs = self.line_replacements.items()
+            lis = self.line_insertions.items()
+            for target_file in target_files:
+                new_contents[target_file] = list()
+                orig_codeline_list = self.program.contents[target_file]
+                new_codeline_list = new_contents[target_file]
 
-            replacements = dict(filter(lambda x: x[0][0] == target_file, lrs))
-            insertions = dict(filter(lambda x: x[0][0] == target_file, lis))
+                replacements = dict(filter(lambda x: x[0][0] == target_file, lrs))
+                insertions = dict(filter(lambda x: x[0][0] == target_file, lis))
 
-            # Gathers the codelines along with applying the patches
-            for i in range(len(orig_codeline_list) + 1):
-                if (target_file, i) in insertions:
-                    for ingredient in insertions[(target_file, i)]:
-                        new_codeline_list.append(
-                            self.program.contents[ingredient[0]][ingredient[1]])
-                if i < len(orig_codeline_list):
-                    if (target_file, i) in replacements:
-                        ingredient = replacements[(target_file, i)]
-                        if ingredient is not None:
-                            new_codeline_list.append(self.program.contents[
-                                ingredient[0]][ingredient[1]])
-                    else:
-                        new_codeline_list.append(orig_codeline_list[i])
-        for target_file_path in sorted(new_contents.keys()):
-            with open(
-                os.path.join(self.program.tmp_path, target_file_path),
-                'w') as target_file:
-                target_file.write('\n'.join(new_contents[target_file_path]) +
-                                  '\n')
-        return new_contents
+                # Gathers the codelines along with applying the patches
+                for i in range(len(orig_codeline_list) + 1):
+                    if (target_file, i) in insertions:
+                        for ingredient in insertions[(target_file, i)]:
+                            new_codeline_list.append(
+                                self.program.contents[ingredient[0]][ingredient[1]])
+                    if i < len(orig_codeline_list):
+                        if (target_file, i) in replacements:
+                            ingredient = replacements[(target_file, i)]
+                            if ingredient is not None:
+                                new_codeline_list.append(self.program.contents[
+                                    ingredient[0]][ingredient[1]])
+                        else:
+                            new_codeline_list.append(orig_codeline_list[i])
+            for target_file in sorted(new_contents.keys()):
+                with open(os.path.join(self.program.tmp_path, target_file), 'w') as tmp_file:
+                    tmp_file.write('\n'.join(new_contents[target_file]) + '\n')
+            return new_contents
+        elif self.program.manipulation_level == MnplLevel.AST:
+            import astor
+            new_contents = dict()
+            for target_file in target_files:
+                new_contents[target_file] = self.program.contents[target_file]
+                """
+                pass
+                """
+                with open(os.path.join(self.program.tmp_path, target_file), 'w') as tmp_file:
+                    tmp_file.write(astor.to_source(new_contents[target_file]))
+            return new_contents

@@ -18,7 +18,7 @@ class MnplLevel(Enum):
 
     """
     PHYSICAL_LINE = 'physical_line'
-    # AST = 'ast'
+    AST = 'ast'
 
     @classmethod
     def is_valid(cls, value):
@@ -120,10 +120,26 @@ class Program(object):
             - key: the file name
             - value: the contents of the file
         """
-        contents = {}
+        assert isinstance(manipulation_level, MnplLevel)
         if manipulation_level == MnplLevel.PHYSICAL_LINE:
+            contents = {}
             for target in target_files:
                 with open(os.path.join(path, target), 'r') as target_file:
                     contents[target] = list(
                         map(str.rstrip, target_file.readlines()))
-        return contents
+            return contents
+        elif manipulation_level == MnplLevel.AST:
+            import ast
+            import astor
+            from .parser import ast_python #, ast_java
+            contents = {}
+            for target in target_files:
+                if target.endswith(".py"):
+                    root = astor.parse_file(os.path.join(path, target))
+                    contents[target] = root
+                    """
+                    tree = ast_python.get_tree(root)
+                    print(tree)
+                    """
+            return contents
+        return None

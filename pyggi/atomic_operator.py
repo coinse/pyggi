@@ -5,6 +5,7 @@ and several classes inherit the AtomicOperator class.
 
 """
 from abc import ABCMeta, abstractmethod
+import ast
 
 class AtomicOperator(metaclass=ABCMeta):
     """
@@ -73,6 +74,16 @@ class AtomicOperator(metaclass=ABCMeta):
     def __str__(self):
         pass
 
+    @abstractmethod
+    def is_valid_for(self, program):
+        """
+        :param program: The program instance to which this edit will be applied
+        :type program: :py:class:`.Program`
+        :return: Whether the edit is able to be applied to the program
+        :rtype: bool
+        """
+        pass
+
     @classmethod
     @abstractmethod
     def random(cls):
@@ -133,6 +144,12 @@ class LineReplacement(AtomicOperator):
         :return: ``Replace [line] with [ingredient]``
         """
         return "Replace {} with {}".format(self.line, self.ingredient)
+
+    def is_valid_for(self, program):
+        from .program import MnplLevel
+        if program.manipulation_level == MnplLevel.PHYSICAL_LINE:
+            return True
+        return False
 
     @classmethod
     def random(cls, program, line_file=None, ingr_file=None, del_rate=0):
@@ -205,6 +222,12 @@ class LineInsertion(AtomicOperator):
     def __str__(self):
         return "Insert {} into {}".format(self.ingredient, self.point)
 
+    def is_valid_for(self, program):
+        from .program import MnplLevel
+        if program.manipulation_level == MnplLevel.PHYSICAL_LINE:
+            return True
+        return False
+
     @classmethod
     def random(cls, program, point_file=None, ingr_file=None):
         """
@@ -230,3 +253,38 @@ class LineInsertion(AtomicOperator):
             random.randrange(0, len(program.contents[ingr_file]))
         )
         return cls(point, ingredient)
+
+class StmtReplacement(AtomicOperator):
+    def __init__(self, stmt, ingredient=None):
+        """
+        :param line: The file path and the index of line which should be replaced
+        :type line: tuple(str, int)
+        :param ingredient: The file path and the index of code line which is an ingredient
+        :type ingredient: None or tuple(str, int)
+        """
+        super().__init__()
+        assert isinstance(stmt[0], str)
+        assert isinstance(stmt[1], list)
+        assert all(isinstance(x, int) and x >= 0 for x in stmt[1])
+        if ingredient:
+            assert isinstance(ingredient[0], str)
+            assert isinstance(ingredient[1], list)
+            assert all(isinstance(x, int) and x >= 0 for x in ingredient[1])
+        self.stmt = stmt
+        self.ingredient = ingredient
+
+    def __str__(self):
+        """
+        :return: ``Replace [stmt] with [ingredient]``
+        """
+        return "Replace {} with {}".format(self.stmt, self.ingredient)
+
+    def is_valid_for(self, program):
+        from .program import MnplLevel
+        if program.manipulation_level == MnplLevel.AST:
+            return True
+        return False
+
+    @classmethod
+    def random(cls, program):
+        pass

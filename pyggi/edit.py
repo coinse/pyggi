@@ -54,6 +54,16 @@ class Edit(metaclass=ABCMeta):
     def __str__(self):
         pass
 
+    @abstractmethod
+    def is_valid_for(self, program):
+        """
+        :param program: The program instance to which this edit will be applied
+        :type program: :py:class:`.Program`
+        :return: Whether the edit is able to be applied to the program
+        :rtype: bool
+        """
+        pass
+
     @property
     @abstractmethod
     def length_of_args(self):
@@ -78,6 +88,12 @@ class LineDeletion(Edit):
     """
     def __str__(self):
         return "Delete {}".format(self.x)
+
+    def is_valid_for(self, program):
+        from .program import MnplLevel
+        if program.manipulation_level == MnplLevel.PHYSICAL_LINE:
+            return True
+        return False
 
     @property
     def x(self):
@@ -130,6 +146,12 @@ class LineMoving(Edit):
     """
     def __str__(self):
         return "Move {} -> {}".format(self.x, self.y)
+
+    def is_valid_for(self, program):
+        from .program import MnplLevel
+        if program.manipulation_level == MnplLevel.PHYSICAL_LINE:
+            return True
+        return False
 
     @property
     def x(self):
@@ -192,3 +214,47 @@ class LineMoving(Edit):
             random.randrange(0, len(program.contents[ingr_file]))
         )
         return cls(ingredient, point)
+
+class StmtDeletion(Edit):
+    """
+    StmtDeletion: Delete x (Actually, Replace x with an empty statement)
+    """
+    def __str__(self):
+        return "Delete {}".format(self.x)
+
+    def is_valid_for(self, program):
+        from .program import MnplLevel
+        if program.manipulation_level == MnplLevel.AST:
+            return True
+        return False
+
+    @property
+    def x(self):
+        """
+        Delete **x**
+
+        :return: The file path and the index of target stmt to be deleted.
+        :rtype: tuple(str, list(int))
+        """
+        return self.args[0]
+
+    @property
+    def length_of_args(self):
+        """
+        :return: ``1``
+        :rtype: int
+        """
+        return 1
+
+    @property
+    def atomic_operators(self):
+        """
+        :return: ``[StmtReplacement(self.x, None)]``
+        :rtype: list(:py:class:`.atomic_operator.AtomicOperator`)
+        """
+        from .atomic_operator import StmtReplacement
+        return [StmtReplacement(self.x, None)]
+
+    @classmethod
+    def random(cls, program, stmt_file=None):
+        pass

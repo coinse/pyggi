@@ -137,9 +137,7 @@ class Program(object):
                 if target.endswith(".py"):
                     root = astor.parse_file(os.path.join(path, target))
                     contents[target] = root
-                    """
                     tree = ast_python.get_tree(root)
                     print(tree)
-                    """
             return contents
         return None

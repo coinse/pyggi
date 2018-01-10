@@ -1,4 +1,6 @@
 from pyggi import Program, Patch, MnplLevel, TestResult
+from pyggi.atomic_operator import StmtReplacement
+from pyggi.edit import StmtDeletion
 import ast
 import astor
 
@@ -16,14 +18,17 @@ def result_parser(result):
 triangle = Program("sample/Triangle_fast_python", manipulation_level=MnplLevel.AST)
 
 
-print(triangle.contents)
 print(Patch(triangle).run_test(timeout=30, result_parser=result_parser))
 root = triangle.contents['triangle.py']
-root.body[0], root.body[1] = root.body[1], root.body[0]
+#root.body[0], root.body[1] = root.body[1], root.body[0]
+#root.body[4].body[0] = ast.Pass()
+#root.body.append(root.body[4].body[0])
 print(astor.to_source(root))
-print(triangle.contents)
-print(Patch(triangle).run_test(timeout=30, result_parser=result_parser))
-
+patch = Patch(triangle)
+patch.add(StmtDeletion(('triangle.py', [4, 0])))
+patch.add(StmtReplacement(('triangle.py', [4, 2, 0]), ('triangle.py', [4, 3, 0])))
+print(patch.run_test(timeout=30, result_parser=result_parser))
+print(patch.diff)
 """
 # del
 root.body[1] = ast.Pass()

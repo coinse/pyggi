@@ -233,8 +233,8 @@ class StmtDeletion(Edit):
         """
         Delete **x**
 
-        :return: The file path and the index of target stmt to be deleted.
-        :rtype: tuple(str, list(int))
+        :return: The file path and the position of target stmt to be deleted.
+        :rtype: tuple(str, list(tuple(str, int)))
         """
         return self.args[0]
 

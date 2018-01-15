@@ -123,9 +123,9 @@ class LineReplacement(AtomicOperator):
     """
     def __init__(self, line, ingredient=None):
         """
-        :param line: The file path and the index of line which should be replaced
+        :param line: The file path and index of line which should be replaced
         :type line: tuple(str, int)
-        :param ingredient: The file path and the index of code line which is an ingredient
+        :param ingredient: The file path and index of code line which is an ingredient
         :type ingredient: None or tuple(str, int)
         """
         super().__init__()
@@ -202,10 +202,10 @@ class LineInsertion(AtomicOperator):
 
     def __init__(self, point, ingredient):
         """
-        :param point: The file path and the point to which the code
+        :param point: The file path and point to which the code
           line should be inserted
         :type point: tuple(str, int)
-        :param ingredient: The file path and the index of code line
+        :param ingredient: The file path and index of code line
           which is an ingredient
         :type ingredient: tuple(str, int)
         """
@@ -254,22 +254,25 @@ class LineInsertion(AtomicOperator):
         )
         return cls(point, ingredient)
 
+
 class StmtReplacement(AtomicOperator):
     def __init__(self, stmt, ingredient=None):
         """
-        :param line: The file path and the index of line which should be replaced
-        :type line: tuple(str, int)
-        :param ingredient: The file path and the index of code line which is an ingredient
-        :type ingredient: None or tuple(str, int)
+        :param stmt: The file path and the position of statement which should be replaced
+        :type stmt: tuple(str, list(tuple(str, int)))
+        :param ingredient: The file path and the position of statement which is an ingredient
+        :type ingredient: None or tuple(str, list(tuple(str, int)))
         """
         super().__init__()
         assert isinstance(stmt[0], str)
         assert isinstance(stmt[1], list)
-        assert all(isinstance(x, int) and x >= 0 for x in stmt[1])
+        assert all(isinstance(t, tuple) and isinstance(t[0], str)
+            and isinstance(t[1], int) and t[1] >= 0 for t in stmt[1])
         if ingredient:
             assert isinstance(ingredient[0], str)
             assert isinstance(ingredient[1], list)
-            assert all(isinstance(x, int) and x >= 0 for x in ingredient[1])
+            assert all(isinstance(t, tuple) and isinstance(t[0], str)
+                and isinstance(t[1], int) and t[1] >= 0 for t in ingredient[1])
         self.stmt = stmt
         self.ingredient = ingredient
 
@@ -284,6 +287,61 @@ class StmtReplacement(AtomicOperator):
         if program.manipulation_level == MnplLevel.AST:
             return True
         return False
+
+    def apply(self, contents):
+        from .helper import stmt_python
+        stmt_python.replace((contents[self.stmt[0]], self.stmt[1]),
+            (contents[self.ingredient[0]], self.ingredient[1]))
+
+    @classmethod
+    def random(cls, program):
+        pass
+
+
+class StmtInsertion(AtomicOperator):
+    def __init__(self, stmt, ingredient, direction='before'):
+        """
+        :param stmt: The file path and position of statement which is a target of modification
+        :type stmt: tuple(str, list(tuple(str, int)))
+        :param ingredient: The file path and the position of statement which will be inserted
+        :type ingredient: None or tuple(str, list(tuple(str, int)))
+        :param direction: *'before'* or *'after'*
+        :type direction: str
+        """
+        super().__init__()
+        assert isinstance(stmt[0], str)
+        assert isinstance(stmt[1], list)
+        assert all(isinstance(t, tuple) and isinstance(t[0], str)
+            and isinstance(t[1], int) and t[1] >= 0 for t in stmt[1])
+        assert isinstance(ingredient[0], str)
+        assert isinstance(ingredient[1], list)
+        assert all(isinstance(t, tuple) and isinstance(t[0], str)
+            and isinstance(t[1], int) and t[1] >= 0 for t in ingredient[1])
+        assert direction in ['before', 'after']
+        self.stmt = stmt
+        self.ingredient = ingredient
+        self.direction = direction
+
+    def __str__(self):
+        """
+        :return: ``Insert [ingredient] [direction] [stmt]``
+        """
+        return "Insert {} {} {}".format(self.ingredient, self.direction, self.stmt)
+
+    def is_valid_for(self, program):
+        from .program import MnplLevel
+        if program.manipulation_level == MnplLevel.AST:
+            return True
+        return False
+
+    def apply(self, contents):
+        from .helper import stmt_python
+        if self.direction == 'before':
+            stmt_python.insert_before((contents[self.stmt[0]], self.stmt[1]),
+                (contents[self.ingredient[0]], self.ingredient[1]))
+        elif self.direction == 'after':
+            stmt_python.insert_after((contents[self.stmt[0]], self.stmt[1]),
+                (contents[self.ingredient[0]], self.ingredient[1]))
 
     @classmethod
     def random(cls, program):

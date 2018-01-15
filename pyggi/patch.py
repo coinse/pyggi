@@ -91,6 +91,11 @@ class Patch:
                     diffs += diff
         return diffs
 
+    @property
+    def modification_points(self):
+        self.apply()
+        return self._modification_points
+
     def run_test(self, timeout=15, result_parser=TestResult.pyggi_result_parser):
         """
         Run the test script provided by the user
@@ -264,7 +269,7 @@ class Patch:
                                     ingredient[0]][ingredient[1]])
                         else:
                             new_codeline_list.append(orig_codeline_list[i])
-            for target_file in sorted(new_contents.keys()):
+            for target_file in new_contents:
                 with open(os.path.join(self.program.tmp_path, target_file), 'w') as tmp_file:
                     tmp_file.write('\n'.join(new_contents[target_file]) + '\n')
             return new_contents
@@ -272,22 +277,13 @@ class Patch:
             import ast
             import astor
             import copy
-            new_contents = dict()
-            for target_file in target_files:
-                new_contents[target_file] = copy.deepcopy(self.program.contents[target_file])
-                # StmtReplacement
-                for _sr in self.atomics.get('StmtReplacement', list()):
-                    if _sr.stmt[0] == target_file:
-                        if _sr.ingredient:
-                            ingr_node = new_contents[target_file]
-                            for i in range(len(_sr.ingredient[1])):
-                                ingr_node = ingr_node.body[_sr.ingredient[1][i]]
-                        else:
-                            ingr_node = ast.Pass()
-                        stmt_node = new_contents[target_file]
-                        for i in range(len(_sr.stmt[1]) - 1):
-                            stmt_node = stmt_node.body[_sr.stmt[1][i]]
-                        stmt_node.body[_sr.stmt[1][-1]] = ingr_node
+            from .helper import stmt_python
+            self._modification_points = dict()
+            new_contents = copy.deepcopy(self.program.contents)
+            for edit in self.edit_list:
+                edit.apply(new_contents)
+            for target_file in new_contents:
+                self._modification_points[target_file] = stmt_python.get_modification_points(new_contents[target_file])
                 with open(os.path.join(self.program.tmp_path, target_file), 'w') as tmp_file:
                     tmp_file.write(astor.to_source(new_contents[target_file]))
             return new_contents

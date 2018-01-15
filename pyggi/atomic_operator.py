@@ -5,7 +5,9 @@ and several classes inherit the AtomicOperator class.
 
 """
 from abc import ABCMeta, abstractmethod
+from .program import Program
 import ast
+
 
 class AtomicOperator(metaclass=ABCMeta):
     """
@@ -50,6 +52,7 @@ class AtomicOperator(metaclass=ABCMeta):
 
 
     """
+
     def __eq__(self, other):
         if self.__class__.__name__ != other.__class__.__name__:
             return False
@@ -121,6 +124,7 @@ class LineReplacement(AtomicOperator):
         4
         ======== ========
     """
+
     def __init__(self, line, ingredient=None):
         """
         :param line: The file path and index of line which should be replaced
@@ -170,14 +174,10 @@ class LineReplacement(AtomicOperator):
         assert del_rate >= 0 and del_rate <= 1
         line_file = line_file or random.choice(program.target_files)
         ingr_file = ingr_file or random.choice(program.target_files)
-        line = (
-            line_file,
-            random.randrange(0, len(program.contents[line_file]))
-        )
-        ingredient = (
-            ingr_file,
-            random.randrange(0, len(program.contents[ingr_file]))
-        )
+        line = (line_file, random.randrange(0,
+            len(program.contents[line_file])))
+        ingredient = (ingr_file,
+            random.randrange(0, len(program.contents[ingr_file])))
         if random.random() < del_rate:
             ingredient = None
         return cls(line, ingredient)
@@ -244,18 +244,15 @@ class LineInsertion(AtomicOperator):
         import random
         point_file = point_file or random.choice(program.target_files)
         ingr_file = ingr_file or random.choice(program.target_files)
-        point = (
-            point_file,
-            random.randrange(0, len(program.contents[point_file])+1)
-        )
-        ingredient = (
-            ingr_file,
-            random.randrange(0, len(program.contents[ingr_file]))
-        )
+        point = (point_file,
+            random.randrange(0, len(program.contents[point_file]) + 1))
+        ingredient = (ingr_file,
+            random.randrange(0, len(program.contents[ingr_file])))
         return cls(point, ingredient)
 
 
 class StmtReplacement(AtomicOperator):
+
     def __init__(self, stmt, ingredient=None):
         """
         :param stmt: The file path and the position of statement which should be replaced
@@ -265,14 +262,24 @@ class StmtReplacement(AtomicOperator):
         """
         super().__init__()
         assert isinstance(stmt[0], str)
-        assert isinstance(stmt[1], list)
-        assert all(isinstance(t, tuple) and isinstance(t[0], str)
-            and isinstance(t[1], int) and t[1] >= 0 for t in stmt[1])
+        if Program.is_python_code(stmt[0]):
+            from .helper import stmt_python
+            assert stmt_python.is_pos_type(stmt[1])
+        else:
+            raise Exception("StmtReplacement",
+                "{} file is not supported".format(
+                    Program.get_file_extension(stmt[0])))
         if ingredient:
+            assert Program.get_file_extension(
+                stmt[0]) == Program.get_file_extension(ingredient[0])
             assert isinstance(ingredient[0], str)
-            assert isinstance(ingredient[1], list)
-            assert all(isinstance(t, tuple) and isinstance(t[0], str)
-                and isinstance(t[1], int) and t[1] >= 0 for t in ingredient[1])
+            if Program.is_python_code(ingredient[0]):
+                from .helper import stmt_python
+                assert stmt_python.is_pos_type(ingredient[1])
+            else:
+                raise Exception("StmtReplacement",
+                    "{} file is not supported".format(
+                        Program.get_file_extension(ingredient[0])))
         self.stmt = stmt
         self.ingredient = ingredient
 
@@ -289,9 +296,24 @@ class StmtReplacement(AtomicOperator):
         return False
 
     def apply(self, contents):
-        from .helper import stmt_python
-        stmt_python.replace((contents[self.stmt[0]], self.stmt[1]),
-            (contents[self.ingredient[0]], self.ingredient[1]))
+        """"
+        Apply the operator to the contents of program
+
+        :param contents: The contents of program
+        :type contents: dict(str, ?)
+        :return: success or not
+        :rtype: bool
+        """
+        assert not self.ingredient or Program.have_the_same_file_extension(
+            self.stmt[0], self.ingredient[0])
+        if Program.is_python_code(self.stmt[0]):
+            from .helper import stmt_python
+            if not self.ingredient:
+                return stmt_python.replace((contents[self.stmt[0]], self.stmt[1]),
+                    self.ingredient)
+            return stmt_python.replace((contents[self.stmt[0]], self.stmt[1]),
+                (contents[self.ingredient[0]], self.ingredient[1]))
+        return False
 
     @classmethod
     def random(cls, program):
@@ -299,6 +321,7 @@ class StmtReplacement(AtomicOperator):
 
 
 class StmtInsertion(AtomicOperator):
+
     def __init__(self, stmt, ingredient, direction='before'):
         """
         :param stmt: The file path and position of statement which is a target of modification
@@ -309,14 +332,24 @@ class StmtInsertion(AtomicOperator):
         :type direction: str
         """
         super().__init__()
+        assert Program.get_file_extension(
+            stmt[0]) == Program.get_file_extension(ingredient[0])
         assert isinstance(stmt[0], str)
-        assert isinstance(stmt[1], list)
-        assert all(isinstance(t, tuple) and isinstance(t[0], str)
-            and isinstance(t[1], int) and t[1] >= 0 for t in stmt[1])
         assert isinstance(ingredient[0], str)
-        assert isinstance(ingredient[1], list)
-        assert all(isinstance(t, tuple) and isinstance(t[0], str)
-            and isinstance(t[1], int) and t[1] >= 0 for t in ingredient[1])
+        if Program.is_python_code(stmt[0]):
+            from .helper import stmt_python
+            assert stmt_python.is_pos_type(stmt[1])
+        else:
+            raise Exception("StmtInsertion",
+                "{} file is not supported".format(
+                    Program.get_file_extension(stmt[0])))
+        if Program.is_python_code(ingredient[0]):
+            from .helper import stmt_python
+            assert stmt_python.is_pos_type(ingredient[1])
+        else:
+            raise Exception("StmtInsertion",
+                "{} file is not supported".format(
+                    Program.get_file_extension(ingredient[0])))
         assert direction in ['before', 'after']
         self.stmt = stmt
         self.ingredient = ingredient
@@ -326,7 +359,8 @@ class StmtInsertion(AtomicOperator):
         """
         :return: ``Insert [ingredient] [direction] [stmt]``
         """
-        return "Insert {} {} {}".format(self.ingredient, self.direction, self.stmt)
+        return "Insert {} {} {}".format(self.ingredient, self.direction,
+            self.stmt)
 
     def is_valid_for(self, program):
         from .program import MnplLevel
@@ -335,13 +369,27 @@ class StmtInsertion(AtomicOperator):
         return False
 
     def apply(self, contents):
-        from .helper import stmt_python
-        if self.direction == 'before':
-            stmt_python.insert_before((contents[self.stmt[0]], self.stmt[1]),
-                (contents[self.ingredient[0]], self.ingredient[1]))
-        elif self.direction == 'after':
-            stmt_python.insert_after((contents[self.stmt[0]], self.stmt[1]),
-                (contents[self.ingredient[0]], self.ingredient[1]))
+        """
+        Apply the operator to the contents of program
+
+        :param contents: The contents of program
+        :type contents: dict(str, ?)
+        :return: success or not
+        :rtype: bool
+        """
+        assert Program.have_the_same_file_extension(self.stmt[0],
+            self.ingredient[0])
+        if Program.is_python_code(self.stmt[0]):
+            from .helper import stmt_python
+            if self.direction == 'before':
+                return stmt_python.insert_before(
+                    (contents[self.stmt[0]], self.stmt[1]),
+                    (contents[self.ingredient[0]], self.ingredient[1]))
+            elif self.direction == 'after':
+                return stmt_python.insert_after(
+                    (contents[self.stmt[0]], self.stmt[1]),
+                    (contents[self.ingredient[0]], self.ingredient[1]))
+        return False
 
     @classmethod
     def random(cls, program):

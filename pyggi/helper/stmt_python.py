@@ -1,6 +1,18 @@
 import ast
 from copy import deepcopy
 
+def is_pos_type(pos):
+    """
+    :param pos: The position of the node
+    :type pos: ?
+    :return: whether it is type of tuple(str, list(tuple(str, int))) and all integers >= 0
+    :rtype: bool
+    """
+    if not isinstance(pos, list):
+        return False
+    return all(isinstance(t, tuple) and isinstance(t[0], str)
+        and isinstance(t[1], int) and t[1] >= 0 for t in pos)
+
 def get_modification_points(root):
     """
     :param root: The root node of AST

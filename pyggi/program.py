@@ -89,6 +89,38 @@ class Program(object):
         """
         return os.path.join(Program.TMP_DIR, self.name)
 
+    def write_to_tmp_dir(self, new_contents):
+        """
+        Write new contents to the temporary directory of program
+
+        :param new_contents: The new contents of the program.
+          Refer to *apply* method of :py:class:`.patch.Patch`
+        :type new_contents: dict(str, ?)
+        :rtype: None
+        """
+        for target_file in new_contents:
+            with open(os.path.join(self.tmp_path, target_file), 'w') as tmp_file:
+                tmp_file.write(Program.to_source(self.manipulation_level, new_contents[target_file]))
+
+    @classmethod
+    def to_source(cls, manipulation_level, contents_of_file):
+        """
+        Change contents of file to the source code
+
+        :param manipulation_level: The manipulation level of the program
+        :type manipulation_level: :py:class:`MnplLevel`
+        :param contents_of_file: The contents of the file which is the parsed form of source code
+        :type contents_of_file: ?
+        :return: The source code
+        :rtype: str
+        """
+        if manipulation_level == MnplLevel.PHYSICAL_LINE:
+            return '\n'.join(contents_of_file) + '\n'
+        elif manipulation_level == MnplLevel.AST:
+            import astor
+            return astor.to_source(contents_of_file)
+        return ''
+
     @classmethod
     def clean_tmp_dir(cls, tmp_path):
         """
@@ -131,12 +163,57 @@ class Program(object):
         elif manipulation_level == MnplLevel.AST:
             import ast
             import astor
-            from .parser import ast_python #, ast_java
             contents = {}
             for target in target_files:
-                if target.endswith(".py"):
+                if cls.is_python_code(target):
                     root = astor.parse_file(os.path.join(path, target))
                     contents[target] = root
-                    # tree = ast_python.get_tree(root)
+                else:
+                    raise Exception('Program', '{} file is not supported'.format(cls.get_file_extension(target)))
             return contents
         return None
+
+    @staticmethod
+    def is_python_code(source_path):
+        """
+        :param source_path: The path of the source file
+        :type source_path: str
+        :return: whether the file's extention is *.py* or not
+        :rtype: bool
+        """
+        _, file_extension = os.path.splitext(source_path)
+        return file_extension == '.py'
+
+    @staticmethod
+    def is_java_code(source_path):
+        """
+        :param source_path: The path of the source file
+        :type source_path: str
+        :return: whether the file's extention is *.java* or not
+        :rtype: bool
+        """
+        _, file_extension = os.path.splitext(source_path)
+        return file_extension == '.java'
+
+    @staticmethod
+    def get_file_extension(file_path):
+        """
+        :param file_path: The path of file
+        :type file_path: str
+        :return: file extension
+        :rtype: str
+        """
+        _, file_extension = os.path.splitext(file_path)
+        return file_extension
+
+    @staticmethod
+    def have_the_same_file_extension(file_path_1, file_path_2):
+        """
+        :param file_path_1: The path of file 1
+        :type file_path_1: str
+        :param file_path_2: The path of file 2
+        :type file_path_2: str
+        :return: same or not
+        :rtype: bool
+        """
+        return Program.get_file_extension(file_path_1) == Program.get_file_extension(file_path_2)

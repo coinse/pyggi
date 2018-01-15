@@ -2,7 +2,7 @@
 This module contains Patch class.
 """
 import os
-from .program import MnplLevel
+from .program import Program, MnplLevel
 from .atomic_operator import AtomicOperator
 from .edit import Edit
 from .test_result import TestResult
@@ -271,11 +271,9 @@ class Patch:
                             new_codeline_list.append(orig_codeline_list[i])
             for target_file in new_contents:
                 with open(os.path.join(self.program.tmp_path, target_file), 'w') as tmp_file:
-                    tmp_file.write('\n'.join(new_contents[target_file]) + '\n')
+                    tmp_file.write(Program.to_source(self.program.manipulation_level, new_contents[target_file]))
             return new_contents
         elif self.program.manipulation_level == MnplLevel.AST:
-            import ast
-            import astor
             import copy
             from .helper import stmt_python
             self._modification_points = dict()
@@ -283,7 +281,8 @@ class Patch:
             for edit in self.edit_list:
                 edit.apply(new_contents)
             for target_file in new_contents:
-                self._modification_points[target_file] = stmt_python.get_modification_points(new_contents[target_file])
+                if Program.is_python_code(target_file):
+                    self._modification_points[target_file] = stmt_python.get_modification_points(new_contents[target_file])
                 with open(os.path.join(self.program.tmp_path, target_file), 'w') as tmp_file:
-                    tmp_file.write(astor.to_source(new_contents[target_file]))
+                    tmp_file.write(Program.to_source(self.program.manipulation_level, new_contents[target_file]))
             return new_contents

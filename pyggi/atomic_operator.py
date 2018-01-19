@@ -255,31 +255,19 @@ class StmtReplacement(AtomicOperator):
 
     def __init__(self, stmt, ingredient=None):
         """
-        :param stmt: The file path and the position of statement which should be replaced
-        :type stmt: tuple(str, list(tuple(str, int)))
-        :param ingredient: The file path and the position of statement which is an ingredient
-        :type ingredient: None or tuple(str, list(tuple(str, int)))
+        :param stmt: The file path and the node # of statement which should be replaced
+        :type stmt: tuple(str, int)
+        :param ingredient: The file path and the node # of statement which is an ingredient
+        :type ingredient: None or tuple(str, int)
         """
         super().__init__()
         assert isinstance(stmt[0], str)
-        if Program.is_python_code(stmt[0]):
-            from .helper import stmt_python
-            assert stmt_python.is_pos_type(stmt[1])
-        else:
-            raise Exception("StmtReplacement",
-                "{} file is not supported".format(
-                    Program.get_file_extension(stmt[0])))
+        assert isinstance(stmt[1], int)
+        assert stmt[1] >= 0
         if ingredient:
-            assert Program.get_file_extension(
-                stmt[0]) == Program.get_file_extension(ingredient[0])
             assert isinstance(ingredient[0], str)
-            if Program.is_python_code(ingredient[0]):
-                from .helper import stmt_python
-                assert stmt_python.is_pos_type(ingredient[1])
-            else:
-                raise Exception("StmtReplacement",
-                    "{} file is not supported".format(
-                        Program.get_file_extension(ingredient[0])))
+            assert isinstance(ingredient[1], int)
+            assert ingredient[1] >= 0
         self.stmt = stmt
         self.ingredient = ingredient
 
@@ -295,12 +283,13 @@ class StmtReplacement(AtomicOperator):
             return True
         return False
 
-    def apply(self, contents):
+    def apply(self, program, new_contents):
         """"
         Apply the operator to the contents of program
-
-        :param contents: The contents of program
-        :type contents: dict(str, ?)
+        :param program: The original program instance
+        :type program: :py:class:`.Program`
+        :param new_contents: The new contents of program to which the edit will be applied
+        :type new_contents: dict(str, ?)
         :return: success or not
         :rtype: bool
         """
@@ -308,11 +297,13 @@ class StmtReplacement(AtomicOperator):
             self.stmt[0], self.ingredient[0])
         if Program.is_python_code(self.stmt[0]):
             from .helper import stmt_python
+            dst_root = new_contents[self.stmt[0]]
+            dst_pos = stmt_python.get_modification_points(dst_root)[self.stmt[1]]
             if not self.ingredient:
-                return stmt_python.replace((contents[self.stmt[0]], self.stmt[1]),
-                    self.ingredient)
-            return stmt_python.replace((contents[self.stmt[0]], self.stmt[1]),
-                (contents[self.ingredient[0]], self.ingredient[1]))
+                return stmt_python.replace((dst_root, dst_pos), self.ingredient)
+            ingr_root = program.contents[self.ingredient[0]]
+            ingr_pos = stmt_python.get_modification_points(ingr_root)[self.ingredient[1]]
+            return stmt_python.replace((dst_root, dst_pos), (ingr_root, ingr_pos))
         return False
 
     @classmethod
@@ -332,24 +323,12 @@ class StmtInsertion(AtomicOperator):
         :type direction: str
         """
         super().__init__()
-        assert Program.get_file_extension(
-            stmt[0]) == Program.get_file_extension(ingredient[0])
         assert isinstance(stmt[0], str)
+        assert isinstance(stmt[1], int)
+        assert stmt[1] >= 0
         assert isinstance(ingredient[0], str)
-        if Program.is_python_code(stmt[0]):
-            from .helper import stmt_python
-            assert stmt_python.is_pos_type(stmt[1])
-        else:
-            raise Exception("StmtInsertion",
-                "{} file is not supported".format(
-                    Program.get_file_extension(stmt[0])))
-        if Program.is_python_code(ingredient[0]):
-            from .helper import stmt_python
-            assert stmt_python.is_pos_type(ingredient[1])
-        else:
-            raise Exception("StmtInsertion",
-                "{} file is not supported".format(
-                    Program.get_file_extension(ingredient[0])))
+        assert isinstance(ingredient[1], int)
+        assert ingredient[1] >= 0
         assert direction in ['before', 'after']
         self.stmt = stmt
         self.ingredient = ingredient
@@ -368,12 +347,14 @@ class StmtInsertion(AtomicOperator):
             return True
         return False
 
-    def apply(self, contents):
+    def apply(self, program, new_contents):
         """
         Apply the operator to the contents of program
 
-        :param contents: The contents of program
-        :type contents: dict(str, ?)
+        :param program: The original program instance
+        :type program: :py:class:`.Program`
+        :param new_contents: The new contents of program to which the edit will be applied
+        :type new_contents: dict(str, ?)
         :return: success or not
         :rtype: bool
         """
@@ -381,14 +362,14 @@ class StmtInsertion(AtomicOperator):
             self.ingredient[0])
         if Program.is_python_code(self.stmt[0]):
             from .helper import stmt_python
+            dst_root = new_contents[self.stmt[0]]
+            dst_pos = stmt_python.get_modification_points(dst_root)[self.stmt[1]]
+            ingr_root = program.contents[self.ingredient[0]]
+            ingr_pos = stmt_python.get_modification_points(ingr_root)[self.ingredient[1]]
             if self.direction == 'before':
-                return stmt_python.insert_before(
-                    (contents[self.stmt[0]], self.stmt[1]),
-                    (contents[self.ingredient[0]], self.ingredient[1]))
+                return stmt_python.insert_before((dst_root, dst_pos), (ingr_root, ingr_pos))
             elif self.direction == 'after':
-                return stmt_python.insert_after(
-                    (contents[self.stmt[0]], self.stmt[1]),
-                    (contents[self.ingredient[0]], self.ingredient[1]))
+                return stmt_python.insert_after((dst_root, dst_pos), (ingr_root, ingr_pos))
         return False
 
     @classmethod

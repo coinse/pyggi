@@ -69,6 +69,7 @@ class Program(object):
         Program.clean_tmp_dir(self.tmp_path)
         copy_tree(self.path, self.tmp_path)
         self.contents = Program.parse(self.manipulation_level, self.path, self.target_files)
+        self._modification_points = None
 
     def __str__(self):
         if self.manipulation_level == MnplLevel.PHYSICAL_LINE:
@@ -80,6 +81,29 @@ class Program(object):
                     idx += 1
             return code
         return self.target_files
+
+    @property
+    def modification_points(self):
+        """
+        :return: The list of position of modification points for each target program
+        :rtype: dict(str, ?)
+        """
+        assert isinstance(self.manipulation_level, MnplLevel)
+
+        if self._modification_points:
+            return self._modification_points
+
+        self._modification_points = dict()
+        if self.manipulation_level == MnplLevel.PHYSICAL_LINE:
+            for target_file in self.target_files:
+                self._modification_points[target_file] = list(range(len(self.contents[target_file])))
+        elif self.manipulation_level == MnplLevel.AST:
+            for target_file in self.target_files:
+                if Program.is_python_code(target_file):
+                    from .helper import stmt_python
+                    self._modification_points[target_file] = stmt_python.get_modification_points(
+                        self.contents[target_file])
+        return self._modification_points
 
     @property
     def tmp_path(self):
@@ -101,6 +125,29 @@ class Program(object):
         for target_file in new_contents:
             with open(os.path.join(self.tmp_path, target_file), 'w') as tmp_file:
                 tmp_file.write(Program.to_source(self.manipulation_level, new_contents[target_file]))
+
+    def print_modification_points(self, target_file):
+        """
+        Print the source of each modification points
+
+        :param target_file: The path to target file
+        :type target_file: str
+        :return: None
+        :rtype: None
+        """
+        title_format = "=" * 25 + " {} {} " + "=" * 25
+        if self.manipulation_level == MnplLevel.PHYSICAL_LINE:
+            for i, index in enumerate(self.modification_points[target_file]):
+                print(title_format.format('line', i))
+                print(self.contents[target_file][index])
+        elif self.manipulation_level == MnplLevel.AST:
+            if Program.is_python_code(target_file):
+                import astor
+                from .helper import stmt_python
+                for i, pos in enumerate(self.modification_points[target_file]):
+                    print(title_format.format('node', i))
+                    blk, idx = stmt_python.pos_2_block_n_index(self.contents[target_file], pos)
+                    print(astor.to_source(blk[idx]))
 
     @classmethod
     def to_source(cls, manipulation_level, contents_of_file):

@@ -63,27 +63,24 @@ class TestPatch(object):
         assert len(patch) == 2
         assert patch.edit_list[1] == moving_instance
 
-    def test_atomics(self, setup):
+    def test_get_atomics(self, setup):
         patch, program = setup
-        atomics = patch.atomics
-
-        assert 'LineReplacement' in atomics
-        assert 'LineInsertion' in atomics
-
-        assert len(atomics['LineReplacement']) == 2
-        assert patch.edit_list[0].atomic_operators[0] in atomics[
-            'LineReplacement']
-        assert patch.edit_list[1].atomic_operators[1] in atomics[
-            'LineReplacement']
-
-        assert len(atomics['LineInsertion']) == 1
-        assert patch.edit_list[1].atomic_operators[0] in atomics[
-            'LineInsertion']
+    
+        assert len(patch.get_atomics('LineReplacement')) == 2
+        assert len(patch.get_atomics('LineInsertion')) == 1
+        
+        atomics = patch.get_atomics()
+        count = 0
+        for edit in patch.edit_list:
+            for atomic in edit.atomic_operators:
+                assert atomic in atomics
+                count += 1
+        assert count == len(atomics)
 
     def test_line_replacements(self, setup):
         patch, program = setup
         lrs = patch.line_replacements
-        atomic_lrs = patch.atomics['LineReplacement']
+        atomic_lrs = patch.get_atomics('LineReplacement')
 
         assert len(lrs) >= 1
         for key, val in lrs.items():
@@ -93,7 +90,7 @@ class TestPatch(object):
     def test_line_insertions(self, setup):
         patch, program = setup
         lis = patch.line_insertions
-        atomic_lis = patch.atomics['LineInsertion']
+        atomic_lis = patch.get_atomics('LineInsertion')
 
         assert len(lis) == 1
         for key, val in lis.items():

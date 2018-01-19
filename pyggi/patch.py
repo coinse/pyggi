@@ -91,11 +91,6 @@ class Patch:
                     diffs += diff
         return diffs
 
-    @property
-    def modification_points(self):
-        self.apply()
-        return self._modification_points
-
     def run_test(self, timeout=15, result_parser=TestResult.pyggi_result_parser):
         """
         Run the test script provided by the user
@@ -152,8 +147,7 @@ class Patch:
         """
         del self.edit_list[index]
 
-    @property
-    def atomics(self):
+    def get_atomics(self, atomic_class_name=None):
         """
         Combine all the atomic operators of the edits.
         An edit is originally a sequence of atomic operators,
@@ -161,20 +155,15 @@ class Patch:
         So this is a sort of flattening process.
 
         :return: The atomic operators, see *Hint*.
-        :rtype: dict(str, list(:py:class:`.atomic_operator.AtomicOperator`))
-
-        .. hint::
-            - key: The name of the atomic operator(ex. 'LineReplacement')
-            - value: The list of the atomic operator instances
+        :rtype: list(:py:class:`.atomic_operator.AtomicOperator`)
         """
-        atomics = dict()
+        atomics = []
         for edit in self.edit_list:
             for atomic in edit.atomic_operators:
-                atomic_class = atomic.__class__.__name__
-                atomics[atomic_class] = atomics.get(atomic_class, list())
-                atomics[atomic_class].append(atomic)
+                if not atomic_class_name or atomic_class_name == atomic.__class__.__name__:
+                    atomics.append(atomic)
         return atomics
-
+    
     @property
     def line_replacements(self) -> dict:
         """
@@ -190,14 +179,14 @@ class Patch:
             - value: None or the index of ingredient line
 
         .. note::
-            If ``self.atomics`` is ``[LineReplacement(8, None), LineInsertion(4, 10)]``, ::
+            If ``self.get_atomics()`` is ``[LineReplacement(8, None), LineInsertion(4, 10)]``, ::
 
                 print(self.line_replacements)
                 >> { 8: None }
 
         """
         lrs = dict()
-        for _lr in self.atomics.get('LineReplacement', list()):
+        for _lr in self.get_atomics('LineReplacement'):
             if _lr.line not in lrs or lrs[_lr.line] is not None:
                 lrs[_lr.line] = _lr.ingredient
         return lrs
@@ -217,14 +206,14 @@ class Patch:
             - value: The list of indices of ingredient lines
 
         .. note::
-            If ``self.atomics`` is ``[LineReplacement(8, None), LineInsertion(4, 10)]``, ::
+            If ``self.get_atomics()`` is ``[LineReplacement(8, None), LineInsertion(4, 10)]``, ::
 
                 print(self.line_insertions)
                 >> { 4: [10] }
 
         '''
         lis = dict()
-        for _li in self.atomics.get('LineInsertion', list()):
+        for _li in self.get_atomics('LineInsertion'):
             lis[_li.point] = lis.get(_li.point, list())
             lis[_li.point].append(_li.ingredient)
         return lis
@@ -242,6 +231,7 @@ class Patch:
             - key: The target file name(path) related to the program root path
             - value: The contents of the file
         """
+        assert isinstance(self.program.manipulation_level, MnplLevel)
         target_files = self.program.contents.keys()
         if self.program.manipulation_level == MnplLevel.PHYSICAL_LINE:
             new_contents = dict()
@@ -269,20 +259,18 @@ class Patch:
                                     ingredient[0]][ingredient[1]])
                         else:
                             new_codeline_list.append(orig_codeline_list[i])
-            for target_file in new_contents:
-                with open(os.path.join(self.program.tmp_path, target_file), 'w') as tmp_file:
-                    tmp_file.write(Program.to_source(self.program.manipulation_level, new_contents[target_file]))
-            return new_contents
         elif self.program.manipulation_level == MnplLevel.AST:
             import copy
-            from .helper import stmt_python
-            self._modification_points = dict()
             new_contents = copy.deepcopy(self.program.contents)
-            for edit in self.edit_list:
-                edit.apply(new_contents)
-            for target_file in new_contents:
-                if Program.is_python_code(target_file):
-                    self._modification_points[target_file] = stmt_python.get_modification_points(new_contents[target_file])
-                with open(os.path.join(self.program.tmp_path, target_file), 'w') as tmp_file:
-                    tmp_file.write(Program.to_source(self.program.manipulation_level, new_contents[target_file]))
-            return new_contents
+            for target_file in target_files:
+                atomics = list(filter(lambda a: a.stmt[0] == target_file, self.get_atomics()))
+                # node with highest node # first
+                # for the same node #, smallest index first
+                atomics = [t[1] for t in sorted(enumerate(atomics), key=lambda t: (-t[1].stmt[1], t[0]))]
+                for atomic in atomics:
+                    atomic.apply(self.program, new_contents)
+
+        for target_file in new_contents:
+            with open(os.path.join(self.program.tmp_path, target_file), 'w') as tmp_file:
+                tmp_file.write(Program.to_source(self.program.manipulation_level, new_contents[target_file]))
+        return new_contents

@@ -20,13 +20,9 @@ def result_parser(result):
 
 triangle = Program(
     "sample/Triangle_fast_python", manipulation_level=MnplLevel.AST)
+triangle.print_modification_points('triangle.py')
 
 patch = Patch(triangle)
-
-a = random.choice(patch.modification_points['triangle.py'])
-b = random.choice(patch.modification_points['triangle.py'])
-print (a, b)
-#patch.add(StmtInsertion(('triangle.py', a), ('triangle.py', b), 'before'))
-patch.add(StmtReplacement(('triangle.py', a), ('triangle.py', b)))
+patch.add(StmtReplacement(('triangle.py', 5), ('triangle.py', 26)))
 print (patch.run_test(timeout=30, result_parser=result_parser))
 print (patch.diff)

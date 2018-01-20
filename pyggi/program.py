@@ -69,6 +69,7 @@ class Program(object):
         Program.clean_tmp_dir(self.tmp_path)
         copy_tree(self.path, self.tmp_path)
         self.contents = Program.parse(self.manipulation_level, self.path, self.target_files)
+        self.modification_weights = dict()
         self._modification_points = None
 
     def __str__(self):
@@ -81,6 +82,14 @@ class Program(object):
                     idx += 1
             return code
         return self.target_files
+
+    @property
+    def tmp_path(self):
+        """
+        :return: The path of the temporary dirctory
+        :rtype: str
+        """
+        return os.path.join(Program.TMP_DIR, self.name)
 
     @property
     def modification_points(self):
@@ -105,27 +114,37 @@ class Program(object):
                         self.contents[target_file])
         return self._modification_points
 
-    @property
-    def tmp_path(self):
-        """
-        :return: The path of the temporary dirctory
-        :rtype: str
-        """
-        return os.path.join(Program.TMP_DIR, self.name)
-
     def select_modification_point(self, target_file, method="random"):
         """
         :param str target_file: The modification point is chosen within target_file
-        :param str method: The way how to choose a modification point
-        :return: the index of modification point
+        :param str method: The way how to choose a modification point, *'random'* or *'weighted'*
+        :return: The **index** of modification point
         :rtype: int
         """
+        import random
         assert target_file in self.target_files
-        assert method in ['random']
+        assert method in ['random', 'weighted']
         candidates = self.modification_points[target_file]
-        if method == 'random':
-            import random
+        if method == 'random' or target_file not in self.modification_weights:
             return random.randrange(len(candidates))
+        elif method == 'weighted':
+            cumulated_weights = sum(self.modification_weights[target_file])
+            list_of_prob = list(map(lambda w: float(w)/cumulated_weights, self.modification_weights[target_file]))
+            return random.choices(list(range(len(candidates))), weights=list_of_prob, k=1)
+
+    def set_modification_weights(self, target_file, weights):
+        """
+        :param str target_file: The path to file
+        :param weights: The modification weight([0,1]) of each modification points
+        :type weights: list(float)
+        :return: None
+        :rtype: None
+        """
+        from copy import deepcopy
+        assert target_file in self.target_files
+        assert len(self.modification_points[target_file]) == len(weights)
+        assert not list(filter(lambda w: w < 0 or w > 1, weights))
+        self.modification_weights[target_file] = deepcopy(weights)
 
     def write_to_tmp_dir(self, new_contents):
         """

@@ -113,6 +113,20 @@ class Program(object):
         """
         return os.path.join(Program.TMP_DIR, self.name)
 
+    def select_modification_point(self, target_file, method="random"):
+        """
+        :param str target_file: The modification point is chosen within target_file
+        :param str method: The way how to choose a modification point
+        :return: the index of modification point
+        :rtype: int
+        """
+        assert target_file in self.target_files
+        assert method in ['random']
+        candidates = self.modification_points[target_file]
+        if method == 'random':
+            import random
+            return random.randrange(len(candidates))
+
     def write_to_tmp_dir(self, new_contents):
         """
         Write new contents to the temporary directory of program
@@ -185,14 +199,13 @@ class Program(object):
     @classmethod
     def parse(cls, manipulation_level, path, target_files):
         """
-
-        :param manipulation_level: The granularity level
+        :param manipulation_level: The granularity level of a program
         :type manipulation_level: :py:class:`.program.MnplLevel`
         :param str path: The project root path
-        :param target_files: The relative paths of target files within the project root
+        :param target_files: The paths to target files from the project root
         :type target_files: list(str)
 
-        :return: the contents of the files, see `Hint`
+        :return: The contents of the files, see `Hint`
         :rtype: dict(str, list(str))
 
         .. hint::

@@ -5,7 +5,7 @@ from pyggi.edit import LineDeletion, LineMoving
 
 @pytest.fixture(scope='session')
 def setup():
-    program = Program('./resource/Triangle_bug', MnplLevel.PHYSICAL_LINE)
+    program = Program('./resource/Triangle_bug', MnplLevel.LINE)
     assert len(program.target_files) == 1
     assert program.target_files[0] == 'Triangle.java'
 
@@ -34,7 +34,7 @@ class TestPatch(object):
 
     def test_eq(self, setup):
         patch, program = setup
-        program2 = Program('./resource/Triangle_bug', MnplLevel.PHYSICAL_LINE)
+        program2 = Program('./resource/Triangle_bug', MnplLevel.LINE)
         patch2 = Patch(program2)
 
         assert patch == patch2
@@ -77,32 +77,11 @@ class TestPatch(object):
                 count += 1
         assert count == len(atomics)
 
-    def test_line_replacements(self, setup):
-        patch, program = setup
-        lrs = patch.line_replacements
-        atomic_lrs = patch.get_atomics('LineReplacement')
-
-        assert len(lrs) >= 1
-        for key, val in lrs.items():
-            assert any(key == atomic.line for atomic in atomic_lrs)
-            assert any(val == atomic.ingredient for atomic in atomic_lrs)
-
-    def test_line_insertions(self, setup):
-        patch, program = setup
-        lis = patch.line_insertions
-        atomic_lis = patch.get_atomics('LineInsertion')
-
-        assert len(lis) == 1
-        for key, val in lis.items():
-            assert key == atomic_lis[0].point
-            assert len(val) == 1
-            assert val[0] == atomic_lis[0].ingredient
-
     def test_apply(self, setup):
         patch, program = setup
 
-        assert len(program.contents['Triangle.java']) + patch.edit_size == len(
-            patch.apply()['Triangle.java'])
+        assert len(program.contents['Triangle.java']) + len(
+            patch.get_atomics('LineInsertion'))== len(patch.apply()['Triangle.java'])
 
     def test_run_test(self, setup):
         patch, program = setup

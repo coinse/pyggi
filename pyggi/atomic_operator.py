@@ -77,12 +77,32 @@ class AtomicOperator(metaclass=ABCMeta):
     def __str__(self):
         pass
 
+    @property
+    @abstractmethod
+    def modification_point(self):
+        pass
+
     @abstractmethod
     def is_valid_for(self, program):
         """
         :param program: The program instance to which this edit will be applied
         :type program: :py:class:`.Program`
         :return: Whether the edit is able to be applied to the program
+        :rtype: bool
+        """
+        pass
+
+    @abstractmethod
+    def apply(self, program, new_contents, modification_points):
+        """"
+        Apply the operator to the contents of program
+        :param program: The original program instance
+        :type program: :py:class:`.Program`
+        :param new_contents: The new contents of program to which the edit will be applied
+        :type new_contents: dict(str, list(?))
+        :param modification_points: The original modification points
+        :type modification_points: list(?)
+        :return: success or not
         :rtype: bool
         """
         pass
@@ -149,6 +169,10 @@ class LineReplacement(AtomicOperator):
         """
         return "Replace {} with {}".format(self.line, self.ingredient)
 
+    @property
+    def modification_point(self):
+        return self.line
+
     def is_valid_for(self, program):
         from .program import MnplLevel
         if program.manipulation_level == MnplLevel.LINE:
@@ -173,15 +197,32 @@ class LineReplacement(AtomicOperator):
         import random
         assert del_rate >= 0 and del_rate <= 1
         line_file = line_file or random.choice(program.target_files)
-        ingr_file = ingr_file or random.choice(program.target_files)
-        line = (line_file, random.randrange(0,
-            len(program.contents[line_file])))
-        ingredient = (ingr_file,
-            random.randrange(0, len(program.contents[ingr_file])))
+        line = (line_file, program.select_modification_point(line_file, 'random'))
         if random.random() < del_rate:
             ingredient = None
+        else:
+            ingr_file = ingr_file or random.choice(program.target_files)
+            ingredient = (ingr_file, program.select_modification_point(ingr_file, 'random'))
         return cls(line, ingredient)
 
+    def apply(self, program, new_contents, modification_points):
+        """"
+        Apply the operator to the contents of program
+        :param program: The original program instance
+        :type program: :py:class:`.Program`
+        :param new_contents: The new contents of program to which the edit will be applied
+        :type new_contents: dict(str, list(str))
+        :param modification_points: The original modification points
+        :type modification_points: list(int)
+        :return: success or not
+        :rtype: bool
+        """
+        assert self.is_valid_for(program)
+        if self.ingredient:
+            new_contents[self.line[0]][modification_points[self.line[0]][self.line[1]]] == program.contents[self.ingredient[0]][self.ingredient[1]]
+        else:
+            new_contents[self.line[0]][modification_points[self.line[0]][self.line[1]]] = ''
+        return modification_points
 
 class LineInsertion(AtomicOperator):
     """
@@ -200,28 +241,34 @@ class LineInsertion(AtomicOperator):
         ======== ========
     """
 
-    def __init__(self, point, ingredient):
+    def __init__(self, line, ingredient, direction='before'):
         """
-        :param point: The file path and point to which the code
-          line should be inserted
-        :type point: tuple(str, int)
-        :param ingredient: The file path and index of code line
-          which is an ingredient
+        :param line: The file path and position of line which is a target of modification
+        :type line: tuple(str, int)
+        :param ingredient: The file path and index of code line which is an ingredient
         :type ingredient: tuple(str, int)
+        :param direction: *'before'* or *'after'*
+        :type direction: str
         """
         super().__init__()
-        assert isinstance(point[0], str)
-        assert isinstance(point[1], int)
-        assert point[1] >= 0
+        assert isinstance(line[0], str)
+        assert isinstance(line[1], int)
+        assert line[1] >= 0
         assert isinstance(ingredient[0], str)
         assert isinstance(ingredient[1], int)
         assert ingredient[1] >= 0
-        self.point = point
+        assert direction in ['before', 'after']
+        self.line = line
         self.ingredient = ingredient
+        self.direction = direction
 
     def __str__(self):
-        return "Insert {} into {}".format(self.ingredient, self.point)
+        return "Insert {} {} {}".format(self.ingredient, self.direction, self.line)
 
+    @property
+    def modification_point(self):
+        return self.line
+    
     def is_valid_for(self, program):
         from .program import MnplLevel
         if program.manipulation_level == MnplLevel.LINE:
@@ -229,26 +276,47 @@ class LineInsertion(AtomicOperator):
         return False
 
     @classmethod
-    def random(cls, program, point_file=None, ingr_file=None):
+    def random(cls, program, line_file=None, ingr_file=None):
         """
         :param program: The program instance to which the random edit will be applied.
         :type program: :py:class:`.Program`
-        :param str point_file: Point means the insertion point to which the ingr will be inserted.
-          If point_file is specified, the point will be chosen within the file.
+        :param str line_file: Line means the modification point of the edit.
+          If line_file is specified, the line will be chosen within the file.
         :param str ingr_file: Ingredient is the line to be copied.
           If ingr_file is specified, the target line will be chosen within the file.
         :return: The LineInsertion instance with the randomly-selected properties:
-          point and ingredient.
+          line and ingredient.
         :rtype: :py:class:`.atomic_operator.LineInsertion`
         """
         import random
-        point_file = point_file or random.choice(program.target_files)
+        line_file = line_file or random.choice(program.target_files)
         ingr_file = ingr_file or random.choice(program.target_files)
-        point = (point_file,
-            random.randrange(0, len(program.contents[point_file]) + 1))
-        ingredient = (ingr_file,
-            random.randrange(0, len(program.contents[ingr_file])))
-        return cls(point, ingredient)
+        line = (line_file, program.select_modification_point(line_file, 'random'))
+        ingredient = (ingr_file, program.select_modification_point(ingr_file, 'random'))
+        return cls(line, ingredient)
+
+    def apply(self, program, new_contents, modification_points):
+        """"
+        Apply the operator to the contents of program
+        :param program: The original program instance
+        :type program: :py:class:`.Program`
+        :param new_contents: The new contents of program to which the edit will be applied
+        :type new_contents: dict(str, list(str))
+        :param modification_points: The original modification points
+        :type modification_points: list(int)
+        :return: success or not
+        :rtype: bool
+        """
+        assert self.is_valid_for(program)
+        if self.direction == 'before':
+            new_contents[self.line[0]].insert(modification_points[self.line[0]][self.line[1]], program.contents[self.ingredient[0]][self.ingredient[1]])
+            for i in range(self.line[1], len(modification_points[self.line[0]])):
+                modification_points[self.line[0]][i] += 1
+        elif self.direction == 'after':
+            new_contents[self.line[0]].insert(modification_points[self.line[0]][self.line[1]] + 1, program.contents[self.ingredient[0]][self.ingredient[1]])
+            for i in range(self.line[1] + 1, len(modification_points[self.line[0]])):
+                modification_points[self.line[0]][i] += 1
+        return True
 
 
 class StmtReplacement(AtomicOperator):
@@ -277,32 +345,39 @@ class StmtReplacement(AtomicOperator):
         """
         return "Replace {} with {}".format(self.stmt, self.ingredient)
 
+    @property
+    def modification_point(self):
+        return self.stmt
+
     def is_valid_for(self, program):
         from .program import MnplLevel
         if program.manipulation_level == MnplLevel.AST:
             return True
         return False
 
-    def apply(self, program, new_contents):
+    def apply(self, program, new_contents, modification_points):
         """"
         Apply the operator to the contents of program
         :param program: The original program instance
         :type program: :py:class:`.Program`
         :param new_contents: The new contents of program to which the edit will be applied
         :type new_contents: dict(str, ?)
+        :param modification_points: The original modification points
+        :type modification_points: list(int, )
         :return: success or not
         :rtype: bool
         """
+        assert self.is_valid_for(program)
         assert not self.ingredient or Program.have_the_same_file_extension(
             self.stmt[0], self.ingredient[0])
         if Program.is_python_code(self.stmt[0]):
             from .helper import stmt_python
             dst_root = new_contents[self.stmt[0]]
-            dst_pos = stmt_python.get_modification_points(dst_root)[self.stmt[1]]
+            dst_pos = modification_points[self.stmt[0]][self.stmt[1]]
             if not self.ingredient:
                 return stmt_python.replace((dst_root, dst_pos), self.ingredient)
             ingr_root = program.contents[self.ingredient[0]]
-            ingr_pos = stmt_python.get_modification_points(ingr_root)[self.ingredient[1]]
+            ingr_pos = program.get_modification_points[self.ingredient[0]][self.ingredient[1]]
             return stmt_python.replace((dst_root, dst_pos), (ingr_root, ingr_pos))
         return False
 
@@ -341,13 +416,17 @@ class StmtInsertion(AtomicOperator):
         return "Insert {} {} {}".format(self.ingredient, self.direction,
             self.stmt)
 
+    @property
+    def modification_point(self):
+        return self.stmt
+
     def is_valid_for(self, program):
         from .program import MnplLevel
         if program.manipulation_level == MnplLevel.AST:
             return True
         return False
 
-    def apply(self, program, new_contents):
+    def apply(self, program, new_contents, modification_points):
         """
         Apply the operator to the contents of program
 
@@ -355,22 +434,42 @@ class StmtInsertion(AtomicOperator):
         :type program: :py:class:`.Program`
         :param new_contents: The new contents of program to which the edit will be applied
         :type new_contents: dict(str, ?)
+        :param modification_points: The original modification points
+        :type modification_points: list(int, )
         :return: success or not
         :rtype: bool
         """
+        assert self.is_valid_for(program)
         assert Program.have_the_same_file_extension(self.stmt[0],
             self.ingredient[0])
+        success = False
         if Program.is_python_code(self.stmt[0]):
             from .helper import stmt_python
             dst_root = new_contents[self.stmt[0]]
-            dst_pos = stmt_python.get_modification_points(dst_root)[self.stmt[1]]
+            dst_pos = modification_points[self.stmt[0]][self.stmt[1]]
             ingr_root = program.contents[self.ingredient[0]]
             ingr_pos = stmt_python.get_modification_points(ingr_root)[self.ingredient[1]]
             if self.direction == 'before':
-                return stmt_python.insert_before((dst_root, dst_pos), (ingr_root, ingr_pos))
+                success = stmt_python.insert_before((dst_root, dst_pos), (ingr_root, ingr_pos))
+                if success:
+                    depth = len(dst_pos)
+                    parent = dst_pos[:depth-1]
+                    index = dst_pos[depth - 1][1]
+                    for pos in modification_points[self.stmt[0]]:
+                        if parent == pos[:depth-1] and index <= pos[depth - 1][1]:
+                            a, i = pos[depth - 1]
+                            pos[depth - 1] = (a, i + 1)
             elif self.direction == 'after':
-                return stmt_python.insert_after((dst_root, dst_pos), (ingr_root, ingr_pos))
-        return False
+                success = stmt_python.insert_after((dst_root, dst_pos), (ingr_root, ingr_pos))
+                if success:
+                    depth = len(dst_pos)
+                    parent = dst_pos[:depth-1]
+                    index = dst_pos[depth - 1][1]
+                    for pos in modification_points[self.stmt[0]]:
+                        if parent == pos[:depth-1] and index < pos[depth - 1][1]:
+                            a, i = pos[depth - 1]
+                            pos[depth - 1] = (a, i + 1)
+        return success
 
     @classmethod
     def random(cls, program):

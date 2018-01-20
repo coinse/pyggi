@@ -42,7 +42,7 @@ class TestEdit(object):
 
         def test_random(self):
             program = Program('./resource/Triangle_bug',
-                              MnplLevel.PHYSICAL_LINE)
+                              MnplLevel.LINE)
             random_line_deletion = LineDeletion.random(program)
 
             assert random_line_deletion.x is not None
@@ -74,7 +74,7 @@ class TestEdit(object):
 
         def test_random(self):
             program = Program('./resource/Triangle_bug',
-                              MnplLevel.PHYSICAL_LINE)
+                              MnplLevel.LINE)
             random_line_moving = LineMoving.random(program)
 
             assert random_line_moving.x is not None

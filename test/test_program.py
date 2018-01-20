@@ -5,7 +5,7 @@ from pyggi import Program, MnplLevel
 
 @pytest.fixture(scope='session')
 def setup():
-    program = Program('./resource/Triangle_bug', MnplLevel.PHYSICAL_LINE)
+    program = Program('./resource/Triangle_bug', MnplLevel.LINE)
     assert len(program.target_files) == 1
     assert program.target_files[0] == 'Triangle.java'
 
@@ -15,7 +15,7 @@ def setup():
 class TestMnplLevel(object):
 
     def test_is_valid(self):
-        assert MnplLevel.is_valid('physical_line')
+        assert MnplLevel.is_valid('line')
         assert not MnplLevel.is_valid('random_text')
 
 
@@ -26,7 +26,7 @@ class TestProgram(object):
 
         assert not program.path.endswith('/')
         assert program.name == os.path.basename(program.path)
-        assert program.manipulation_level == MnplLevel.PHYSICAL_LINE
+        assert program.manipulation_level == MnplLevel.LINE
         assert program.test_command is not None
         assert program.target_files is not None
 

@@ -2,6 +2,7 @@
 This module contains Patch class.
 """
 import os
+from copy import deepcopy
 from .program import Program, MnplLevel
 from .atomic_operator import AtomicOperator
 from .edit import Edit
@@ -23,6 +24,7 @@ class Patch:
         self.program = program
         self.test_result = None
         self.edit_list = []
+        self.modification_points = deepcopy(program.modification_points)
 
     def __str__(self):
         return ' | '.join(list(map(str, self.edit_list)))
@@ -40,29 +42,11 @@ class Patch:
         :return: The created Patch
         :rtype: :py:class:`.Patch`
         """
-        import copy
         clone_patch = Patch(self.program)
-        clone_patch.edit_list = copy.deepcopy(self.edit_list)
+        clone_patch.edit_list = deepcopy(self.edit_list)
         clone_patch.test_result = None
+        clone_patch.modification_points = deepcopy(self.modification_points)
         return clone_patch
-
-    @property
-    def edit_size(self) -> int:
-        """
-        Define the size of modifications made by this patch
-
-        :return: The size value
-        :rtype: int
-
-        .. note::
-            1. If two lines are deleted, returns -2
-            2. If two lines are inserted, returns 2
-            3. If one line is replaced with other, returns 0 (no change in size but in contents)
-        """
-        lrs = self.line_replacements.items()
-        lis = self.line_insertions.items()
-        return sum(map(lambda x: len(x[1]), lis)) - len(
-            list(filter(lambda x: x[1] is None, lrs)))
 
     @property
     def diff(self) -> str:
@@ -164,60 +148,6 @@ class Patch:
                     atomics.append(atomic)
         return atomics
     
-    @property
-    def line_replacements(self) -> dict:
-        """
-        Extract only the line replacement information
-        from the edit_list of the patch.
-        For more information, see :py:class:`.atomic_operator.LineReplacement`
-
-        :return: The line replacement information, see *Hint*.
-        :rtype: dict(int, int or None)
-
-        .. hint::
-            - key: the index of line which is supposed to be replaced
-            - value: None or the index of ingredient line
-
-        .. note::
-            If ``self.get_atomics()`` is ``[LineReplacement(8, None), LineInsertion(4, 10)]``, ::
-
-                print(self.line_replacements)
-                >> { 8: None }
-
-        """
-        lrs = dict()
-        for _lr in self.get_atomics('LineReplacement'):
-            if _lr.line not in lrs or lrs[_lr.line] is not None:
-                lrs[_lr.line] = _lr.ingredient
-        return lrs
-
-    @property
-    def line_insertions(self) -> dict:
-        '''
-        Extract only the line insertion information
-        from the edit_list of the patch.
-        For more information, see :py:class:`.atomic_operator.LineInsertion`
-
-        :return: The line insertion information, see *Hint*.
-        :rtype: dict(int, list(int))
-
-        .. hint::
-            - key: The index of insertion point
-            - value: The list of indices of ingredient lines
-
-        .. note::
-            If ``self.get_atomics()`` is ``[LineReplacement(8, None), LineInsertion(4, 10)]``, ::
-
-                print(self.line_insertions)
-                >> { 4: [10] }
-
-        '''
-        lis = dict()
-        for _li in self.get_atomics('LineInsertion'):
-            lis[_li.point] = lis.get(_li.point, list())
-            lis[_li.point].append(_li.ingredient)
-        return lis
-
     def apply(self):
         """
         This method applies the patch to the target program.
@@ -233,43 +163,12 @@ class Patch:
         """
         assert isinstance(self.program.manipulation_level, MnplLevel)
         target_files = self.program.contents.keys()
-        if self.program.manipulation_level == MnplLevel.LINE:
-            new_contents = dict()
-            lrs = self.line_replacements.items()
-            lis = self.line_insertions.items()
-            for target_file in target_files:
-                new_contents[target_file] = list()
-                orig_codeline_list = self.program.contents[target_file]
-                new_codeline_list = new_contents[target_file]
-
-                replacements = dict(filter(lambda x: x[0][0] == target_file, lrs))
-                insertions = dict(filter(lambda x: x[0][0] == target_file, lis))
-
-                # Gathers the codelines along with applying the patches
-                for i in range(len(orig_codeline_list) + 1):
-                    if (target_file, i) in insertions:
-                        for ingredient in insertions[(target_file, i)]:
-                            new_codeline_list.append(
-                                self.program.contents[ingredient[0]][ingredient[1]])
-                    if i < len(orig_codeline_list):
-                        if (target_file, i) in replacements:
-                            ingredient = replacements[(target_file, i)]
-                            if ingredient is not None:
-                                new_codeline_list.append(self.program.contents[
-                                    ingredient[0]][ingredient[1]])
-                        else:
-                            new_codeline_list.append(orig_codeline_list[i])
-        elif self.program.manipulation_level == MnplLevel.AST:
-            import copy
-            new_contents = copy.deepcopy(self.program.contents)
-            for target_file in target_files:
-                atomics = list(filter(lambda a: a.stmt[0] == target_file, self.get_atomics()))
-                # node with highest node # first
-                # for the same node #, smallest index first
-                atomics = [t[1] for t in sorted(enumerate(atomics), key=lambda t: (-t[1].stmt[1], t[0]))]
-                for atomic in atomics:
-                    atomic.apply(self.program, new_contents)
-
+        self.modification_points = deepcopy(self.program.modification_points)
+        new_contents = deepcopy(self.program.contents)
+        for target_file in target_files:
+            atomics = list(filter(lambda a: a.modification_point[0] == target_file, self.get_atomics()))
+            for atomic in atomics:
+                atomic.apply(self.program, new_contents, self.modification_points)
         for target_file in new_contents:
             with open(os.path.join(self.program.tmp_path, target_file), 'w') as tmp_file:
                 tmp_file.write(Program.to_source(self.program.manipulation_level, new_contents[target_file]))

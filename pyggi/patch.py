@@ -24,7 +24,6 @@ class Patch:
         self.program = program
         self.test_result = None
         self.edit_list = []
-        self.modification_points = deepcopy(program.modification_points)
 
     def __str__(self):
         return ' | '.join(list(map(str, self.edit_list)))
@@ -45,7 +44,6 @@ class Patch:
         clone_patch = Patch(self.program)
         clone_patch.edit_list = deepcopy(self.edit_list)
         clone_patch.test_result = None
-        clone_patch.modification_points = deepcopy(self.modification_points)
         return clone_patch
 
     @property
@@ -163,12 +161,12 @@ class Patch:
         """
         assert isinstance(self.program.manipulation_level, MnplLevel)
         target_files = self.program.contents.keys()
-        self.modification_points = deepcopy(self.program.modification_points)
+        modification_points = deepcopy(self.program.modification_points)
         new_contents = deepcopy(self.program.contents)
         for target_file in target_files:
             atomics = list(filter(lambda a: a.modification_point[0] == target_file, self.get_atomics()))
             for atomic in atomics:
-                atomic.apply(self.program, new_contents, self.modification_points)
+                atomic.apply(self.program, new_contents, modification_points)
         for target_file in new_contents:
             with open(os.path.join(self.program.tmp_path, target_file), 'w') as tmp_file:
                 tmp_file.write(Program.to_source(self.program.manipulation_level, new_contents[target_file]))

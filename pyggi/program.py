@@ -17,8 +17,8 @@ class MnplLevel(Enum):
     MnplLevel represents the granularity levels of program.
 
     """
-    PHYSICAL_LINE = 'physical_line'
-    AST = 'ast'
+    LINE = 'line'
+    AST = 'AST'
 
     @classmethod
     def is_valid(cls, value):
@@ -31,7 +31,7 @@ class MnplLevel(Enum):
         .. hint::
             There are some examples,
             ::
-                MnplLevel.is_valid('physical_line')
+                MnplLevel.is_valid('line')
                 >> True
                 MnplLevel.is_valid('random_text')
                 >> False
@@ -53,7 +53,7 @@ class Program(object):
     CONFIG_FILE_NAME = 'PYGGI_CONFIG'
     TMP_DIR = "./pyggi_tmp/"
 
-    def __init__(self, path, manipulation_level=MnplLevel.PHYSICAL_LINE,
+    def __init__(self, path, manipulation_level=MnplLevel.LINE,
                  config_file_name=CONFIG_FILE_NAME):
         assert isinstance(manipulation_level, MnplLevel)
         self.path = path.strip()
@@ -72,7 +72,7 @@ class Program(object):
         self._modification_points = None
 
     def __str__(self):
-        if self.manipulation_level == MnplLevel.PHYSICAL_LINE:
+        if self.manipulation_level == MnplLevel.LINE:
             code = ''
             for k in sorted(self.contents.keys()):
                 idx = 0
@@ -94,7 +94,7 @@ class Program(object):
             return self._modification_points
 
         self._modification_points = dict()
-        if self.manipulation_level == MnplLevel.PHYSICAL_LINE:
+        if self.manipulation_level == MnplLevel.LINE:
             for target_file in self.target_files:
                 self._modification_points[target_file] = list(range(len(self.contents[target_file])))
         elif self.manipulation_level == MnplLevel.AST:
@@ -136,7 +136,7 @@ class Program(object):
         :rtype: None
         """
         title_format = "=" * 25 + " {} {} " + "=" * 25
-        if self.manipulation_level == MnplLevel.PHYSICAL_LINE:
+        if self.manipulation_level == MnplLevel.LINE:
             for i, index in enumerate(self.modification_points[target_file]):
                 print(title_format.format('line', i))
                 print(self.contents[target_file][index])
@@ -161,7 +161,7 @@ class Program(object):
         :return: The source code
         :rtype: str
         """
-        if manipulation_level == MnplLevel.PHYSICAL_LINE:
+        if manipulation_level == MnplLevel.LINE:
             return '\n'.join(contents_of_file) + '\n'
         elif manipulation_level == MnplLevel.AST:
             import astor
@@ -200,7 +200,7 @@ class Program(object):
             - value: the contents of the file
         """
         assert isinstance(manipulation_level, MnplLevel)
-        if manipulation_level == MnplLevel.PHYSICAL_LINE:
+        if manipulation_level == MnplLevel.LINE:
             contents = {}
             for target in target_files:
                 with open(os.path.join(path, target), 'r') as target_file:

@@ -20,7 +20,7 @@ if __name__ == "__main__":
         help='total iterations per epoch(default: 100)')
     args = parser.parse_args()
     
-    program = Program(args.project_path, MnplLevel.PHYSICAL_LINE)
+    program = Program(args.project_path, MnplLevel.LINE)
    
     class MyLocalSearch(LocalSearch):
         def get_neighbour(self, patch):

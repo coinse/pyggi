@@ -233,7 +233,7 @@ class Patch:
         """
         assert isinstance(self.program.manipulation_level, MnplLevel)
         target_files = self.program.contents.keys()
-        if self.program.manipulation_level == MnplLevel.PHYSICAL_LINE:
+        if self.program.manipulation_level == MnplLevel.LINE:
             new_contents = dict()
             lrs = self.line_replacements.items()
             lis = self.line_insertions.items()

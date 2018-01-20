@@ -91,7 +91,7 @@ class LineDeletion(Edit):
 
     def is_valid_for(self, program):
         from .program import MnplLevel
-        if program.manipulation_level == MnplLevel.PHYSICAL_LINE:
+        if program.manipulation_level == MnplLevel.LINE:
             return True
         return False
 
@@ -149,7 +149,7 @@ class LineMoving(Edit):
 
     def is_valid_for(self, program):
         from .program import MnplLevel
-        if program.manipulation_level == MnplLevel.PHYSICAL_LINE:
+        if program.manipulation_level == MnplLevel.LINE:
             return True
         return False
 

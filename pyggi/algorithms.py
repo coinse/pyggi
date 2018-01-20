@@ -25,7 +25,7 @@ class LocalSearch(metaclass=ABCMeta):
             from pyggi.atomic_operator import LineReplacement, LineInsertion
             from pyggi.edit import LineDeletion
 
-            program = Program("<PROGRAM_ROOT_PATH>", MnplLevel.PHYSICAL_LINE)
+            program = Program("<PROGRAM_ROOT_PATH>", MnplLevel.LINE)
 
             class MyLocalSearch(LocalSearch):
                 def get_neighbour(self, patch):

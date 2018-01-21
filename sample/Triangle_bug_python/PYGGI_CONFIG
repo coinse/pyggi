@@ -1,0 +1,6 @@
+{
+  "target_files": [
+    "triangle.py"
+  ],
+  "test_command": "pytest -s test_triangle.py"
+}

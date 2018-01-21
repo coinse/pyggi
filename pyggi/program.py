@@ -130,7 +130,7 @@ class Program(object):
         elif method == 'weighted':
             cumulated_weights = sum(self.modification_weights[target_file])
             list_of_prob = list(map(lambda w: float(w)/cumulated_weights, self.modification_weights[target_file]))
-            return random.choices(list(range(len(candidates))), weights=list_of_prob, k=1)
+            return random.choices(list(range(len(candidates))), weights=list_of_prob, k=1)[0]
 
     def set_modification_weights(self, target_file, weights):
         """

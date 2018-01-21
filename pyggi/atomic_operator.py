@@ -467,7 +467,7 @@ class StmtInsertion(AtomicOperator):
                     parent = dst_pos[:depth-1]
                     index = dst_pos[depth-1][1]
                     for pos in modification_points[self.stmt[0]]:
-                        if parent == pos[:depth-1] and index <= pos[depth-1][1]:
+                        if parent == pos[:depth-1] and len(pos) >= depth and index <= pos[depth-1][1]:
                             a, i = pos[depth-1]
                             pos[depth-1] = (a, i + 1)
             elif self.direction == 'after':
@@ -477,7 +477,7 @@ class StmtInsertion(AtomicOperator):
                     parent = dst_pos[:depth-1]
                     index = dst_pos[depth - 1][1]
                     for pos in modification_points[self.stmt[0]]:
-                        if parent == pos[:depth-1] and index < pos[depth-1][1]:
+                        if parent == pos[:depth-1] and len(pos) >= depth and index < pos[depth-1][1]:
                             a, i = pos[depth-1]
                             pos[depth-1] = (a, i + 1)
         return success

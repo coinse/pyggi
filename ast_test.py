@@ -21,9 +21,10 @@ def result_parser(result):
 triangle = Program(
     "sample/Triangle_fast_python", manipulation_level=MnplLevel.AST)
 triangle.print_modification_points('triangle.py')
-
+weights = [1] * len(triangle.modification_points['triangle.py'])
+triangle.set_modification_weights('triangle.py', weights)
 patch = Patch(triangle)
-patch.add(StmtMoving.create(triangle))
+patch.add(StmtMoving.create(triangle, method='weighted'))
 print (patch)
 #patch.add(StmtInsertion(('triangle.py', 4), ('triangle.py', 0)))
 #patch.add(StmtInsertion(('triangle.py', 4), ('triangle.py', 1)))

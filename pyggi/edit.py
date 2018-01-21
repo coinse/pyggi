@@ -125,12 +125,13 @@ class LineDeletion(Edit):
         return [LineReplacement(self.x, None)]
 
     @classmethod
-    def create(cls, program, line_file=None):
+    def create(cls, program, line_file=None, method='random'):
         """
         :param program: The program instance to which the random edit will be applied.
         :type program: :py:class:`.Program`
         :param str line_file: Line is the target line to delete.
           If line_file is specified, the target line will be chosen within the file.
+        :param str method: The way of choosing the modification point. **'random'** or **'weighted'**
         :return: The LineDeletion instance with the randomly-selected line index.
         :rtype: :py:class:`.edit.LineDeletion`
         """
@@ -138,7 +139,7 @@ class LineDeletion(Edit):
         line_file = line_file or random.choice(program.target_files)
         line = (
             line_file,
-            program.select_modification_point(line_file, 'random')
+            program.select_modification_point(line_file, method)
         )
         return cls(line)
 
@@ -203,13 +204,14 @@ class LineMoving(Edit):
         return [LineInsertion(self.y, self.x, self.direction), LineReplacement(self.x, None)]
 
     @classmethod
-    def create(cls, program, line_file=None, ingr_file=None, direction='before'):
+    def create(cls, program, line_file=None, ingr_file=None, direction='before', method='random'):
         """
         :param program: The program instance to which the random edit will be applied.
         :type program: :py:class:`.Program`
         :param str line_file: Line means the modification point of the edit. If line_file is specified, the line will be chosen within the file.
         :param str ingr_file: Ingredient is the line to be moved.
           If ingr_file is specified, the ingredient line will be chosen within the file.
+        :param str method: The way of choosing the modification point. **'random'** or **'weighted'**
         :return: The LineMoving instance with the randomly-selected line & ingr.
         :rtype: :py:class:`.edit.LineMoving`
         """
@@ -218,7 +220,7 @@ class LineMoving(Edit):
         ingr_file = ingr_file or random.choice(program.target_files)
         line = (
             line_file,
-            program.select_modification_point(line_file, 'random')
+            program.select_modification_point(line_file, method)
         )
         ingredient = (
             ingr_file,
@@ -267,12 +269,13 @@ class StmtDeletion(Edit):
         return [StmtReplacement(self.x, None)]
 
     @classmethod
-    def create(cls, program, stmt_file=None):
+    def create(cls, program, stmt_file=None, method='random'):
         """
         :param program: The program instance to which the random edit will be applied.
         :type program: :py:class:`.Program`
         :param str stmt_file: stmt is the target statement to delete.
           If stmt_file is specified, the target statement will be chosen within that file.
+        :param str method: The way of choosing the modification point. **'random'** or **'weighted'**
         :return: The StmtDeletion instance with the randomly-selected modification point.
         :rtype: :py:class:`.edit.StmtDeletion`
         """
@@ -280,7 +283,7 @@ class StmtDeletion(Edit):
         stmt_file = stmt_file or random.choice(program.target_files)
         stmt = (
             stmt_file,
-            program.select_modification_point(stmt_file, 'random')
+            program.select_modification_point(stmt_file, method)
         )
         return cls(stmt)
 
@@ -345,7 +348,7 @@ class StmtMoving(Edit):
         return [StmtInsertion(self.y, self.x, self.direction), StmtReplacement(self.x, None)]
 
     @classmethod
-    def create(cls, program, stmt_file=None, ingr_file=None, direction='before'):
+    def create(cls, program, stmt_file=None, ingr_file=None, direction='before', method='random'):
         """
         :param program: The program instance to which the random edit will be applied.
         :type program: :py:class:`.Program`
@@ -353,6 +356,7 @@ class StmtMoving(Edit):
           If stmt_file is specified, the statement will be chosen within that file.
         :param str ingr_file: Ingredient is the statement to be moved.
           If ingr_file is specified, the ingredient statement will be chosen within that file.
+        :param str method: The way of choosing the modification point. **'random'** or **'weighted'**
         :return: The StmtMoving instance with the randomly-selected stmt & ingr.
         :rtype: :py:class:`.edit.StmtMoving`
         """
@@ -361,7 +365,7 @@ class StmtMoving(Edit):
         ingr_file = ingr_file or random.choice(program.target_files)
         stmt = (
             stmt_file,
-            program.select_modification_point(stmt_file, 'random')
+            program.select_modification_point(stmt_file, method)
         )
         ingredient = (
             ingr_file,

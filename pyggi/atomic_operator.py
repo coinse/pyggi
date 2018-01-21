@@ -173,7 +173,7 @@ class LineReplacement(AtomicOperator):
         return modification_points
 
     @classmethod
-    def create(cls, program, line_file=None, ingr_file=None, del_rate=0):
+    def create(cls, program, line_file=None, ingr_file=None, del_rate=0, method='random'):
         """
         :param program: The program instance to which the random edit will be applied.
         :type program: :py:class:`.Program`
@@ -183,6 +183,7 @@ class LineReplacement(AtomicOperator):
           If ingr_file is specified, the target line will be chosen within the file.
         :param float del_rate: The probability of that line is deleted
           instead of replaced with another line
+        :param str method: The way of choosing the modification point. **'random'** or **'weighted'**
         :return: The LineReplacement instance with the randomly-selected properties:
           line and ingredient.
         :rtype: :py:class:`.atomic_operator.LineReplacement`
@@ -190,7 +191,7 @@ class LineReplacement(AtomicOperator):
         import random
         assert del_rate >= 0 and del_rate <= 1
         line_file = line_file or random.choice(program.target_files)
-        line = (line_file, program.select_modification_point(line_file, 'random'))
+        line = (line_file, program.select_modification_point(line_file, method))
         if random.random() < del_rate:
             ingredient = None
         else:
@@ -280,7 +281,7 @@ class LineInsertion(AtomicOperator):
         return True
 
     @classmethod
-    def create(cls, program, line_file=None, ingr_file=None, direction='before'):
+    def create(cls, program, line_file=None, ingr_file=None, direction='before', method='random'):
         """
         :param program: The program instance to which the random edit will be applied.
         :type program: :py:class:`.Program`
@@ -288,6 +289,7 @@ class LineInsertion(AtomicOperator):
           If line_file is specified, the line will be chosen within the file.
         :param str ingr_file: Ingredient is the line to be copied.
           If ingr_file is specified, the target line will be chosen within the file.
+        :param str method: The way of choosing the modification point. **'random'** or **'weighted'**
         :return: The LineInsertion instance with the randomly-selected properties:
           line and ingredient.
         :rtype: :py:class:`.atomic_operator.LineInsertion`
@@ -297,7 +299,7 @@ class LineInsertion(AtomicOperator):
         ingr_file = ingr_file or random.choice(program.target_files)
         line = (
             line_file,
-            program.select_modification_point(line_file, 'random')
+            program.select_modification_point(line_file, method)
         )
         ingredient = (
             ingr_file,
@@ -369,7 +371,7 @@ class StmtReplacement(AtomicOperator):
         return False
 
     @classmethod
-    def create(cls, program, stmt_file=None, ingr_file=None, del_rate=0):
+    def create(cls, program, stmt_file=None, ingr_file=None, del_rate=0, method='random'):
         """
         :param program: The program instance to which the random edit will be applied.
         :type program: :py:class:`.Program`
@@ -378,6 +380,7 @@ class StmtReplacement(AtomicOperator):
         :param str ingr_file: Ingredient is the statement to be copied.
           If ingr_file is specified, the ingredient statement will be chosen within that file.
         :param float del_rate: The probability of ingredient will be None. ([0,1])
+        :param str method: The way of choosing the modification point. **'random'** or **'weighted'**
         :return: The StmtReplacement instance with the randomly-selected properties:
           stmt and ingredient.
         :rtype: :py:class:`.atomic_operator.StmtReplacement`
@@ -385,7 +388,7 @@ class StmtReplacement(AtomicOperator):
         import random
         assert del_rate >= 0 and del_rate <= 1
         stmt_file = stmt_file or random.choice(program.target_files)
-        stmt = (stmt_file, program.select_modification_point(stmt_file, 'random'))
+        stmt = (stmt_file, program.select_modification_point(stmt_file, method))
         if random.random() < del_rate:
             ingredient = None
         else:
@@ -480,7 +483,7 @@ class StmtInsertion(AtomicOperator):
         return success
 
     @classmethod
-    def create(cls, program, stmt_file=None, ingr_file=None, direction='before'):
+    def create(cls, program, stmt_file=None, ingr_file=None, direction='before', method='random'):
         """
         :param program: The program instance to which the random edit will be applied.
         :type program: :py:class:`.Program`
@@ -488,6 +491,7 @@ class StmtInsertion(AtomicOperator):
           If stmt_file is specified, the stmt will be chosen within that file.
         :param str ingr_file: Ingredient is the stmt to be copied.
           If ingr_file is specified, the target stmt will be chosen within that file.
+        :param str method: The way of choosing the modification point. **'random'** or **'weighted'**
         :return: The StmtInsertion instance with the randomly-selected properties:
           stmt and ingredient.
         :rtype: :py:class:`.atomic_operator.StmtInsertion`
@@ -497,7 +501,7 @@ class StmtInsertion(AtomicOperator):
         ingr_file = ingr_file or random.choice(program.target_files)
         stmt = (
             stmt_file,
-            program.select_modification_point(stmt_file, 'random')
+            program.select_modification_point(stmt_file, method)
         )
         ingredient = (
             ingr_file,

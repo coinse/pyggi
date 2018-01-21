@@ -196,7 +196,7 @@ class LineMoving(Edit):
     @property
     def atomic_operators(self):
         """
-        :return: ``[LineInsertion(self.y, self.x), LineReplacement(self.x, None)]``
+        :return: ``[LineInsertion(self.y, self.x, self.direction), LineReplacement(self.x, None)]``
         :rtype: list(:py:class:`.atomic_operator.AtomicOperator`)
         """
         from .atomic_operator import LineInsertion, LineReplacement
@@ -244,8 +244,8 @@ class StmtDeletion(Edit):
         """
         Delete **x**
 
-        :return: The file path and the position of target stmt to be deleted.
-        :rtype: tuple(str, list(tuple(str, int)))
+        :return: The file path and the index of modification point to be deleted.
+        :rtype: tuple(str, int)
         """
         return self.args[0]
 
@@ -283,3 +283,88 @@ class StmtDeletion(Edit):
             program.select_modification_point(stmt_file, 'random')
         )
         return cls(stmt)
+
+class StmtMoving(Edit):
+    """
+    StmtMoving: Move x [before|after] y
+    """
+    def __str__(self):
+        return "Move {} {} {}".format(self.x, self.direction, self.y)
+
+    def is_valid_for(self, program):
+        from .program import MnplLevel
+        if program.manipulation_level == MnplLevel.AST:
+            return True
+        return False
+
+    @property
+    def x(self):
+        """
+        Move **x** [before|after] y
+
+        :return: The file path and the index of ingredient statement to be moved.
+        :rtype: tuple(str, int)
+        """
+        return self.args[0]
+
+    @property
+    def y(self):
+        """
+        Move x [before|after] **y**
+
+        :return: The file path and the index of modification point.
+        :rtype: tuple(str, int)
+        """
+        return self.args[1]
+
+    @property
+    def direction(self):
+        """
+        Move x **[before|after]** y
+
+        :return: **'before'** or **'after'**
+        :rtype: str
+        """
+        return self.args[2]
+
+    @property
+    def length_of_args(self):
+        """
+        :return: ``3``
+        :rtype: int
+        """
+        return 3
+
+    @property
+    def atomic_operators(self):
+        """
+        :return: ``[StmtInsertion(self.y, self.x, self.direction), StmtReplacement(self.x, None)]``
+        :rtype: list(:py:class:`.atomic_operator.AtomicOperator`)
+        """
+        from .atomic_operator import StmtInsertion, StmtReplacement
+        return [StmtInsertion(self.y, self.x, self.direction), StmtReplacement(self.x, None)]
+
+    @classmethod
+    def create(cls, program, stmt_file=None, ingr_file=None, direction='before'):
+        """
+        :param program: The program instance to which the random edit will be applied.
+        :type program: :py:class:`.Program`
+        :param str stmt_file: stmt means the modification point of the edit.
+          If stmt_file is specified, the statement will be chosen within that file.
+        :param str ingr_file: Ingredient is the statement to be moved.
+          If ingr_file is specified, the ingredient statement will be chosen within that file.
+        :return: The StmtMoving instance with the randomly-selected stmt & ingr.
+        :rtype: :py:class:`.edit.StmtMoving`
+        """
+        import random
+        stmt_file = stmt_file or random.choice(program.target_files)
+        ingr_file = ingr_file or random.choice(program.target_files)
+        stmt = (
+            stmt_file,
+            program.select_modification_point(stmt_file, 'random')
+        )
+        ingredient = (
+            ingr_file,
+            program.select_modification_point(ingr_file, 'random')
+        )
+        return cls(ingredient, stmt, direction)

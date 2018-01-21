@@ -1,6 +1,6 @@
 from pyggi import Program, Patch, MnplLevel, TestResult
 from pyggi.atomic_operator import StmtReplacement, StmtInsertion
-from pyggi.edit import StmtDeletion
+from pyggi.edit import StmtDeletion, StmtMoving
 from pyggi.helper import stmt_python
 import ast
 import astor
@@ -23,7 +23,7 @@ triangle = Program(
 triangle.print_modification_points('triangle.py')
 
 patch = Patch(triangle)
-patch.add(StmtInsertion.create(triangle))
+patch.add(StmtMoving.create(triangle))
 print (patch)
 #patch.add(StmtInsertion(('triangle.py', 4), ('triangle.py', 0)))
 #patch.add(StmtInsertion(('triangle.py', 4), ('triangle.py', 1)))

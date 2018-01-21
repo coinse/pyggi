@@ -31,10 +31,10 @@ class TestAtomicOperator(object):
             assert line_replacement.line == line
             assert line_replacement.ingredient == ingredient
 
-        def test_random(self):
+        def test_create(self):
             program = Program('./resource/Triangle_bug',
                               MnplLevel.LINE)
-            random_line_deletion_0 = LineReplacement.random(
+            random_line_deletion_0 = LineReplacement.create(
                 program,
                 line_file='Triangle.java',
                 ingr_file='Triangle.java',
@@ -42,7 +42,7 @@ class TestAtomicOperator(object):
             assert isinstance(random_line_deletion_0, LineReplacement)
             assert random_line_deletion_0.ingredient is not None
 
-            random_line_deletion_1 = LineReplacement.random(
+            random_line_deletion_1 = LineReplacement.create(
                 program,
                 line_file='Triangle.java',
                 ingr_file='Triangle.java',
@@ -58,10 +58,10 @@ class TestAtomicOperator(object):
             assert line_insertion.line == line
             assert line_insertion.ingredient == ingredient
 
-        def test_random(self):
+        def test_create(self):
             program = Program('./resource/Triangle_bug',
                               MnplLevel.LINE)
-            random_line_insertion = LineInsertion.random(
+            random_line_insertion = LineInsertion.create(
                 program, line_file='Triangle.java', ingr_file='Triangle.java')
 
             assert isinstance(random_line_insertion, LineInsertion)

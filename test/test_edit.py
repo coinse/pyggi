@@ -17,7 +17,7 @@ def setup_moving():
     ingr_file = 'Triangle.java'
     point = (point_file, 1)
     ingredient = (ingr_file, 2)
-    return LineMoving(ingredient, point), ingredient, point
+    return LineMoving(ingredient, point, 'before'), ingredient, point
 
 
 class TestEdit(object):
@@ -40,10 +40,10 @@ class TestEdit(object):
             assert [LineReplacement(line_deletion.x,
                                     None)] == line_deletion.atomic_operators
 
-        def test_random(self):
+        def test_create(self):
             program = Program('./resource/Triangle_bug',
                               MnplLevel.LINE)
-            random_line_deletion = LineDeletion.random(program)
+            random_line_deletion = LineDeletion.create(program)
 
             assert random_line_deletion.x is not None
 
@@ -52,7 +52,7 @@ class TestEdit(object):
         def test_length_of_args(self, setup_moving):
             line_moving, _, _ = setup_moving
 
-            assert line_moving.length_of_args == 2
+            assert line_moving.length_of_args == 3
 
         def test_x(self, setup_moving):
             line_moving, ingredient, _ = setup_moving
@@ -72,10 +72,10 @@ class TestEdit(object):
                 LineReplacement(line_moving.x, None)
             ] == line_moving.atomic_operators
 
-        def test_random(self):
+        def test_create(self):
             program = Program('./resource/Triangle_bug',
                               MnplLevel.LINE)
-            random_line_moving = LineMoving.random(program)
+            random_line_moving = LineMoving.create(program)
 
             assert random_line_moving.x is not None
             assert random_line_moving.y is not None

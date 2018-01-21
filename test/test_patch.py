@@ -50,14 +50,14 @@ class TestPatch(object):
     def test_add(self, setup):
         patch, program = setup
         deletion_operator = LineDeletion
-        deletion_instance = deletion_operator.random(program)
+        deletion_instance = deletion_operator.create(program)
         patch.add(deletion_instance)
 
         assert len(patch) == 1
         assert patch.edit_list[0] == deletion_instance
 
         moving_operator = LineMoving
-        moving_instance = moving_operator.random(program)
+        moving_instance = moving_operator.create(program)
         patch.add(moving_instance)
 
         assert len(patch) == 2

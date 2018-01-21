@@ -109,7 +109,7 @@ class AtomicOperator(metaclass=ABCMeta):
 
     @classmethod
     @abstractmethod
-    def random(cls):
+    def create(cls):
         """
         :return: The operator instance with randomly-selected properties.
         :rtype: :py:class:`.atomic_operator.AtomicOperator`
@@ -180,7 +180,7 @@ class LineReplacement(AtomicOperator):
         return False
 
     @classmethod
-    def random(cls, program, line_file=None, ingr_file=None, del_rate=0):
+    def create(cls, program, line_file=None, ingr_file=None, del_rate=0):
         """
         :param program: The program instance to which the random edit will be applied.
         :type program: :py:class:`.Program`
@@ -276,7 +276,7 @@ class LineInsertion(AtomicOperator):
         return False
 
     @classmethod
-    def random(cls, program, line_file=None, ingr_file=None):
+    def create(cls, program, line_file=None, ingr_file=None, direction='before'):
         """
         :param program: The program instance to which the random edit will be applied.
         :type program: :py:class:`.Program`
@@ -291,9 +291,15 @@ class LineInsertion(AtomicOperator):
         import random
         line_file = line_file or random.choice(program.target_files)
         ingr_file = ingr_file or random.choice(program.target_files)
-        line = (line_file, program.select_modification_point(line_file, 'random'))
-        ingredient = (ingr_file, program.select_modification_point(ingr_file, 'random'))
-        return cls(line, ingredient)
+        line = (
+            line_file,
+            program.select_modification_point(line_file, 'random')
+        )
+        ingredient = (
+            ingr_file,
+            program.select_modification_point(ingr_file, 'random')
+        )
+        return cls(line, ingredient, direction)
 
     def apply(self, program, new_contents, modification_points):
         """"
@@ -309,11 +315,17 @@ class LineInsertion(AtomicOperator):
         """
         assert self.is_valid_for(program)
         if self.direction == 'before':
-            new_contents[self.line[0]].insert(modification_points[self.line[0]][self.line[1]], program.contents[self.ingredient[0]][self.ingredient[1]])
+            new_contents[self.line[0]].insert(
+                modification_points[self.line[0]][self.line[1]],
+                program.contents[self.ingredient[0]][self.ingredient[1]]
+            )
             for i in range(self.line[1], len(modification_points[self.line[0]])):
                 modification_points[self.line[0]][i] += 1
         elif self.direction == 'after':
-            new_contents[self.line[0]].insert(modification_points[self.line[0]][self.line[1]] + 1, program.contents[self.ingredient[0]][self.ingredient[1]])
+            new_contents[self.line[0]].insert(
+                modification_points[self.line[0]][self.line[1]] + 1,
+                program.contents[self.ingredient[0]][self.ingredient[1]]
+            )
             for i in range(self.line[1] + 1, len(modification_points[self.line[0]])):
                 modification_points[self.line[0]][i] += 1
         return True
@@ -382,8 +394,9 @@ class StmtReplacement(AtomicOperator):
         return False
 
     @classmethod
-    def random(cls, program):
-        pass
+    def create(cls, program):
+        #FIXME
+        raise Exception("create() not supported for StmtReplacement")
 
 
 class StmtInsertion(AtomicOperator):
@@ -454,11 +467,11 @@ class StmtInsertion(AtomicOperator):
                 if success:
                     depth = len(dst_pos)
                     parent = dst_pos[:depth-1]
-                    index = dst_pos[depth - 1][1]
+                    index = dst_pos[depth-1][1]
                     for pos in modification_points[self.stmt[0]]:
-                        if parent == pos[:depth-1] and index <= pos[depth - 1][1]:
-                            a, i = pos[depth - 1]
-                            pos[depth - 1] = (a, i + 1)
+                        if parent == pos[:depth-1] and index <= pos[depth-1][1]:
+                            a, i = pos[depth-1]
+                            pos[depth-1] = (a, i + 1)
             elif self.direction == 'after':
                 success = stmt_python.insert_after((dst_root, dst_pos), (ingr_root, ingr_pos))
                 if success:
@@ -466,11 +479,12 @@ class StmtInsertion(AtomicOperator):
                     parent = dst_pos[:depth-1]
                     index = dst_pos[depth - 1][1]
                     for pos in modification_points[self.stmt[0]]:
-                        if parent == pos[:depth-1] and index < pos[depth - 1][1]:
-                            a, i = pos[depth - 1]
-                            pos[depth - 1] = (a, i + 1)
+                        if parent == pos[:depth-1] and index < pos[depth-1][1]:
+                            a, i = pos[depth-1]
+                            pos[depth-1] = (a, i + 1)
         return success
 
     @classmethod
-    def random(cls, program):
-        pass
+    def create(cls, program):
+        #FIXME
+        raise Exception("create() not supported for StmtInsertion")

@@ -11,6 +11,7 @@ import ast
 
 class AtomicOperator(metaclass=ABCMeta):
     """
+    
     PYGGI-defined Atomic Operator:
     User can generate the own edit operators
     which can be converted into a list of atomic operators.
@@ -21,35 +22,8 @@ class AtomicOperator(metaclass=ABCMeta):
 
     * LineReplacement
     * LineInsertion
-
-    .. hint::
-
-        +---------+---------+---------------------+
-        | Point # | Line #  | Code                |
-        +=========+=========+=====================+
-        |    0    |         |                     |
-        +---------+---------+---------------------+
-        |         |    0    | from math import *  |
-        +---------+---------+---------------------+
-        |    1    |         |                     |
-        +---------+---------+---------------------+
-        |         |    1    | for i in range(3):  |
-        +---------+---------+---------------------+
-        |    2    |         |                     |
-        +---------+---------+---------------------+
-        |         |    2    |   print(i)          |
-        +---------+---------+---------------------+
-        |    3    |         |                     |
-        +---------+---------+---------------------+
-        |         |    3    |   if (sqrt(i) > 2): |
-        +---------+---------+---------------------+
-        |    4    |         |                     |
-        +---------+---------+---------------------+
-        |         |    4    |       return        |
-        +---------+---------+---------------------+
-        |   ...   |   ...   | ..................  |
-        +---------+---------+---------------------+
-
+    * StmtReplacement
+    * StmtInsertion
 
     """
 
@@ -179,6 +153,25 @@ class LineReplacement(AtomicOperator):
             return True
         return False
 
+    def apply(self, program, new_contents, modification_points):
+        """"
+        Apply the operator to the contents of program
+        :param program: The original program instance
+        :type program: :py:class:`.Program`
+        :param new_contents: The new contents of program to which the edit will be applied
+        :type new_contents: dict(str, list(str))
+        :param modification_points: The original modification points
+        :type modification_points: list(int)
+        :return: success or not
+        :rtype: bool
+        """
+        assert self.is_valid_for(program)
+        if self.ingredient:
+            new_contents[self.line[0]][modification_points[self.line[0]][self.line[1]]] == program.contents[self.ingredient[0]][self.ingredient[1]]
+        else:
+            new_contents[self.line[0]][modification_points[self.line[0]][self.line[1]]] = ''
+        return modification_points
+
     @classmethod
     def create(cls, program, line_file=None, ingr_file=None, del_rate=0):
         """
@@ -205,24 +198,6 @@ class LineReplacement(AtomicOperator):
             ingredient = (ingr_file, program.select_modification_point(ingr_file, 'random'))
         return cls(line, ingredient)
 
-    def apply(self, program, new_contents, modification_points):
-        """"
-        Apply the operator to the contents of program
-        :param program: The original program instance
-        :type program: :py:class:`.Program`
-        :param new_contents: The new contents of program to which the edit will be applied
-        :type new_contents: dict(str, list(str))
-        :param modification_points: The original modification points
-        :type modification_points: list(int)
-        :return: success or not
-        :rtype: bool
-        """
-        assert self.is_valid_for(program)
-        if self.ingredient:
-            new_contents[self.line[0]][modification_points[self.line[0]][self.line[1]]] == program.contents[self.ingredient[0]][self.ingredient[1]]
-        else:
-            new_contents[self.line[0]][modification_points[self.line[0]][self.line[1]]] = ''
-        return modification_points
 
 class LineInsertion(AtomicOperator):
     """
@@ -275,32 +250,6 @@ class LineInsertion(AtomicOperator):
             return True
         return False
 
-    @classmethod
-    def create(cls, program, line_file=None, ingr_file=None, direction='before'):
-        """
-        :param program: The program instance to which the random edit will be applied.
-        :type program: :py:class:`.Program`
-        :param str line_file: Line means the modification point of the edit.
-          If line_file is specified, the line will be chosen within the file.
-        :param str ingr_file: Ingredient is the line to be copied.
-          If ingr_file is specified, the target line will be chosen within the file.
-        :return: The LineInsertion instance with the randomly-selected properties:
-          line and ingredient.
-        :rtype: :py:class:`.atomic_operator.LineInsertion`
-        """
-        import random
-        line_file = line_file or random.choice(program.target_files)
-        ingr_file = ingr_file or random.choice(program.target_files)
-        line = (
-            line_file,
-            program.select_modification_point(line_file, 'random')
-        )
-        ingredient = (
-            ingr_file,
-            program.select_modification_point(ingr_file, 'random')
-        )
-        return cls(line, ingredient, direction)
-
     def apply(self, program, new_contents, modification_points):
         """"
         Apply the operator to the contents of program
@@ -329,6 +278,32 @@ class LineInsertion(AtomicOperator):
             for i in range(self.line[1] + 1, len(modification_points[self.line[0]])):
                 modification_points[self.line[0]][i] += 1
         return True
+
+    @classmethod
+    def create(cls, program, line_file=None, ingr_file=None, direction='before'):
+        """
+        :param program: The program instance to which the random edit will be applied.
+        :type program: :py:class:`.Program`
+        :param str line_file: Line means the modification point of the edit.
+          If line_file is specified, the line will be chosen within the file.
+        :param str ingr_file: Ingredient is the line to be copied.
+          If ingr_file is specified, the target line will be chosen within the file.
+        :return: The LineInsertion instance with the randomly-selected properties:
+          line and ingredient.
+        :rtype: :py:class:`.atomic_operator.LineInsertion`
+        """
+        import random
+        line_file = line_file or random.choice(program.target_files)
+        ingr_file = ingr_file or random.choice(program.target_files)
+        line = (
+            line_file,
+            program.select_modification_point(line_file, 'random')
+        )
+        ingredient = (
+            ingr_file,
+            program.select_modification_point(ingr_file, 'random')
+        )
+        return cls(line, ingredient, direction)
 
 
 class StmtReplacement(AtomicOperator):
@@ -389,14 +364,34 @@ class StmtReplacement(AtomicOperator):
             if not self.ingredient:
                 return stmt_python.replace((dst_root, dst_pos), self.ingredient)
             ingr_root = program.contents[self.ingredient[0]]
-            ingr_pos = program.get_modification_points[self.ingredient[0]][self.ingredient[1]]
+            ingr_pos = program.modification_points[self.ingredient[0]][self.ingredient[1]]
             return stmt_python.replace((dst_root, dst_pos), (ingr_root, ingr_pos))
         return False
 
     @classmethod
-    def create(cls, program):
-        #FIXME
-        raise Exception("create() not supported for StmtReplacement")
+    def create(cls, program, stmt_file=None, ingr_file=None, del_rate=0):
+        """
+        :param program: The program instance to which the random edit will be applied.
+        :type program: :py:class:`.Program`
+        :param str stmt_file: stmt is the target statement to delete.
+          If stmt_file is specified, the target statement will be chosen within that file.
+        :param str ingr_file: Ingredient is the statement to be copied.
+          If ingr_file is specified, the ingredient statement will be chosen within that file.
+        :param float del_rate: The probability of ingredient will be None. ([0,1])
+        :return: The StmtReplacement instance with the randomly-selected properties:
+          stmt and ingredient.
+        :rtype: :py:class:`.atomic_operator.StmtReplacement`
+        """
+        import random
+        assert del_rate >= 0 and del_rate <= 1
+        stmt_file = stmt_file or random.choice(program.target_files)
+        stmt = (stmt_file, program.select_modification_point(stmt_file, 'random'))
+        if random.random() < del_rate:
+            ingredient = None
+        else:
+            ingr_file = ingr_file or random.choice(program.target_files)
+            ingredient = (ingr_file, program.select_modification_point(ingr_file, 'random'))
+        return cls(stmt, ingredient)
 
 
 class StmtInsertion(AtomicOperator):
@@ -485,6 +480,27 @@ class StmtInsertion(AtomicOperator):
         return success
 
     @classmethod
-    def create(cls, program):
-        #FIXME
-        raise Exception("create() not supported for StmtInsertion")
+    def create(cls, program, stmt_file=None, ingr_file=None, direction='before'):
+        """
+        :param program: The program instance to which the random edit will be applied.
+        :type program: :py:class:`.Program`
+        :param str line_file: stmt means the modification point of the edit.
+          If stmt_file is specified, the stmt will be chosen within that file.
+        :param str ingr_file: Ingredient is the stmt to be copied.
+          If ingr_file is specified, the target stmt will be chosen within that file.
+        :return: The StmtInsertion instance with the randomly-selected properties:
+          stmt and ingredient.
+        :rtype: :py:class:`.atomic_operator.StmtInsertion`
+        """
+        import random
+        stmt_file = stmt_file or random.choice(program.target_files)
+        ingr_file = ingr_file or random.choice(program.target_files)
+        stmt = (
+            stmt_file,
+            program.select_modification_point(stmt_file, 'random')
+        )
+        ingredient = (
+            ingr_file,
+            program.select_modification_point(ingr_file, 'random')
+        )
+        return cls(stmt, ingredient, direction)

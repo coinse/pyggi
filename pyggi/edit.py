@@ -85,6 +85,8 @@ class Edit(metaclass=ABCMeta):
 class LineDeletion(Edit):
     """
     LineDeletion: Delete x
+    
+    It replaces the code line with an empty line.
     """
     def __str__(self):
         return "Delete {}".format(self.x)
@@ -266,5 +268,18 @@ class StmtDeletion(Edit):
 
     @classmethod
     def create(cls, program, stmt_file=None):
-        #FIXME
-        raise Exception("create() not supported for StmtDeletion")
+        """
+        :param program: The program instance to which the random edit will be applied.
+        :type program: :py:class:`.Program`
+        :param str stmt_file: stmt is the target statement to delete.
+          If stmt_file is specified, the target statement will be chosen within that file.
+        :return: The StmtDeletion instance with the randomly-selected modification point.
+        :rtype: :py:class:`.edit.StmtDeletion`
+        """
+        import random
+        stmt_file = stmt_file or random.choice(program.target_files)
+        stmt = (
+            stmt_file,
+            program.select_modification_point(stmt_file, 'random')
+        )
+        return cls(stmt)

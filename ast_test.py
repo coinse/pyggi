@@ -23,8 +23,10 @@ triangle = Program(
 triangle.print_modification_points('triangle.py')
 
 patch = Patch(triangle)
-patch.add(StmtInsertion(('triangle.py', 4), ('triangle.py', 0)))
-patch.add(StmtInsertion(('triangle.py', 4), ('triangle.py', 1)))
-patch.add(StmtInsertion(('triangle.py', 4), ('triangle.py', 2)))
+patch.add(StmtInsertion.create(triangle))
+print (patch)
+#patch.add(StmtInsertion(('triangle.py', 4), ('triangle.py', 0)))
+#patch.add(StmtInsertion(('triangle.py', 4), ('triangle.py', 1)))
+#patch.add(StmtInsertion(('triangle.py', 4), ('triangle.py', 2)))
 print (patch.run_test(timeout=30, result_parser=result_parser))
 print (patch.diff)

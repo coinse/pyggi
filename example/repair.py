@@ -21,7 +21,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     program = Program(args.project_path, MnplLevel.LINE)
-
+    #program.set_modifcation_points = []
     class MyTabuSearch(LocalSearch):
         def get_neighbour(self, patch):
             while True:
@@ -30,7 +30,7 @@ if __name__ == "__main__":
                     temp_patch.remove(random.randrange(0, len(temp_patch)))
                 else:
                     edit_operator = random.choice([LineDeletion, LineInsertion, LineReplacement])
-                    temp_patch.add(edit_operator.create(program))
+                    temp_patch.add(edit_operator.create(program, method="weighted"))
                 if not any(item == temp_patch for item in self.tabu):
                     self.tabu.append(temp_patch)
                     break

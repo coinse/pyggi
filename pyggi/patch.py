@@ -167,6 +167,7 @@ class Patch:
             atomics = list(filter(lambda a: a.modification_point[0] == target_file, self.get_atomics()))
             for atomic in atomics:
                 atomic.apply(self.program, new_contents, modification_points)
+        #self.program.reset_tmp_dir()
         for target_file in new_contents:
             with open(os.path.join(self.program.tmp_path, target_file), 'w') as tmp_file:
                 tmp_file.write(Program.to_source(self.program.manipulation_level, new_contents[target_file]))

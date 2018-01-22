@@ -83,6 +83,10 @@ class Program(object):
             return code
         return self.target_files
 
+    def reset_tmp_dir(self):
+        Program.clean_tmp_dir(self.tmp_path)
+        copy_tree(self.path, self.tmp_path)
+
     @property
     def tmp_path(self):
         """

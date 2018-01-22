@@ -3,12 +3,12 @@ from pyggi.atomic_operator import LineReplacement, LineInsertion
 from pyggi.edit import LineDeletion, LineMoving
 import copy, random
 
-def result_parser(result):
+def result_parser(stdout, stderr):
     import re
-    m = re.findall("runtime: ([0-9.]+)", result)
+    m = re.findall("runtime: ([0-9.]+)", stdout)
     if len(m) > 0:
         runtime = m[0]
-        failed = re.findall("([0-9]+) failed", result)
+        failed = re.findall("([0-9]+) failed", stdout)
         pass_all = len(failed) == 0
         return TestResult(True, {'runtime': runtime, 'pass_all': pass_all})
     else:

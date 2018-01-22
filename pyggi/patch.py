@@ -81,7 +81,7 @@ class Patch:
         :param float timeout: The time limit of test run (unit: seconds)
         :param result_parser: The parser of test output
           (default: :py:meth:`.TestResult.pyggi_result_parser`)
-        :type result_parser: None or callable((str), :py:class:`.TestResult`)
+        :type result_parser: None or callable((str, str), :py:class:`.TestResult`)
         :return: The parsed output of test script execution
         :rtype: :py:class:`.TestResult`
         """
@@ -98,9 +98,9 @@ class Patch:
             stderr=subprocess.PIPE)
         try:
             start = time.time()
-            stdout, _ = sprocess.communicate(timeout=timeout)
+            stdout, stderr = sprocess.communicate(timeout=timeout)
             elapsed_time = time.time() - start
-            self.test_result = result_parser(stdout.decode("ascii"))
+            self.test_result = result_parser(stdout.decode("ascii"), stderr.decode("ascii"))
             self.test_result.elapsed_time = elapsed_time
         except subprocess.TimeoutExpired:
             elapsed_time = timeout * 1000 # seconds to milliseconds

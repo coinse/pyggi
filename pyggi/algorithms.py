@@ -134,7 +134,7 @@ class LocalSearch(metaclass=ABCMeta):
         :param float timeout: The time limit of test run (unit: seconds)
         :param result_parser: The parser of test output
           (default: :py:meth:`.TestResult.pyggi_result_parser`)
-        :type result_parser: None or callable((str), :py:class:`.TestResult`)
+        :type result_parser: None or callable((str, str), :py:class:`.TestResult`)
         :return: The result of searching(Time, Success, FitnessEval, CompileFailed, BestPatch)
         :rtype: dict(int, dict(str, ))
         """

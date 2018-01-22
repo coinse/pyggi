@@ -166,10 +166,12 @@ class LineReplacement(AtomicOperator):
         :rtype: bool
         """
         assert self.is_valid_for(program)
+        l_f, l_n = self.line # line file and line number
         if self.ingredient:
-            new_contents[self.line[0]][modification_points[self.line[0]][self.line[1]]] == program.contents[self.ingredient[0]][self.ingredient[1]]
+            i_f, i_n = self.ingredient
+            new_contents[l_f][modification_points[l_f][l_n]] = program.contents[i_f][i_n]
         else:
-            new_contents[self.line[0]][modification_points[self.line[0]][self.line[1]]] = ''
+            new_contents[l_f][modification_points[l_f][l_n]] = ''
         return modification_points
 
     @classmethod
@@ -264,20 +266,22 @@ class LineInsertion(AtomicOperator):
         :rtype: bool
         """
         assert self.is_valid_for(program)
+        l_f, l_n = self.line
+        i_f, i_n = self.ingredient
         if self.direction == 'before':
-            new_contents[self.line[0]].insert(
-                modification_points[self.line[0]][self.line[1]],
-                program.contents[self.ingredient[0]][self.ingredient[1]]
+            new_contents[l_f].insert(
+                modification_points[l_f][l_n],
+                program.contents[i_f][i_n]
             )
-            for i in range(self.line[1], len(modification_points[self.line[0]])):
-                modification_points[self.line[0]][i] += 1
+            for i in range(l_n, len(modification_points[l_f])):
+                modification_points[l_f][i] += 1
         elif self.direction == 'after':
-            new_contents[self.line[0]].insert(
-                modification_points[self.line[0]][self.line[1]] + 1,
-                program.contents[self.ingredient[0]][self.ingredient[1]]
+            new_contents[l_f].insert(
+                modification_points[l_f][l_n] + 1,
+                program.contents[i_f][i_n]
             )
-            for i in range(self.line[1] + 1, len(modification_points[self.line[0]])):
-                modification_points[self.line[0]][i] += 1
+            for i in range(l_n + 1, len(modification_points[l_f])):
+                modification_points[l_f][i] += 1
         return True
 
     @classmethod

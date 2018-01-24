@@ -163,7 +163,7 @@ class Program(object):
             with open(os.path.join(self.tmp_path, target_file), 'w') as tmp_file:
                 tmp_file.write(Program.to_source(self.manipulation_level, new_contents[target_file]))
 
-    def print_modification_points(self, target_file):
+    def print_modification_points(self, target_file, indices=None):
         """
         Print the source of each modification points
 
@@ -173,18 +173,22 @@ class Program(object):
         :rtype: None
         """
         title_format = "=" * 25 + " {} {} " + "=" * 25
+        if not indices:
+            indices = range(len(self.modification_points[target_file]))
         if self.manipulation_level == MnplLevel.LINE:
-            for i, index in enumerate(self.modification_points[target_file]):
+            def print_modification_point(contents, modification_points, i):
                 print(title_format.format('line', i))
-                print(self.contents[target_file][index])
+                print(contents[modification_points[i]])
         elif self.manipulation_level == MnplLevel.AST:
             if Program.is_python_code(target_file):
-                import astor
-                from .helper import stmt_python
-                for i, pos in enumerate(self.modification_points[target_file]):
+                def print_modification_point(contents, modification_points, i):
+                    import astor
+                    from .helper import stmt_python
                     print(title_format.format('node', i))
-                    blk, idx = stmt_python.pos_2_block_n_index(self.contents[target_file], pos)
+                    blk, idx = stmt_python.pos_2_block_n_index(contents, modification_points[i])
                     print(astor.to_source(blk[idx]))
+        for i in indices:
+            print_modification_point(self.contents[target_file], self.modification_points[target_file], i)
 
     @classmethod
     def to_source(cls, manipulation_level, contents_of_file):

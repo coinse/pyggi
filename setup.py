@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 def readme():
     with open('README.md') as f:
@@ -15,7 +15,7 @@ setup(
     author='Coinse',
     author_email='',
     license='MIT',
-    packages=['pyggi'],
+    packages=find_packages(),
     install_requires=['argparse', 'astor'],
     dependency_links=[],
     zip_safe=False)

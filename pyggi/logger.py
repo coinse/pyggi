@@ -21,7 +21,7 @@ class Logger(object):
         # initialize
         self._logger = logging.getLogger(name)
         self._logger.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('[%(levelname)s]\t%(message)s')
+        formatter = logging.Formatter('%(asctime)s\t[%(levelname)s]\t%(message)s')
         # log directory
         if not os.path.exists(Logger.LOG_DIR):
             os.mkdir(Logger.LOG_DIR)

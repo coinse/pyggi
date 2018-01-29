@@ -9,7 +9,7 @@ import argparse
 from pyggi import Program, Patch, ParsingLevel, TestResult
 from pyggi.algorithms import LocalSearch
 from pyggi.atomic_operator import LineReplacement, LineInsertion
-from pyggi.edit import LineDeletion
+from pyggi.custom_operator import LineDeletion
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='PYGGI Improvment Example')

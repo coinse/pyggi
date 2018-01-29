@@ -1,6 +1,6 @@
 from pyggi import Program, Patch, ParsingLevel, TestResult
 from pyggi.atomic_operator import LineReplacement, LineInsertion
-from pyggi.edit import LineDeletion, LineMoving
+from pyggi.custom_operator import LineDeletion, LineMoving
 import copy, random
 
 def result_parser(stdout, stderr):

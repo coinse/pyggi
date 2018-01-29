@@ -23,7 +23,7 @@ class LocalSearch(metaclass=ABCMeta):
             from pyggi import Program, Patch, ParsingLevel
             from pyggi.algorithms import LocalSearch
             from pyggi.atomic_operator import LineReplacement, LineInsertion
-            from pyggi.edit import LineDeletion
+            from pyggi.custom_operator import LineDeletion
 
             program = Program("<PROGRAM_ROOT_PATH>", ParsingLevel.LINE)
 

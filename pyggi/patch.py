@@ -5,14 +5,14 @@ import os
 from copy import deepcopy
 from .program import Program, ParsingLevel
 from .atomic_operator import AtomicOperator
-from .edit import Edit
+from .custom_operator import CustomOperator
 from .test_result import TestResult
 
 
 class Patch:
     """
 
-    Patch is a sequence of edits such as deletion, copying, and replacement.
+    Patch is a sequence of edit operators: both atomic and custom.
     During search iteration, PYGGI modifies the source code of the target program
     by applying a candidate patch. Subsequently, it runs the test script to collect
     dynamic information, such as the execution time or any other user-provided
@@ -114,10 +114,10 @@ class Patch:
         Add an edit to the edit list
 
         :param edit: The edit to be added
-        :type edit: :py:class:`.atomic_operator.AtomicOperator` or :py:class:`.Edit`
+        :type edit: :py:class:`.atomic_operator.AtomicOperator` or :py:class:`.custom_operator.CustomOperator`
         :return: None
         """
-        assert isinstance(edit, (AtomicOperator, Edit))
+        assert isinstance(edit, (AtomicOperator, CustomOperator))
         assert edit.is_valid_for(self.program)
         self.edit_list.append(edit)
 
@@ -132,7 +132,7 @@ class Patch:
     def get_atomics(self, atomic_class_name=None):
         """
         Combine all the atomic operators of the edits.
-        An edit is originally a sequence of atomic operators,
+        A custom operator is originally a sequence of atomic operators,
         and a patch is a sequence of the edits.
         So this is a sort of flattening process.
 

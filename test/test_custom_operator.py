@@ -1,6 +1,6 @@
 import pytest
 from pyggi import Program, ParsingLevel
-from pyggi.edit import LineDeletion, LineMoving
+from pyggi.custom_operator import LineDeletion, LineMoving
 from pyggi.atomic_operator import LineReplacement, LineInsertion
 
 
@@ -20,7 +20,7 @@ def setup_moving():
     return LineMoving(ingredient, point, 'before'), ingredient, point
 
 
-class TestEdit(object):
+class TestCustomOperator(object):
 
     class TestLineDeletion(object):
 

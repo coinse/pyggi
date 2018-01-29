@@ -13,7 +13,7 @@ class AtomicOperator(metaclass=ABCMeta):
     """
     
     PYGGI-defined Atomic Operator:
-    User can generate the own edit operators
+    User can generate the own custom edit operators
     which can be converted into a list of atomic operators.
     For example, **MOVE x -> y** operator can be represented as
     **[LineReplacement(x, None),LineInsertion(x, y)]**

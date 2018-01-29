@@ -1,6 +1,6 @@
 import pytest
 from pyggi import Program, Patch, ParsingLevel
-from pyggi.edit import LineDeletion, LineMoving
+from pyggi.custom_operator import LineDeletion, LineMoving
 
 
 @pytest.fixture(scope='session')

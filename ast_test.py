@@ -1,6 +1,6 @@
 from pyggi import Program, Patch, ParsingLevel, TestResult
 from pyggi.atomic_operator import StmtReplacement, StmtInsertion
-from pyggi.edit import StmtDeletion, StmtMoving
+from pyggi.custom_operator import StmtDeletion, StmtMoving
 from pyggi.helper import stmt_python
 import ast
 import astor

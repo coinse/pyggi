@@ -1,19 +1,19 @@
 """
 
-This module contains Edit class which is an abstact base class,
-and several classes inherit the Edit class.
+This module contains CustomOperator class which is an abstact base class,
+and several classes inherit the CustomOperator class.
 The classes are provided as examples of custom edit operator.
 
 """
 from abc import ABCMeta, abstractmethod
 from .atomic_operator import AtomicOperator
 
-class Edit(metaclass=ABCMeta):
+class CustomOperator(metaclass=ABCMeta):
     """
-    Edit is an abstact class which is designed to be used
+    CustomOperator is an abstact class which is designed to be used
     as a basic structure of custom edit operators.
 
-    Every class that inherits Edit class must override the
+    Every class that inherits CustomOperator class must override the
     methods marked with ``@abstractmethod`` to create instances.
 
     * :py:meth:`__str__`
@@ -82,7 +82,7 @@ class Edit(metaclass=ABCMeta):
         """
         pass
 
-class LineDeletion(Edit):
+class LineDeletion(CustomOperator):
     """
     LineDeletion: Delete x
     
@@ -127,13 +127,13 @@ class LineDeletion(Edit):
     @classmethod
     def create(cls, program, line_file=None, method='random'):
         """
-        :param program: The program instance to which the random edit will be applied.
+        :param program: The program instance to which the random custom operator will be applied.
         :type program: :py:class:`.Program`
         :param str line_file: Line is the target line to delete.
           If line_file is specified, the target line will be chosen within the file.
         :param str method: The way of choosing the modification point. **'random'** or **'weighted'**
         :return: The LineDeletion instance with the randomly-selected line index.
-        :rtype: :py:class:`.edit.LineDeletion`
+        :rtype: :py:class:`.custom_operator.LineDeletion`
         """
         import random
         line_file = line_file or random.choice(program.target_files)
@@ -143,7 +143,7 @@ class LineDeletion(Edit):
         )
         return cls(line)
 
-class LineMoving(Edit):
+class LineMoving(CustomOperator):
     """
     LineMoving: Move x [before|after] y
     """
@@ -206,14 +206,14 @@ class LineMoving(Edit):
     @classmethod
     def create(cls, program, line_file=None, ingr_file=None, direction='before', method='random'):
         """
-        :param program: The program instance to which the random edit will be applied.
+        :param program: The program instance to which the created custom operator will be applied.
         :type program: :py:class:`.Program`
         :param str line_file: Line means the modification point of the edit. If line_file is specified, the line will be chosen within the file.
         :param str ingr_file: Ingredient is the line to be moved.
           If ingr_file is specified, the ingredient line will be chosen within the file.
         :param str method: The way of choosing the modification point. **'random'** or **'weighted'**
         :return: The LineMoving instance with the randomly-selected line & ingr.
-        :rtype: :py:class:`.edit.LineMoving`
+        :rtype: :py:class:`.custom_operator.LineMoving`
         """
         import random
         line_file = line_file or random.choice(program.target_files)
@@ -228,7 +228,7 @@ class LineMoving(Edit):
         )
         return cls(ingredient, line, direction)
 
-class StmtDeletion(Edit):
+class StmtDeletion(CustomOperator):
     """
     StmtDeletion: Delete x (Actually, Replace x with an empty statement)
     """
@@ -271,13 +271,13 @@ class StmtDeletion(Edit):
     @classmethod
     def create(cls, program, stmt_file=None, method='random'):
         """
-        :param program: The program instance to which the random edit will be applied.
+        :param program: The program instance to which the created custom operator will be applied.
         :type program: :py:class:`.Program`
         :param str stmt_file: stmt is the target statement to delete.
           If stmt_file is specified, the target statement will be chosen within that file.
         :param str method: The way of choosing the modification point. **'random'** or **'weighted'**
         :return: The StmtDeletion instance with the randomly-selected modification point.
-        :rtype: :py:class:`.edit.StmtDeletion`
+        :rtype: :py:class:`.custom_operator.StmtDeletion`
         """
         import random
         stmt_file = stmt_file or random.choice(program.target_files)
@@ -287,7 +287,7 @@ class StmtDeletion(Edit):
         )
         return cls(stmt)
 
-class StmtMoving(Edit):
+class StmtMoving(CustomOperator):
     """
     StmtMoving: Move x [before|after] y
     """
@@ -350,7 +350,7 @@ class StmtMoving(Edit):
     @classmethod
     def create(cls, program, stmt_file=None, ingr_file=None, direction='before', method='random'):
         """
-        :param program: The program instance to which the random edit will be applied.
+        :param program: The program instance to which the created custom operator will be applied.
         :type program: :py:class:`.Program`
         :param str stmt_file: stmt means the modification point of the edit.
           If stmt_file is specified, the statement will be chosen within that file.
@@ -358,7 +358,7 @@ class StmtMoving(Edit):
           If ingr_file is specified, the ingredient statement will be chosen within that file.
         :param str method: The way of choosing the modification point. **'random'** or **'weighted'**
         :return: The StmtMoving instance with the randomly-selected stmt & ingr.
-        :rtype: :py:class:`.edit.StmtMoving`
+        :rtype: :py:class:`.custom_operator.StmtMoving`
         """
         import random
         stmt_file = stmt_file or random.choice(program.target_files)

@@ -92,8 +92,8 @@ class LineDeletion(Edit):
         return "Delete {}".format(self.x)
 
     def is_valid_for(self, program):
-        from .program import MnplLevel
-        if program.manipulation_level == MnplLevel.LINE:
+        from .program import ParsingLevel
+        if program.parsing_level == ParsingLevel.LINE:
             return True
         return False
 
@@ -151,8 +151,8 @@ class LineMoving(Edit):
         return "Move {} {} {}".format(self.x, self.direction, self.y)
 
     def is_valid_for(self, program):
-        from .program import MnplLevel
-        if program.manipulation_level == MnplLevel.LINE:
+        from .program import ParsingLevel
+        if program.parsing_level == ParsingLevel.LINE:
             return True
         return False
 
@@ -236,8 +236,8 @@ class StmtDeletion(Edit):
         return "Delete {}".format(self.x)
 
     def is_valid_for(self, program):
-        from .program import MnplLevel
-        if program.manipulation_level == MnplLevel.AST:
+        from .program import ParsingLevel
+        if program.parsing_level == ParsingLevel.AST:
             return True
         return False
 
@@ -295,8 +295,8 @@ class StmtMoving(Edit):
         return "Move {} {} {}".format(self.x, self.direction, self.y)
 
     def is_valid_for(self, program):
-        from .program import MnplLevel
-        if program.manipulation_level == MnplLevel.AST:
+        from .program import ParsingLevel
+        if program.parsing_level == ParsingLevel.AST:
             return True
         return False
 

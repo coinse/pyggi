@@ -1,4 +1,4 @@
-from pyggi import Program, Patch, MnplLevel, TestResult
+from pyggi import Program, Patch, ParsingLevel, TestResult
 from pyggi.atomic_operator import LineReplacement, LineInsertion
 from pyggi.edit import LineDeletion, LineMoving
 import copy, random
@@ -15,7 +15,7 @@ def result_parser(stdout, stderr):
         return TestResult(False, None)
 
 triangle = Program(
-    "sample/Triangle_bug_python", manipulation_level=MnplLevel.LINE)
+    "sample/Triangle_bug_python", parsing_level=ParsingLevel.LINE)
 # triangle.print_modification_points('triangle.py')
 
 # See sample/Triangle_bug_python/get_spectrum.py

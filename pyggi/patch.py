@@ -3,7 +3,7 @@ This module contains Patch class.
 """
 import os
 from copy import deepcopy
-from .program import Program, MnplLevel
+from .program import Program, ParsingLevel
 from .atomic_operator import AtomicOperator
 from .edit import Edit
 from .test_result import TestResult
@@ -159,7 +159,7 @@ class Patch:
             - key: The target file name(path) related to the program root path
             - value: The contents of the file
         """
-        assert isinstance(self.program.manipulation_level, MnplLevel)
+        assert isinstance(self.program.parsing_level, ParsingLevel)
         target_files = self.program.contents.keys()
         modification_points = deepcopy(self.program.modification_points)
         new_contents = deepcopy(self.program.contents)
@@ -170,5 +170,5 @@ class Patch:
         #self.program.reset_tmp_dir()
         for target_file in new_contents:
             with open(os.path.join(self.program.tmp_path, target_file), 'w') as tmp_file:
-                tmp_file.write(Program.to_source(self.program.manipulation_level, new_contents[target_file]))
+                tmp_file.write(Program.to_source(self.program.parsing_level, new_contents[target_file]))
         return new_contents

@@ -148,8 +148,8 @@ class LineReplacement(AtomicOperator):
         return self.line
 
     def is_valid_for(self, program):
-        from .program import MnplLevel
-        if program.manipulation_level == MnplLevel.LINE:
+        from .program import ParsingLevel
+        if program.parsing_level == ParsingLevel.LINE:
             return True
         return False
 
@@ -248,8 +248,8 @@ class LineInsertion(AtomicOperator):
         return self.line
     
     def is_valid_for(self, program):
-        from .program import MnplLevel
-        if program.manipulation_level == MnplLevel.LINE:
+        from .program import ParsingLevel
+        if program.parsing_level == ParsingLevel.LINE:
             return True
         return False
 
@@ -343,8 +343,8 @@ class StmtReplacement(AtomicOperator):
         return self.stmt
 
     def is_valid_for(self, program):
-        from .program import MnplLevel
-        if program.manipulation_level == MnplLevel.AST:
+        from .program import ParsingLevel
+        if program.parsing_level == ParsingLevel.AST:
             return True
         return False
 
@@ -436,8 +436,8 @@ class StmtInsertion(AtomicOperator):
         return self.stmt
 
     def is_valid_for(self, program):
-        from .program import MnplLevel
-        if program.manipulation_level == MnplLevel.AST:
+        from .program import ParsingLevel
+        if program.parsing_level == ParsingLevel.AST:
             return True
         return False
 

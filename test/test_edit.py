@@ -1,5 +1,5 @@
 import pytest
-from pyggi import Program, MnplLevel
+from pyggi import Program, ParsingLevel
 from pyggi.edit import LineDeletion, LineMoving
 from pyggi.atomic_operator import LineReplacement, LineInsertion
 
@@ -42,7 +42,7 @@ class TestEdit(object):
 
         def test_create(self):
             program = Program('./resource/Triangle_bug',
-                              MnplLevel.LINE)
+                              ParsingLevel.LINE)
             random_line_deletion = LineDeletion.create(program)
 
             assert random_line_deletion.x is not None
@@ -74,7 +74,7 @@ class TestEdit(object):
 
         def test_create(self):
             program = Program('./resource/Triangle_bug',
-                              MnplLevel.LINE)
+                              ParsingLevel.LINE)
             random_line_moving = LineMoving.create(program)
 
             assert random_line_moving.x is not None

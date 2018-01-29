@@ -20,12 +20,12 @@ class LocalSearch(metaclass=ABCMeta):
     .. hint::
         Example of LocalSearch class. ::
 
-            from pyggi import Program, Patch, MnplLevel
+            from pyggi import Program, Patch, ParsingLevel
             from pyggi.algorithms import LocalSearch
             from pyggi.atomic_operator import LineReplacement, LineInsertion
             from pyggi.edit import LineDeletion
 
-            program = Program("<PROGRAM_ROOT_PATH>", MnplLevel.LINE)
+            program = Program("<PROGRAM_ROOT_PATH>", ParsingLevel.LINE)
 
             class MyLocalSearch(LocalSearch):
                 def get_neighbour(self, patch):

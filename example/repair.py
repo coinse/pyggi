@@ -6,7 +6,7 @@ Automated program repair ::
 import sys
 import random
 import argparse
-from pyggi import Program, Patch, MnplLevel
+from pyggi import Program, Patch, ParsingLevel
 from pyggi.algorithms import LocalSearch
 from pyggi.atomic_operator import LineReplacement, LineInsertion
 from pyggi.edit import LineDeletion
@@ -20,7 +20,7 @@ if __name__ == "__main__":
         help='total iterations per epoch(default: 10000)')
     args = parser.parse_args()
     
-    program = Program(args.project_path, MnplLevel.LINE)
+    program = Program(args.project_path, ParsingLevel.LINE)
     #program.set_modifcation_points = []
     class MyTabuSearch(LocalSearch):
         def get_neighbour(self, patch):

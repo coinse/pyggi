@@ -1,6 +1,6 @@
 """
 
-This module contains ParsingLevel and Program class.
+This module contains GranularityLevel and Program class.
 
 """
 import os
@@ -11,10 +11,10 @@ from distutils.dir_util import copy_tree
 from .logger import Logger
 
 
-class ParsingLevel(Enum):
+class GranularityLevel(Enum):
     """
 
-    ParsingLevel represents the granularity levels of program.
+    GranularityLevel represents the granularity levels of program.
 
     """
     LINE = 'line'
@@ -31,9 +31,9 @@ class ParsingLevel(Enum):
         .. hint::
             There are some examples,
             ::
-                ParsingLevel.is_valid('line')
+                GranularityLevel.is_valid('line')
                 >> True
-                ParsingLevel.is_valid('random_text')
+                GranularityLevel.is_valid('random_text')
                 >> False
         """
         return any(value == item.value for item in cls)
@@ -53,27 +53,27 @@ class Program(object):
     CONFIG_FILE_NAME = 'PYGGI_CONFIG'
     TMP_DIR = "./pyggi_tmp/"
 
-    def __init__(self, path, parsing_level=ParsingLevel.LINE,
+    def __init__(self, path, granularity_level=GranularityLevel.LINE,
                  config_file_name=CONFIG_FILE_NAME):
-        assert isinstance(parsing_level, ParsingLevel)
+        assert isinstance(granularity_level, GranularityLevel)
         self.path = path.strip()
         if self.path.endswith('/'):
             self.path = self.path[:-1]
         self.name = os.path.basename(self.path)
         self.logger = Logger(self.name)
-        self.parsing_level = parsing_level
+        self.granularity_level = granularity_level
         with open(os.path.join(self.path, config_file_name)) as config_file:
             config = json.load(config_file)
             self.test_command = config['test_command']
             self.target_files = config['target_files']
         Program.clean_tmp_dir(self.tmp_path)
         copy_tree(self.path, self.tmp_path)
-        self.contents = Program.parse(self.parsing_level, self.path, self.target_files)
+        self.contents = Program.parse(self.granularity_level, self.path, self.target_files)
         self.modification_weights = dict()
         self._modification_points = None
 
     def __str__(self):
-        if self.parsing_level == ParsingLevel.LINE:
+        if self.granularity_level == GranularityLevel.LINE:
             code = ''
             for k in sorted(self.contents.keys()):
                 idx = 0
@@ -101,16 +101,16 @@ class Program(object):
         :return: The list of position of modification points for each target program
         :rtype: dict(str, ?)
         """
-        assert isinstance(self.parsing_level, ParsingLevel)
+        assert isinstance(self.granularity_level, GranularityLevel)
 
         if self._modification_points:
             return self._modification_points
 
         self._modification_points = dict()
-        if self.parsing_level == ParsingLevel.LINE:
+        if self.granularity_level == GranularityLevel.LINE:
             for target_file in self.target_files:
                 self._modification_points[target_file] = list(range(len(self.contents[target_file])))
-        elif self.parsing_level == ParsingLevel.AST:
+        elif self.granularity_level == GranularityLevel.AST:
             for target_file in self.target_files:
                 if Program.is_python_code(target_file):
                     from .helper import stmt_python
@@ -161,7 +161,7 @@ class Program(object):
         """
         for target_file in new_contents:
             with open(os.path.join(self.tmp_path, target_file), 'w') as tmp_file:
-                tmp_file.write(Program.to_source(self.parsing_level, new_contents[target_file]))
+                tmp_file.write(Program.to_source(self.granularity_level, new_contents[target_file]))
 
     def print_modification_points(self, target_file, indices=None):
         """
@@ -175,11 +175,11 @@ class Program(object):
         title_format = "=" * 25 + " {} {} " + "=" * 25
         if not indices:
             indices = range(len(self.modification_points[target_file]))
-        if self.parsing_level == ParsingLevel.LINE:
+        if self.granularity_level == GranularityLevel.LINE:
             def print_modification_point(contents, modification_points, i):
                 print(title_format.format('line', i))
                 print(contents[modification_points[i]])
-        elif self.parsing_level == ParsingLevel.AST:
+        elif self.granularity_level == GranularityLevel.AST:
             if Program.is_python_code(target_file):
                 def print_modification_point(contents, modification_points, i):
                     import astor
@@ -191,20 +191,20 @@ class Program(object):
             print_modification_point(self.contents[target_file], self.modification_points[target_file], i)
 
     @classmethod
-    def to_source(cls, parsing_level, contents_of_file):
+    def to_source(cls, granularity_level, contents_of_file):
         """
         Change contents of file to the source code
 
-        :param parsing_level: The parsing level of the program
-        :type parsing_level: :py:class:`ParsingLevel`
+        :param granularity_level: The parsing level of the program
+        :type granularity_level: :py:class:`GranularityLevel`
         :param contents_of_file: The contents of the file which is the parsed form of source code
         :type contents_of_file: ?
         :return: The source code
         :rtype: str
         """
-        if parsing_level == ParsingLevel.LINE:
+        if granularity_level == GranularityLevel.LINE:
             return '\n'.join(contents_of_file) + '\n'
-        elif parsing_level == ParsingLevel.AST:
+        elif granularity_level == GranularityLevel.AST:
             import astor
             return astor.to_source(contents_of_file)
         return ''
@@ -224,10 +224,10 @@ class Program(object):
         os.mkdir(tmp_path)
 
     @classmethod
-    def parse(cls, parsing_level, path, target_files):
+    def parse(cls, granularity_level, path, target_files):
         """
-        :param parsing_level: The granularity level of a program
-        :type parsing_level: :py:class:`.program.ParsingLevel`
+        :param granularity_level: The granularity level of a program
+        :type granularity_level: :py:class:`.program.GranularityLevel`
         :param str path: The project root path
         :param target_files: The paths to target files from the project root
         :type target_files: list(str)
@@ -239,15 +239,15 @@ class Program(object):
             - key: the file name
             - value: the contents of the file
         """
-        assert isinstance(parsing_level, ParsingLevel)
-        if parsing_level == ParsingLevel.LINE:
+        assert isinstance(granularity_level, GranularityLevel)
+        if granularity_level == GranularityLevel.LINE:
             contents = {}
             for target in target_files:
                 with open(os.path.join(path, target), 'r') as target_file:
                     contents[target] = list(
                         map(str.rstrip, target_file.readlines()))
             return contents
-        elif parsing_level == ParsingLevel.AST:
+        elif granularity_level == GranularityLevel.AST:
             import ast
             import astor
             contents = {}

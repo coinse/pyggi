@@ -92,8 +92,8 @@ class LineDeletion(CustomOperator):
         return "Delete {}".format(self.x)
 
     def is_valid_for(self, program):
-        from .program import ParsingLevel
-        if program.parsing_level == ParsingLevel.LINE:
+        from .program import GranularityLevel
+        if program.granularity_level == GranularityLevel.LINE:
             return True
         return False
 
@@ -151,8 +151,8 @@ class LineMoving(CustomOperator):
         return "Move {} {} {}".format(self.x, self.direction, self.y)
 
     def is_valid_for(self, program):
-        from .program import ParsingLevel
-        if program.parsing_level == ParsingLevel.LINE:
+        from .program import GranularityLevel
+        if program.granularity_level == GranularityLevel.LINE:
             return True
         return False
 
@@ -236,8 +236,8 @@ class StmtDeletion(CustomOperator):
         return "Delete {}".format(self.x)
 
     def is_valid_for(self, program):
-        from .program import ParsingLevel
-        if program.parsing_level == ParsingLevel.AST:
+        from .program import GranularityLevel
+        if program.granularity_level == GranularityLevel.AST:
             return True
         return False
 
@@ -295,8 +295,8 @@ class StmtMoving(CustomOperator):
         return "Move {} {} {}".format(self.x, self.direction, self.y)
 
     def is_valid_for(self, program):
-        from .program import ParsingLevel
-        if program.parsing_level == ParsingLevel.AST:
+        from .program import GranularityLevel
+        if program.granularity_level == GranularityLevel.AST:
             return True
         return False
 

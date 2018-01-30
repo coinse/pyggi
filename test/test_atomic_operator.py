@@ -1,5 +1,5 @@
 import pytest
-from pyggi import Program, ParsingLevel
+from pyggi import Program, GranularityLevel
 from pyggi.atomic_operator import LineReplacement, LineInsertion
 
 
@@ -33,7 +33,7 @@ class TestAtomicOperator(object):
 
         def test_create(self):
             program = Program('./resource/Triangle_bug',
-                              ParsingLevel.LINE)
+                              GranularityLevel.LINE)
             random_line_deletion_0 = LineReplacement.create(
                 program,
                 line_file='Triangle.java',
@@ -60,7 +60,7 @@ class TestAtomicOperator(object):
 
         def test_create(self):
             program = Program('./resource/Triangle_bug',
-                              ParsingLevel.LINE)
+                              GranularityLevel.LINE)
             random_line_insertion = LineInsertion.create(
                 program, line_file='Triangle.java', ingr_file='Triangle.java')
 

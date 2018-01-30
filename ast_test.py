@@ -1,4 +1,4 @@
-from pyggi import Program, Patch, ParsingLevel, TestResult
+from pyggi import Program, Patch, GranularityLevel, TestResult
 from pyggi.atomic_operator import StmtReplacement, StmtInsertion
 from pyggi.custom_operator import StmtDeletion, StmtMoving
 from pyggi.helper import stmt_python
@@ -21,7 +21,7 @@ def result_parser(stdout, stderr):
 
 # Create new Program instance for 'sample/Triangle_fast_python'
 triangle = Program(
-    "sample/Triangle_fast_python", parsing_level=ParsingLevel.AST)
+    "sample/Triangle_fast_python", granularity_level=GranularityLevel.AST)
 triangle.print_modification_points('triangle.py')
 
 # Set modification weights

@@ -21,7 +21,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     program = Program(args.project_path, GranularityLevel.LINE)
-    #program.set_modifcation_points = []
+    program.set_modification_weights('triangle.py', [1]*35)
     class MyTabuSearch(LocalSearch):
         def get_neighbour(self, patch):
             while True:

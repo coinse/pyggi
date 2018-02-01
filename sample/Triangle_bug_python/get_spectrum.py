@@ -2,7 +2,7 @@ import shlex, subprocess, math
 
 MEASURE = "coverage run triangle.py {} {} {}"
 REPORT = "coverage report -m"
-NUM_LINES = 31
+NUM_LINES = 35
 
 triangles = [
     (1, 2, 9), (1, 9, 2), (2, 1, 9), (2, 9, 1), (9, 1, 2),

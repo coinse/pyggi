@@ -20,7 +20,7 @@ def test_equalateral_triangles():
 
 
 def test_isoceles_triangles():
-    triangles = [(100, 90, 90), (90, 100, 90), (90, 90, 100), (2, 2, 3)]
+    triangles = [(100, 90, 90), (90, 100, 90), (90, 90, 100), (3, 3, 2), (3, 2, 3), (2, 3, 3)]
 
     check_classification(triangles, TriangleType.ISOCELES)
 

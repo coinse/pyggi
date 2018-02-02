@@ -139,9 +139,9 @@ class LineReplacement(AtomicOperator):
 
     def __str__(self):
         """
-        :return: ``Replace [line] with [ingredient]``
+        :return: ``LineReplacement([line], [ingredient])``
         """
-        return "Replace {} with {}".format(self.line, self.ingredient)
+        return "LineReplacement({}, {})".format(self.line, self.ingredient)
 
     @property
     def modification_point(self):
@@ -241,7 +241,7 @@ class LineInsertion(AtomicOperator):
         self.direction = direction
 
     def __str__(self):
-        return "Insert {} {} {}".format(self.ingredient, self.direction, self.line)
+        return "LineInsertion({}, {}, '{}')".format(self.line, self.ingredient, self.direction)
 
     @property
     def modification_point(self):
@@ -334,9 +334,9 @@ class StmtReplacement(AtomicOperator):
 
     def __str__(self):
         """
-        :return: ``Replace [stmt] with [ingredient]``
+        :return: ``StmtReplacement([stmt], [ingredient])``
         """
-        return "Replace {} with {}".format(self.stmt, self.ingredient)
+        return "StmtReplacement({}, {})".format(self.stmt, self.ingredient)
 
     @property
     def modification_point(self):
@@ -426,10 +426,9 @@ class StmtInsertion(AtomicOperator):
 
     def __str__(self):
         """
-        :return: ``Insert [ingredient] [direction] [stmt]``
+        :return: ``StmtInsertion([line], [ingredient], [direction])``
         """
-        return "Insert {} {} {}".format(self.ingredient, self.direction,
-            self.stmt)
+        return "StmtInsertion({}, {}, '{}')".format(self.stmt, self.ingredient, self.direction)
 
     @property
     def modification_point(self):

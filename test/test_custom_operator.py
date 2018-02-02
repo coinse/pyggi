@@ -17,7 +17,7 @@ def setup_moving():
     ingr_file = 'Triangle.java'
     point = (point_file, 1)
     ingredient = (ingr_file, 2)
-    return LineMoving(ingredient, point, 'before'), ingredient, point
+    return LineMoving(point, ingredient, 'before'), ingredient, point
 
 
 class TestCustomOperator(object):

@@ -38,11 +38,11 @@ class CustomOperator(metaclass=ABCMeta):
         :rtype: str
 
         .. note::
-            If the edit is ``LineMoving(('Triangle.java', 4), ('Triangle.java', 10))``
+            If the edit is ``LineMoving(('Triangle.java', 10), ('Triangle.java', 4))``
 
             returns::
 
-                1) Insert ('Triangle.java', 4) into ('Triangle.java', 10)
+                1) Insert ('Triangle.java', 4) before ('Triangle.java', 10)
                 2) Replace ('Triangle.java', 4) with None
         """
         return "\n".join(
@@ -89,7 +89,7 @@ class LineDeletion(CustomOperator):
     It replaces the code line with an empty line.
     """
     def __str__(self):
-        return "Delete {}".format(self.x)
+        return "LineDeletion({})".format(self.x)
 
     def is_valid_for(self, program):
         from .program import GranularityLevel
@@ -148,7 +148,7 @@ class LineMoving(CustomOperator):
     LineMoving: Move x [before|after] y
     """
     def __str__(self):
-        return "Move {} {} {}".format(self.x, self.direction, self.y)
+        return "LineMoving({}, {}, '{}')".format(self.y, self.x, self.direction)
 
     def is_valid_for(self, program):
         from .program import GranularityLevel
@@ -164,7 +164,7 @@ class LineMoving(CustomOperator):
         :return: The file path and the index of target line to be moved.
         :rtype: tuple(str, int)
         """
-        return self.args[0]
+        return self.args[1]
 
     @property
     def y(self):
@@ -174,7 +174,7 @@ class LineMoving(CustomOperator):
         :return: The file path and the index of the point to which line x is inserted.
         :rtype: tuple(str, int)
         """
-        return self.args[1]
+        return self.args[0]
 
     @property
     def direction(self):
@@ -233,7 +233,7 @@ class StmtDeletion(CustomOperator):
     StmtDeletion: Delete x (Actually, Replace x with an empty statement)
     """
     def __str__(self):
-        return "Delete {}".format(self.x)
+        return "StmtDeletion({})".format(self.x)
 
     def is_valid_for(self, program):
         from .program import GranularityLevel
@@ -292,7 +292,7 @@ class StmtMoving(CustomOperator):
     StmtMoving: Move x [before|after] y
     """
     def __str__(self):
-        return "Move {} {} {}".format(self.x, self.direction, self.y)
+        return "StmtMoving({}, {}, '{}')".format(self.y, self.x, self.direction)
 
     def is_valid_for(self, program):
         from .program import GranularityLevel
@@ -308,7 +308,7 @@ class StmtMoving(CustomOperator):
         :return: The file path and the index of ingredient statement to be moved.
         :rtype: tuple(str, int)
         """
-        return self.args[0]
+        return self.args[1]
 
     @property
     def y(self):
@@ -318,7 +318,7 @@ class StmtMoving(CustomOperator):
         :return: The file path and the index of modification point.
         :rtype: tuple(str, int)
         """
-        return self.args[1]
+        return self.args[0]
 
     @property
     def direction(self):

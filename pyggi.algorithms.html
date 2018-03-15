@@ -92,7 +92,7 @@
             
             
               <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="pyggi.html">PYGGI package</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="pyggi.html">pyggi package</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="pyggi.html#submodules">Submodules</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">pyggi.algorithms module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pyggi.atomic_operator.html">pyggi.atomic_operator module</a></li>
@@ -188,12 +188,12 @@
 <div class="admonition hint">
 <p class="first admonition-title">Hint</p>
 <p>Example of LocalSearch class.</p>
-<div class="last highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyggi</span> <span class="k">import</span> <span class="n">Program</span><span class="p">,</span> <span class="n">Patch</span><span class="p">,</span> <span class="n">MnplLevel</span>
+<div class="last highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyggi</span> <span class="k">import</span> <span class="n">Program</span><span class="p">,</span> <span class="n">Patch</span><span class="p">,</span> <span class="n">GranularityLevel</span>
 <span class="kn">from</span> <span class="nn">pyggi.algorithms</span> <span class="k">import</span> <span class="n">LocalSearch</span>
 <span class="kn">from</span> <span class="nn">pyggi.atomic_operator</span> <span class="k">import</span> <span class="n">LineReplacement</span><span class="p">,</span> <span class="n">LineInsertion</span>
-<span class="kn">from</span> <span class="nn">pyggi.edit</span> <span class="k">import</span> <span class="n">LineDeletion</span>
+<span class="kn">from</span> <span class="nn">pyggi.custom_operator</span> <span class="k">import</span> <span class="n">LineDeletion</span>
 
-<span class="n">program</span> <span class="o">=</span> <span class="n">Program</span><span class="p">(</span><span class="s2">&quot;&lt;PROGRAM_ROOT_PATH&gt;&quot;</span><span class="p">,</span> <span class="n">MnplLevel</span><span class="o">.</span><span class="n">PHYSICAL_LINE</span><span class="p">)</span>
+<span class="n">program</span> <span class="o">=</span> <span class="n">Program</span><span class="p">(</span><span class="s2">&quot;&lt;PROGRAM_ROOT_PATH&gt;&quot;</span><span class="p">,</span> <span class="n">GranularityLevel</span><span class="o">.</span><span class="n">LINE</span><span class="p">)</span>
 
 <span class="k">class</span> <span class="nc">MyLocalSearch</span><span class="p">(</span><span class="n">LocalSearch</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">get_neighbour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">patch</span><span class="p">):</span>
@@ -202,7 +202,7 @@
             <span class="n">patch</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">patch</span><span class="p">)))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">edit_operator</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="n">LineDeletion</span><span class="p">,</span> <span class="n">LineInsertion</span><span class="p">,</span> <span class="n">LineReplacement</span><span class="p">])</span>
-            <span class="n">patch</span><span class="o">.</span><span class="n">add_edit</span><span class="p">(</span><span class="n">edit_operator</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">program</span><span class="p">))</span>
+            <span class="n">patch</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">edit_operator</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">program</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">patch</span>
 
     <span class="k">def</span> <span class="nf">get_fitness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">patch</span><span class="p">):</span>
@@ -263,7 +263,7 @@ simply call <code class="docutils literal"><span class="pre">super()</span></cod
 <div class="admonition hint">
 <p class="first admonition-title">Hint</p>
 <p>An example:</p>
-<div class="last highlight-default"><div class="highlight"><pre><span></span><span class="k">return</span> <span class="n">patch</span><span class="o">.</span><span class="n">add_edit</span><span class="p">(</span><span class="n">LineDeletion</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">program</span><span class="p">))</span>
+<div class="last highlight-default"><div class="highlight"><pre><span></span><span class="k">return</span> <span class="n">patch</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">LineDeletion</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">program</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -330,7 +330,7 @@ fitness values of original program.</li>
 <li><strong>epoch</strong> (<em>int</em>) – The total epoch</li>
 <li><strong>max_iter</strong> (<em>int</em>) – The maximum iterations per epoch</li>
 <li><strong>timeout</strong> (<em>float</em>) – The time limit of test run (unit: seconds)</li>
-<li><strong>result_parser</strong> (None or callable((str), <a class="reference internal" href="pyggi.test_result.html#pyggi.test_result.TestResult" title="pyggi.test_result.TestResult"><code class="xref py py-class docutils literal"><span class="pre">TestResult</span></code></a>)) – The parser of test output
+<li><strong>result_parser</strong> (None or callable((str, str), <a class="reference internal" href="pyggi.test_result.html#pyggi.test_result.TestResult" title="pyggi.test_result.TestResult"><code class="xref py py-class docutils literal"><span class="pre">TestResult</span></code></a>)) – The parser of test output
 (default: <a class="reference internal" href="pyggi.test_result.html#pyggi.test_result.TestResult.pyggi_result_parser" title="pyggi.test_result.TestResult.pyggi_result_parser"><code class="xref py py-meth docutils literal"><span class="pre">TestResult.pyggi_result_parser()</span></code></a>)</li>
 </ul>
 </td>

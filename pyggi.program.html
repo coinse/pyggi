@@ -92,7 +92,7 @@
             
             
               <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="pyggi.html">PYGGI package</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="pyggi.html">pyggi package</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="pyggi.html#submodules">Submodules</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="pyggi.algorithms.html">pyggi.algorithms module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pyggi.atomic_operator.html">pyggi.atomic_operator module</a></li>
@@ -174,20 +174,25 @@
             
   <div class="section" id="module-pyggi.program">
 <span id="pyggi-program-module"></span><h1>pyggi.program module<a class="headerlink" href="#module-pyggi.program" title="Permalink to this headline">¶</a></h1>
-<p>This module contains MnplLevel and Program class.</p>
+<p>This module contains GranularityLevel and Program class.</p>
 <dl class="class">
-<dt id="pyggi.program.MnplLevel">
-<em class="property">class </em><code class="descclassname">pyggi.program.</code><code class="descname">MnplLevel</code><a class="reference internal" href="_modules/pyggi/program.html#MnplLevel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyggi.program.MnplLevel" title="Permalink to this definition">¶</a></dt>
+<dt id="pyggi.program.GranularityLevel">
+<em class="property">class </em><code class="descclassname">pyggi.program.</code><code class="descname">GranularityLevel</code><a class="reference internal" href="_modules/pyggi/program.html#GranularityLevel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyggi.program.GranularityLevel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">enum.Enum</span></code></p>
-<p>MnplLevel represents the granularity levels of program.</p>
+<p>GranularityLevel represents the granularity levels of program.</p>
 <dl class="attribute">
-<dt id="pyggi.program.MnplLevel.PHYSICAL_LINE">
-<code class="descname">PHYSICAL_LINE</code><em class="property"> = 'physical_line'</em><a class="headerlink" href="#pyggi.program.MnplLevel.PHYSICAL_LINE" title="Permalink to this definition">¶</a></dt>
+<dt id="pyggi.program.GranularityLevel.AST">
+<code class="descname">AST</code><em class="property"> = 'AST'</em><a class="headerlink" href="#pyggi.program.GranularityLevel.AST" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pyggi.program.GranularityLevel.LINE">
+<code class="descname">LINE</code><em class="property"> = 'line'</em><a class="headerlink" href="#pyggi.program.GranularityLevel.LINE" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="classmethod">
-<dt id="pyggi.program.MnplLevel.is_valid">
-<em class="property">classmethod </em><code class="descname">is_valid</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyggi/program.html#MnplLevel.is_valid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyggi.program.MnplLevel.is_valid" title="Permalink to this definition">¶</a></dt>
+<dt id="pyggi.program.GranularityLevel.is_valid">
+<em class="property">classmethod </em><code class="descname">is_valid</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyggi/program.html#GranularityLevel.is_valid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyggi.program.GranularityLevel.is_valid" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -203,9 +208,9 @@
 <div class="admonition hint">
 <p class="first admonition-title">Hint</p>
 <p>There are some examples,</p>
-<div class="last highlight-default"><div class="highlight"><pre><span></span><span class="n">MnplLevel</span><span class="o">.</span><span class="n">is_valid</span><span class="p">(</span><span class="s1">&#39;physical_line&#39;</span><span class="p">)</span>
+<div class="last highlight-default"><div class="highlight"><pre><span></span><span class="n">GranularityLevel</span><span class="o">.</span><span class="n">is_valid</span><span class="p">(</span><span class="s1">&#39;line&#39;</span><span class="p">)</span>
 <span class="o">&gt;&gt;</span> <span class="kc">True</span>
-<span class="n">MnplLevel</span><span class="o">.</span><span class="n">is_valid</span><span class="p">(</span><span class="s1">&#39;random_text&#39;</span><span class="p">)</span>
+<span class="n">GranularityLevel</span><span class="o">.</span><span class="n">is_valid</span><span class="p">(</span><span class="s1">&#39;random_text&#39;</span><span class="p">)</span>
 <span class="o">&gt;&gt;</span> <span class="kc">False</span>
 </pre></div>
 </div>
@@ -216,7 +221,7 @@
 
 <dl class="class">
 <dt id="pyggi.program.Program">
-<em class="property">class </em><code class="descclassname">pyggi.program.</code><code class="descname">Program</code><span class="sig-paren">(</span><em>path</em>, <em>manipulation_level=&lt;MnplLevel.PHYSICAL_LINE: 'physical_line'&gt;</em>, <em>config_file_name='PYGGI_CONFIG'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyggi/program.html#Program"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyggi.program.Program" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pyggi.program.</code><code class="descname">Program</code><span class="sig-paren">(</span><em>path</em>, <em>granularity_level=&lt;GranularityLevel.LINE: 'line'&gt;</em>, <em>config_file_name='PYGGI_CONFIG'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyggi/program.html#Program"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyggi.program.Program" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Program encapsulates the original source code.
 Currently, PYGGI stores the source code as a list of code lines,
@@ -250,21 +255,110 @@ this class needs to process and store the source code accordingly
 </table>
 </dd></dl>
 
-<dl class="classmethod">
-<dt id="pyggi.program.Program.parse">
-<em class="property">classmethod </em><code class="descname">parse</code><span class="sig-paren">(</span><em>manipulation_level</em>, <em>path</em>, <em>target_files</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyggi/program.html#Program.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyggi.program.Program.parse" title="Permalink to this definition">¶</a></dt>
+<dl class="staticmethod">
+<dt id="pyggi.program.Program.get_file_extension">
+<em class="property">static </em><code class="descname">get_file_extension</code><span class="sig-paren">(</span><em>file_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyggi/program.html#Program.get_file_extension"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyggi.program.Program.get_file_extension" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>file_path</strong> (<em>str</em>) – The path of file</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">file extension</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="pyggi.program.Program.have_the_same_file_extension">
+<em class="property">static </em><code class="descname">have_the_same_file_extension</code><span class="sig-paren">(</span><em>file_path_1</em>, <em>file_path_2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyggi/program.html#Program.have_the_same_file_extension"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyggi.program.Program.have_the_same_file_extension" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>manipulation_level</strong> (<a class="reference internal" href="#pyggi.program.MnplLevel" title="pyggi.program.MnplLevel"><code class="xref py py-class docutils literal"><span class="pre">program.MnplLevel</span></code></a>) – The granularity level</li>
-<li><strong>path</strong> (<em>str</em>) – The project root path</li>
-<li><strong>target_files</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – The relative paths of target files within the project root</li>
+<li><strong>file_path_1</strong> (<em>str</em>) – The path of file 1</li>
+<li><strong>file_path_2</strong> (<em>str</em>) – The path of file 2</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the contents of the files, see <cite>Hint</cite></p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">same or not</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="pyggi.program.Program.is_java_code">
+<em class="property">static </em><code class="descname">is_java_code</code><span class="sig-paren">(</span><em>source_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyggi/program.html#Program.is_java_code"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyggi.program.Program.is_java_code" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>source_path</strong> (<em>str</em>) – The path of the source file</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">whether the file’s extention is <em>.java</em> or not</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="pyggi.program.Program.is_python_code">
+<em class="property">static </em><code class="descname">is_python_code</code><span class="sig-paren">(</span><em>source_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyggi/program.html#Program.is_python_code"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyggi.program.Program.is_python_code" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>source_path</strong> (<em>str</em>) – The path of the source file</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">whether the file’s extention is <em>.py</em> or not</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyggi.program.Program.modification_points">
+<code class="descname">modification_points</code><a class="headerlink" href="#pyggi.program.Program.modification_points" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The list of position of modification points for each target program</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">dict(str, ?)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="pyggi.program.Program.parse">
+<em class="property">classmethod </em><code class="descname">parse</code><span class="sig-paren">(</span><em>granularity_level</em>, <em>path</em>, <em>target_files</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyggi/program.html#Program.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyggi.program.Program.parse" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>granularity_level</strong> (<a class="reference internal" href="#pyggi.program.GranularityLevel" title="pyggi.program.GranularityLevel"><code class="xref py py-class docutils literal"><span class="pre">program.GranularityLevel</span></code></a>) – The granularity level of a program</li>
+<li><strong>path</strong> (<em>str</em>) – The project root path</li>
+<li><strong>target_files</strong> (<em>list</em><em>(</em><em>str</em><em>)</em>) – The paths to target files from the project root</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The contents of the files, see <cite>Hint</cite></p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict(str, list(str))</p>
@@ -281,6 +375,75 @@ this class needs to process and store the source code accordingly
 </div>
 </dd></dl>
 
+<dl class="method">
+<dt id="pyggi.program.Program.print_modification_points">
+<code class="descname">print_modification_points</code><span class="sig-paren">(</span><em>target_file</em>, <em>indices=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyggi/program.html#Program.print_modification_points"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyggi.program.Program.print_modification_points" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the source of each modification points</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>target_file</strong> (<em>str</em>) – The path to target file</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyggi.program.Program.reset_tmp_dir">
+<code class="descname">reset_tmp_dir</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyggi/program.html#Program.reset_tmp_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyggi.program.Program.reset_tmp_dir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyggi.program.Program.select_modification_point">
+<code class="descname">select_modification_point</code><span class="sig-paren">(</span><em>target_file</em>, <em>method='random'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyggi/program.html#Program.select_modification_point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyggi.program.Program.select_modification_point" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>target_file</strong> (<em>str</em>) – The modification point is chosen within target_file</li>
+<li><strong>method</strong> (<em>str</em>) – The way how to choose a modification point, <em>‘random’</em> or <em>‘weighted’</em></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The <strong>index</strong> of modification point</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyggi.program.Program.set_modification_weights">
+<code class="descname">set_modification_weights</code><span class="sig-paren">(</span><em>target_file</em>, <em>weights</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyggi/program.html#Program.set_modification_weights"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyggi.program.Program.set_modification_weights" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>target_file</strong> (<em>str</em>) – The path to file</li>
+<li><strong>weights</strong> (<em>list</em><em>(</em><em>float</em><em>)</em>) – The modification weight([0,1]) of each modification points</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">None</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="pyggi.program.Program.tmp_path">
 <code class="descname">tmp_path</code><a class="headerlink" href="#pyggi.program.Program.tmp_path" title="Permalink to this definition">¶</a></dt>
@@ -291,6 +454,47 @@ this class needs to process and store the source code accordingly
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The path of the temporary dirctory</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="pyggi.program.Program.to_source">
+<em class="property">classmethod </em><code class="descname">to_source</code><span class="sig-paren">(</span><em>granularity_level</em>, <em>contents_of_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyggi/program.html#Program.to_source"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyggi.program.Program.to_source" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change contents of file to the source code</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>granularity_level</strong> (<a class="reference internal" href="#pyggi.program.GranularityLevel" title="pyggi.program.GranularityLevel"><code class="xref py py-class docutils literal"><span class="pre">GranularityLevel</span></code></a>) – The parsing level of the program</li>
+<li><strong>contents_of_file</strong> – The contents of the file which is the parsed form of source code</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The source code</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">str</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyggi.program.Program.write_to_tmp_dir">
+<code class="descname">write_to_tmp_dir</code><span class="sig-paren">(</span><em>new_contents</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyggi/program.html#Program.write_to_tmp_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyggi.program.Program.write_to_tmp_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write new contents to the temporary directory of program</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>new_contents</strong> (<em>dict</em><em>(</em><em>str</em><em>, </em><em>?</em><em>)</em>) – The new contents of the program.
+Refer to <em>apply</em> method of <a class="reference internal" href="pyggi.patch.html#pyggi.patch.Patch" title="pyggi.patch.Patch"><code class="xref py py-class docutils literal"><span class="pre">patch.Patch</span></code></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">None</td>
 </tr>
 </tbody>
 </table>

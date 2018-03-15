@@ -180,12 +180,12 @@
 <span class="sd">    .. hint::</span>
 <span class="sd">        Example of LocalSearch class. ::</span>
 
-<span class="sd">            from pyggi import Program, Patch, MnplLevel</span>
+<span class="sd">            from pyggi import Program, Patch, GranularityLevel</span>
 <span class="sd">            from pyggi.algorithms import LocalSearch</span>
 <span class="sd">            from pyggi.atomic_operator import LineReplacement, LineInsertion</span>
-<span class="sd">            from pyggi.edit import LineDeletion</span>
+<span class="sd">            from pyggi.custom_operator import LineDeletion</span>
 
-<span class="sd">            program = Program(&quot;&lt;PROGRAM_ROOT_PATH&gt;&quot;, MnplLevel.PHYSICAL_LINE)</span>
+<span class="sd">            program = Program(&quot;&lt;PROGRAM_ROOT_PATH&gt;&quot;, GranularityLevel.LINE)</span>
 
 <span class="sd">            class MyLocalSearch(LocalSearch):</span>
 <span class="sd">                def get_neighbour(self, patch):</span>
@@ -194,7 +194,7 @@
 <span class="sd">                        patch.remove(random.randrange(0, len(patch)))</span>
 <span class="sd">                    else:</span>
 <span class="sd">                        edit_operator = random.choice([LineDeletion, LineInsertion, LineReplacement])</span>
-<span class="sd">                        patch.add_edit(edit_operator.random(program))</span>
+<span class="sd">                        patch.add(edit_operator.random(program))</span>
 <span class="sd">                    return patch</span>
 
 <span class="sd">                def get_fitness(self, patch):</span>
@@ -258,7 +258,7 @@
 <span class="sd">        .. hint::</span>
 <span class="sd">            An example::</span>
 
-<span class="sd">                return patch.add_edit(LineDeletion.random(program))</span>
+<span class="sd">                return patch.add(LineDeletion.random(program))</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
@@ -294,7 +294,7 @@
 <span class="sd">        :param float timeout: The time limit of test run (unit: seconds)</span>
 <span class="sd">        :param result_parser: The parser of test output</span>
 <span class="sd">          (default: :py:meth:`.TestResult.pyggi_result_parser`)</span>
-<span class="sd">        :type result_parser: None or callable((str), :py:class:`.TestResult`)</span>
+<span class="sd">        :type result_parser: None or callable((str, str), :py:class:`.TestResult`)</span>
 <span class="sd">        :return: The result of searching(Time, Success, FitnessEval, CompileFailed, BestPatch)</span>
 <span class="sd">        :rtype: dict(int, dict(str, ))</span>
 <span class="sd">        &quot;&quot;&quot;</span>

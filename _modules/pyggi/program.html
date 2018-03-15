@@ -160,7 +160,7 @@
   <h1>Source code for pyggi.program</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 
-<span class="sd">This module contains MnplLevel and Program class.</span>
+<span class="sd">This module contains GranularityLevel and Program class.</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">os</span>
@@ -171,17 +171,17 @@
 <span class="kn">from</span> <span class="nn">.logger</span> <span class="k">import</span> <span class="n">Logger</span>
 
 
-<div class="viewcode-block" id="MnplLevel"><a class="viewcode-back" href="../../pyggi.program.html#pyggi.program.MnplLevel">[docs]</a><span class="k">class</span> <span class="nc">MnplLevel</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<div class="viewcode-block" id="GranularityLevel"><a class="viewcode-back" href="../../pyggi.program.html#pyggi.program.GranularityLevel">[docs]</a><span class="k">class</span> <span class="nc">GranularityLevel</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="sd">    MnplLevel represents the granularity levels of program.</span>
+<span class="sd">    GranularityLevel represents the granularity levels of program.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">PHYSICAL_LINE</span> <span class="o">=</span> <span class="s1">&#39;physical_line&#39;</span>
-    <span class="c1"># AST = &#39;ast&#39;</span>
+    <span class="n">LINE</span> <span class="o">=</span> <span class="s1">&#39;line&#39;</span>
+    <span class="n">AST</span> <span class="o">=</span> <span class="s1">&#39;AST&#39;</span>
 
-<div class="viewcode-block" id="MnplLevel.is_valid"><a class="viewcode-back" href="../../pyggi.program.html#pyggi.program.MnplLevel.is_valid">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">is_valid</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<div class="viewcode-block" id="GranularityLevel.is_valid"><a class="viewcode-back" href="../../pyggi.program.html#pyggi.program.GranularityLevel.is_valid">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">is_valid</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param value: The value of enum to check</span>
 
@@ -191,12 +191,12 @@
 <span class="sd">        .. hint::</span>
 <span class="sd">            There are some examples,</span>
 <span class="sd">            ::</span>
-<span class="sd">                MnplLevel.is_valid(&#39;physical_line&#39;)</span>
+<span class="sd">                GranularityLevel.is_valid(&#39;line&#39;)</span>
 <span class="sd">                &gt;&gt; True</span>
-<span class="sd">                MnplLevel.is_valid(&#39;random_text&#39;)</span>
+<span class="sd">                GranularityLevel.is_valid(&#39;random_text&#39;)</span>
 <span class="sd">                &gt;&gt; False</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">value</span> <span class="o">==</span> <span class="n">item</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">cls</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">value</span> <span class="o">==</span> <span class="n">item</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">cls</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="Program"><a class="viewcode-back" href="../../pyggi.program.html#pyggi.program.Program">[docs]</a><span class="k">class</span> <span class="nc">Program</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -213,25 +213,27 @@
     <span class="n">CONFIG_FILE_NAME</span> <span class="o">=</span> <span class="s1">&#39;PYGGI_CONFIG&#39;</span>
     <span class="n">TMP_DIR</span> <span class="o">=</span> <span class="s2">&quot;./pyggi_tmp/&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">manipulation_level</span><span class="o">=</span><span class="n">MnplLevel</span><span class="o">.</span><span class="n">PHYSICAL_LINE</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">granularity_level</span><span class="o">=</span><span class="n">GranularityLevel</span><span class="o">.</span><span class="n">LINE</span><span class="p">,</span>
                  <span class="n">config_file_name</span><span class="o">=</span><span class="n">CONFIG_FILE_NAME</span><span class="p">):</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">manipulation_level</span><span class="p">,</span> <span class="n">MnplLevel</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">granularity_level</span><span class="p">,</span> <span class="n">GranularityLevel</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">manipulation_level</span> <span class="o">=</span> <span class="n">manipulation_level</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">granularity_level</span> <span class="o">=</span> <span class="n">granularity_level</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">config_file_name</span><span class="p">))</span> <span class="k">as</span> <span class="n">config_file</span><span class="p">:</span>
             <span class="n">config</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">test_command</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;test_command&#39;</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">target_files</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s1">&#39;target_files&#39;</span><span class="p">]</span>
         <span class="n">Program</span><span class="o">.</span><span class="n">clean_tmp_dir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tmp_path</span><span class="p">)</span>
         <span class="n">copy_tree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tmp_path</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">contents</span> <span class="o">=</span> <span class="n">Program</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">manipulation_level</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_files</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">contents</span> <span class="o">=</span> <span class="n">Program</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">granularity_level</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_files</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modification_weights</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_modification_points</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">manipulation_level</span> <span class="o">==</span> <span class="n">MnplLevel</span><span class="o">.</span><span class="n">PHYSICAL_LINE</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">granularity_level</span> <span class="o">==</span> <span class="n">GranularityLevel</span><span class="o">.</span><span class="n">LINE</span><span class="p">:</span>
             <span class="n">code</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
             <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">contents</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
                 <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
@@ -241,6 +243,10 @@
             <span class="k">return</span> <span class="n">code</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_files</span>
 
+<div class="viewcode-block" id="Program.reset_tmp_dir"><a class="viewcode-back" href="../../pyggi.program.html#pyggi.program.Program.reset_tmp_dir">[docs]</a>    <span class="k">def</span> <span class="nf">reset_tmp_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">Program</span><span class="o">.</span><span class="n">clean_tmp_dir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tmp_path</span><span class="p">)</span>
+        <span class="n">copy_tree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tmp_path</span><span class="p">)</span></div>
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">tmp_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -249,8 +255,122 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">Program</span><span class="o">.</span><span class="n">TMP_DIR</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">modification_points</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: The list of position of modification points for each target program</span>
+<span class="sd">        :rtype: dict(str, ?)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">granularity_level</span><span class="p">,</span> <span class="n">GranularityLevel</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modification_points</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modification_points</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_modification_points</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">granularity_level</span> <span class="o">==</span> <span class="n">GranularityLevel</span><span class="o">.</span><span class="n">LINE</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">target_file</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_files</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_modification_points</span><span class="p">[</span><span class="n">target_file</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="n">target_file</span><span class="p">])))</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">granularity_level</span> <span class="o">==</span> <span class="n">GranularityLevel</span><span class="o">.</span><span class="n">AST</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">target_file</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_files</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">Program</span><span class="o">.</span><span class="n">is_python_code</span><span class="p">(</span><span class="n">target_file</span><span class="p">):</span>
+                    <span class="kn">from</span> <span class="nn">.helper</span> <span class="k">import</span> <span class="n">stmt_python</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_modification_points</span><span class="p">[</span><span class="n">target_file</span><span class="p">]</span> <span class="o">=</span> <span class="n">stmt_python</span><span class="o">.</span><span class="n">get_modification_points</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="n">target_file</span><span class="p">])</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modification_points</span>
+
+<div class="viewcode-block" id="Program.select_modification_point"><a class="viewcode-back" href="../../pyggi.program.html#pyggi.program.Program.select_modification_point">[docs]</a>    <span class="k">def</span> <span class="nf">select_modification_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_file</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;random&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param str target_file: The modification point is chosen within target_file</span>
+<span class="sd">        :param str method: The way how to choose a modification point, *&#39;random&#39;* or *&#39;weighted&#39;*</span>
+<span class="sd">        :return: The **index** of modification point</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">random</span>
+        <span class="k">assert</span> <span class="n">target_file</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_files</span>
+        <span class="k">assert</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;random&#39;</span><span class="p">,</span> <span class="s1">&#39;weighted&#39;</span><span class="p">]</span>
+        <span class="n">candidates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modification_points</span><span class="p">[</span><span class="n">target_file</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;random&#39;</span> <span class="ow">or</span> <span class="n">target_file</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">modification_weights</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">candidates</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;weighted&#39;</span><span class="p">:</span>
+            <span class="n">cumulated_weights</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modification_weights</span><span class="p">[</span><span class="n">target_file</span><span class="p">])</span>
+            <span class="n">list_of_prob</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">w</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">w</span><span class="p">)</span><span class="o">/</span><span class="n">cumulated_weights</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">modification_weights</span><span class="p">[</span><span class="n">target_file</span><span class="p">]))</span>
+            <span class="k">return</span> <span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">candidates</span><span class="p">))),</span> <span class="n">weights</span><span class="o">=</span><span class="n">list_of_prob</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Program.set_modification_weights"><a class="viewcode-back" href="../../pyggi.program.html#pyggi.program.Program.set_modification_weights">[docs]</a>    <span class="k">def</span> <span class="nf">set_modification_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_file</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param str target_file: The path to file</span>
+<span class="sd">        :param weights: The modification weight([0,1]) of each modification points</span>
+<span class="sd">        :type weights: list(float)</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">copy</span> <span class="k">import</span> <span class="n">deepcopy</span>
+        <span class="k">assert</span> <span class="n">target_file</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_files</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modification_points</span><span class="p">[</span><span class="n">target_file</span><span class="p">])</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">w</span><span class="p">:</span> <span class="n">w</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">w</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">,</span> <span class="n">weights</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modification_weights</span><span class="p">[</span><span class="n">target_file</span><span class="p">]</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Program.write_to_tmp_dir"><a class="viewcode-back" href="../../pyggi.program.html#pyggi.program.Program.write_to_tmp_dir">[docs]</a>    <span class="k">def</span> <span class="nf">write_to_tmp_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_contents</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write new contents to the temporary directory of program</span>
+
+<span class="sd">        :param new_contents: The new contents of the program.</span>
+<span class="sd">          Refer to *apply* method of :py:class:`.patch.Patch`</span>
+<span class="sd">        :type new_contents: dict(str, ?)</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">target_file</span> <span class="ow">in</span> <span class="n">new_contents</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tmp_path</span><span class="p">,</span> <span class="n">target_file</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">tmp_file</span><span class="p">:</span>
+                <span class="n">tmp_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">Program</span><span class="o">.</span><span class="n">to_source</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">granularity_level</span><span class="p">,</span> <span class="n">new_contents</span><span class="p">[</span><span class="n">target_file</span><span class="p">]))</span></div>
+
+<div class="viewcode-block" id="Program.print_modification_points"><a class="viewcode-back" href="../../pyggi.program.html#pyggi.program.Program.print_modification_points">[docs]</a>    <span class="k">def</span> <span class="nf">print_modification_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_file</span><span class="p">,</span> <span class="n">indices</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Print the source of each modification points</span>
+
+<span class="sd">        :param target_file: The path to target file</span>
+<span class="sd">        :type target_file: str</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">title_format</span> <span class="o">=</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">25</span> <span class="o">+</span> <span class="s2">&quot; </span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2"> &quot;</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">*</span> <span class="mi">25</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">indices</span><span class="p">:</span>
+            <span class="n">indices</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modification_points</span><span class="p">[</span><span class="n">target_file</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">granularity_level</span> <span class="o">==</span> <span class="n">GranularityLevel</span><span class="o">.</span><span class="n">LINE</span><span class="p">:</span>
+            <span class="k">def</span> <span class="nf">print_modification_point</span><span class="p">(</span><span class="n">contents</span><span class="p">,</span> <span class="n">modification_points</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">title_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;line&#39;</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">contents</span><span class="p">[</span><span class="n">modification_points</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">granularity_level</span> <span class="o">==</span> <span class="n">GranularityLevel</span><span class="o">.</span><span class="n">AST</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">Program</span><span class="o">.</span><span class="n">is_python_code</span><span class="p">(</span><span class="n">target_file</span><span class="p">):</span>
+                <span class="k">def</span> <span class="nf">print_modification_point</span><span class="p">(</span><span class="n">contents</span><span class="p">,</span> <span class="n">modification_points</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+                    <span class="kn">import</span> <span class="nn">astor</span>
+                    <span class="kn">from</span> <span class="nn">.helper</span> <span class="k">import</span> <span class="n">stmt_python</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">title_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;node&#39;</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
+                    <span class="n">blk</span><span class="p">,</span> <span class="n">idx</span> <span class="o">=</span> <span class="n">stmt_python</span><span class="o">.</span><span class="n">pos_2_block_n_index</span><span class="p">(</span><span class="n">contents</span><span class="p">,</span> <span class="n">modification_points</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">astor</span><span class="o">.</span><span class="n">to_source</span><span class="p">(</span><span class="n">blk</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
+            <span class="n">print_modification_point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="n">target_file</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">modification_points</span><span class="p">[</span><span class="n">target_file</span><span class="p">],</span> <span class="n">i</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Program.to_source"><a class="viewcode-back" href="../../pyggi.program.html#pyggi.program.Program.to_source">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">to_source</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">granularity_level</span><span class="p">,</span> <span class="n">contents_of_file</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Change contents of file to the source code</span>
+
+<span class="sd">        :param granularity_level: The parsing level of the program</span>
+<span class="sd">        :type granularity_level: :py:class:`GranularityLevel`</span>
+<span class="sd">        :param contents_of_file: The contents of the file which is the parsed form of source code</span>
+<span class="sd">        :type contents_of_file: ?</span>
+<span class="sd">        :return: The source code</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">granularity_level</span> <span class="o">==</span> <span class="n">GranularityLevel</span><span class="o">.</span><span class="n">LINE</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">contents_of_file</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">elif</span> <span class="n">granularity_level</span> <span class="o">==</span> <span class="n">GranularityLevel</span><span class="o">.</span><span class="n">AST</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">astor</span>
+            <span class="k">return</span> <span class="n">astor</span><span class="o">.</span><span class="n">to_source</span><span class="p">(</span><span class="n">contents_of_file</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span></div>
+
 <div class="viewcode-block" id="Program.clean_tmp_dir"><a class="viewcode-back" href="../../pyggi.program.html#pyggi.program.Program.clean_tmp_dir">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">clean_tmp_dir</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">clean_tmp_dir</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Clean the temporary project directory if it exists.</span>
 
@@ -264,29 +384,86 @@
         <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Program.parse"><a class="viewcode-back" href="../../pyggi.program.html#pyggi.program.Program.parse">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">manipulation_level</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">target_files</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">granularity_level</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">target_files</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">        :param manipulation_level: The granularity level</span>
-<span class="sd">        :type manipulation_level: :py:class:`.program.MnplLevel`</span>
+<span class="sd">        :param granularity_level: The granularity level of a program</span>
+<span class="sd">        :type granularity_level: :py:class:`.program.GranularityLevel`</span>
 <span class="sd">        :param str path: The project root path</span>
-<span class="sd">        :param target_files: The relative paths of target files within the project root</span>
+<span class="sd">        :param target_files: The paths to target files from the project root</span>
 <span class="sd">        :type target_files: list(str)</span>
 
-<span class="sd">        :return: the contents of the files, see `Hint`</span>
+<span class="sd">        :return: The contents of the files, see `Hint`</span>
 <span class="sd">        :rtype: dict(str, list(str))</span>
 
 <span class="sd">        .. hint::</span>
 <span class="sd">            - key: the file name</span>
 <span class="sd">            - value: the contents of the file</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">contents</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">if</span> <span class="n">manipulation_level</span> <span class="o">==</span> <span class="n">MnplLevel</span><span class="o">.</span><span class="n">PHYSICAL_LINE</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">granularity_level</span><span class="p">,</span> <span class="n">GranularityLevel</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">granularity_level</span> <span class="o">==</span> <span class="n">GranularityLevel</span><span class="o">.</span><span class="n">LINE</span><span class="p">:</span>
+            <span class="n">contents</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">target_files</span><span class="p">:</span>
                 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">target</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">target_file</span><span class="p">:</span>
                     <span class="n">contents</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
                         <span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="o">.</span><span class="n">rstrip</span><span class="p">,</span> <span class="n">target_file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()))</span>
-        <span class="k">return</span> <span class="n">contents</span></div></div>
+            <span class="k">return</span> <span class="n">contents</span>
+        <span class="k">elif</span> <span class="n">granularity_level</span> <span class="o">==</span> <span class="n">GranularityLevel</span><span class="o">.</span><span class="n">AST</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">ast</span>
+            <span class="kn">import</span> <span class="nn">astor</span>
+            <span class="n">contents</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">target_files</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">is_python_code</span><span class="p">(</span><span class="n">target</span><span class="p">):</span>
+                    <span class="n">root</span> <span class="o">=</span> <span class="n">astor</span><span class="o">.</span><span class="n">parse_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">target</span><span class="p">))</span>
+                    <span class="n">contents</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="o">=</span> <span class="n">root</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Program&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> file is not supported&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">get_file_extension</span><span class="p">(</span><span class="n">target</span><span class="p">)))</span>
+            <span class="k">return</span> <span class="n">contents</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="Program.is_python_code"><a class="viewcode-back" href="../../pyggi.program.html#pyggi.program.Program.is_python_code">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">is_python_code</span><span class="p">(</span><span class="n">source_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param source_path: The path of the source file</span>
+<span class="sd">        :type source_path: str</span>
+<span class="sd">        :return: whether the file&#39;s extention is *.py* or not</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">file_extension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">source_path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">file_extension</span> <span class="o">==</span> <span class="s1">&#39;.py&#39;</span></div>
+
+<div class="viewcode-block" id="Program.is_java_code"><a class="viewcode-back" href="../../pyggi.program.html#pyggi.program.Program.is_java_code">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">is_java_code</span><span class="p">(</span><span class="n">source_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param source_path: The path of the source file</span>
+<span class="sd">        :type source_path: str</span>
+<span class="sd">        :return: whether the file&#39;s extention is *.java* or not</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">file_extension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">source_path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">file_extension</span> <span class="o">==</span> <span class="s1">&#39;.java&#39;</span></div>
+
+<div class="viewcode-block" id="Program.get_file_extension"><a class="viewcode-back" href="../../pyggi.program.html#pyggi.program.Program.get_file_extension">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_file_extension</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param file_path: The path of file</span>
+<span class="sd">        :type file_path: str</span>
+<span class="sd">        :return: file extension</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">file_extension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">file_extension</span></div>
+
+<div class="viewcode-block" id="Program.have_the_same_file_extension"><a class="viewcode-back" href="../../pyggi.program.html#pyggi.program.Program.have_the_same_file_extension">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">have_the_same_file_extension</span><span class="p">(</span><span class="n">file_path_1</span><span class="p">,</span> <span class="n">file_path_2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param file_path_1: The path of file 1</span>
+<span class="sd">        :type file_path_1: str</span>
+<span class="sd">        :param file_path_2: The path of file 2</span>
+<span class="sd">        :type file_path_2: str</span>
+<span class="sd">        :return: same or not</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Program</span><span class="o">.</span><span class="n">get_file_extension</span><span class="p">(</span><span class="n">file_path_1</span><span class="p">)</span> <span class="o">==</span> <span class="n">Program</span><span class="o">.</span><span class="n">get_file_extension</span><span class="p">(</span><span class="n">file_path_2</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>

@@ -165,11 +165,15 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">.program</span> <span class="k">import</span> <span class="n">Program</span>
+<span class="kn">import</span> <span class="nn">ast</span>
+
 
 <div class="viewcode-block" id="AtomicOperator"><a class="viewcode-back" href="../../pyggi.atomic_operator.html#pyggi.atomic_operator.AtomicOperator">[docs]</a><span class="k">class</span> <span class="nc">AtomicOperator</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    </span>
 <span class="sd">    PYGGI-defined Atomic Operator:</span>
-<span class="sd">    User can generate the own edit operators</span>
+<span class="sd">    User can generate the own custom edit operators</span>
 <span class="sd">    which can be converted into a list of atomic operators.</span>
 <span class="sd">    For example, **MOVE x -&gt; y** operator can be represented as</span>
 <span class="sd">    **[LineReplacement(x, None),LineInsertion(x, y)]**</span>
@@ -178,42 +182,16 @@
 
 <span class="sd">    * LineReplacement</span>
 <span class="sd">    * LineInsertion</span>
-
-<span class="sd">    .. hint::</span>
-
-<span class="sd">        +---------+---------+---------------------+</span>
-<span class="sd">        | Point # | Line #  | Code                |</span>
-<span class="sd">        +=========+=========+=====================+</span>
-<span class="sd">        |    0    |         |                     |</span>
-<span class="sd">        +---------+---------+---------------------+</span>
-<span class="sd">        |         |    0    | from math import *  |</span>
-<span class="sd">        +---------+---------+---------------------+</span>
-<span class="sd">        |    1    |         |                     |</span>
-<span class="sd">        +---------+---------+---------------------+</span>
-<span class="sd">        |         |    1    | for i in range(3):  |</span>
-<span class="sd">        +---------+---------+---------------------+</span>
-<span class="sd">        |    2    |         |                     |</span>
-<span class="sd">        +---------+---------+---------------------+</span>
-<span class="sd">        |         |    2    |   print(i)          |</span>
-<span class="sd">        +---------+---------+---------------------+</span>
-<span class="sd">        |    3    |         |                     |</span>
-<span class="sd">        +---------+---------+---------------------+</span>
-<span class="sd">        |         |    3    |   if (sqrt(i) &gt; 2): |</span>
-<span class="sd">        +---------+---------+---------------------+</span>
-<span class="sd">        |    4    |         |                     |</span>
-<span class="sd">        +---------+---------+---------------------+</span>
-<span class="sd">        |         |    4    |       return        |</span>
-<span class="sd">        +---------+---------+---------------------+</span>
-<span class="sd">        |   ...   |   ...   | ..................  |</span>
-<span class="sd">        +---------+---------+---------------------+</span>
-
+<span class="sd">    * StmtReplacement</span>
+<span class="sd">    * StmtInsertion</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
-        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">prop</span><span class="p">]</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">prop</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">prop</span><span class="p">]</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">prop</span><span class="p">]:</span>
                 <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="kc">True</span>
 
@@ -233,9 +211,39 @@
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
 
-<div class="viewcode-block" id="AtomicOperator.random"><a class="viewcode-back" href="../../pyggi.atomic_operator.html#pyggi.atomic_operator.AtomicOperator.random">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="nd">@property</span>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">random</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">modification_point</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="AtomicOperator.is_valid_for"><a class="viewcode-back" href="../../pyggi.atomic_operator.html#pyggi.atomic_operator.AtomicOperator.is_valid_for">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">is_valid_for</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">program</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param program: The program instance to which this edit will be applied</span>
+<span class="sd">        :type program: :py:class:`.Program`</span>
+<span class="sd">        :return: Whether the edit is able to be applied to the program</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="AtomicOperator.apply"><a class="viewcode-back" href="../../pyggi.atomic_operator.html#pyggi.atomic_operator.AtomicOperator.apply">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">program</span><span class="p">,</span> <span class="n">new_contents</span><span class="p">,</span> <span class="n">modification_points</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;&quot;</span>
+<span class="sd">        Apply the operator to the contents of program</span>
+<span class="sd">        :param program: The original program instance</span>
+<span class="sd">        :type program: :py:class:`.Program`</span>
+<span class="sd">        :param new_contents: The new contents of program to which the edit will be applied</span>
+<span class="sd">        :type new_contents: dict(str, list(?))</span>
+<span class="sd">        :param modification_points: The original modification points</span>
+<span class="sd">        :type modification_points: list(?)</span>
+<span class="sd">        :return: success or not</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="AtomicOperator.create"><a class="viewcode-back" href="../../pyggi.atomic_operator.html#pyggi.atomic_operator.AtomicOperator.create">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :return: The operator instance with randomly-selected properties.</span>
 <span class="sd">        :rtype: :py:class:`.atomic_operator.AtomicOperator`</span>
@@ -270,14 +278,15 @@
 <span class="sd">        4</span>
 <span class="sd">        ======== ========</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        :param line: The file path and the index of line which should be replaced</span>
+<span class="sd">        :param line: The file path and index of line which should be replaced</span>
 <span class="sd">        :type line: tuple(str, int)</span>
-<span class="sd">        :param ingredient: The file path and the index of code line which is an ingredient</span>
+<span class="sd">        :param ingredient: The file path and index of code line which is an ingredient</span>
 <span class="sd">        :type ingredient: None or tuple(str, int)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">)</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">int</span><span class="p">)</span>
         <span class="k">assert</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span>
@@ -290,12 +299,43 @@
 
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        :return: ``Replace [line] with [ingredient]``</span>
+<span class="sd">        :return: ``LineReplacement([line], [ingredient])``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s2">&quot;Replace </span><span class="si">{}</span><span class="s2"> with </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">line</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ingredient</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;LineReplacement(</span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">line</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ingredient</span><span class="p">)</span>
 
-<div class="viewcode-block" id="LineReplacement.random"><a class="viewcode-back" href="../../pyggi.atomic_operator.html#pyggi.atomic_operator.LineReplacement.random">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">random</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">program</span><span class="p">,</span> <span class="n">line_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ingr_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">del_rate</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">modification_point</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">line</span>
+
+<div class="viewcode-block" id="LineReplacement.is_valid_for"><a class="viewcode-back" href="../../pyggi.atomic_operator.html#pyggi.atomic_operator.LineReplacement.is_valid_for">[docs]</a>    <span class="k">def</span> <span class="nf">is_valid_for</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">program</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">.program</span> <span class="k">import</span> <span class="n">GranularityLevel</span>
+        <span class="k">if</span> <span class="n">program</span><span class="o">.</span><span class="n">granularity_level</span> <span class="o">==</span> <span class="n">GranularityLevel</span><span class="o">.</span><span class="n">LINE</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="LineReplacement.apply"><a class="viewcode-back" href="../../pyggi.atomic_operator.html#pyggi.atomic_operator.LineReplacement.apply">[docs]</a>    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">program</span><span class="p">,</span> <span class="n">new_contents</span><span class="p">,</span> <span class="n">modification_points</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;&quot;</span>
+<span class="sd">        Apply the operator to the contents of program</span>
+<span class="sd">        :param program: The original program instance</span>
+<span class="sd">        :type program: :py:class:`.Program`</span>
+<span class="sd">        :param new_contents: The new contents of program to which the edit will be applied</span>
+<span class="sd">        :type new_contents: dict(str, list(str))</span>
+<span class="sd">        :param modification_points: The original modification points</span>
+<span class="sd">        :type modification_points: list(int)</span>
+<span class="sd">        :return: success or not</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_valid_for</span><span class="p">(</span><span class="n">program</span><span class="p">)</span>
+        <span class="n">l_f</span><span class="p">,</span> <span class="n">l_n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">line</span> <span class="c1"># line file and line number</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ingredient</span><span class="p">:</span>
+            <span class="n">i_f</span><span class="p">,</span> <span class="n">i_n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ingredient</span>
+            <span class="n">new_contents</span><span class="p">[</span><span class="n">l_f</span><span class="p">][</span><span class="n">modification_points</span><span class="p">[</span><span class="n">l_f</span><span class="p">][</span><span class="n">l_n</span><span class="p">]]</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="n">i_f</span><span class="p">][</span><span class="n">i_n</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_contents</span><span class="p">[</span><span class="n">l_f</span><span class="p">][</span><span class="n">modification_points</span><span class="p">[</span><span class="n">l_f</span><span class="p">][</span><span class="n">l_n</span><span class="p">]]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">modification_points</span></div>
+
+<div class="viewcode-block" id="LineReplacement.create"><a class="viewcode-back" href="../../pyggi.atomic_operator.html#pyggi.atomic_operator.LineReplacement.create">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">program</span><span class="p">,</span> <span class="n">line_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ingr_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">del_rate</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;random&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param program: The program instance to which the random edit will be applied.</span>
 <span class="sd">        :type program: :py:class:`.Program`</span>
@@ -305,6 +345,7 @@
 <span class="sd">          If ingr_file is specified, the target line will be chosen within the file.</span>
 <span class="sd">        :param float del_rate: The probability of that line is deleted</span>
 <span class="sd">          instead of replaced with another line</span>
+<span class="sd">        :param str method: The way of choosing the modification point. **&#39;random&#39;** or **&#39;weighted&#39;**</span>
 <span class="sd">        :return: The LineReplacement instance with the randomly-selected properties:</span>
 <span class="sd">          line and ingredient.</span>
 <span class="sd">        :rtype: :py:class:`.atomic_operator.LineReplacement`</span>
@@ -312,18 +353,13 @@
         <span class="kn">import</span> <span class="nn">random</span>
         <span class="k">assert</span> <span class="n">del_rate</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">del_rate</span> <span class="o">&lt;=</span> <span class="mi">1</span>
         <span class="n">line_file</span> <span class="o">=</span> <span class="n">line_file</span> <span class="ow">or</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">target_files</span><span class="p">)</span>
-        <span class="n">ingr_file</span> <span class="o">=</span> <span class="n">ingr_file</span> <span class="ow">or</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">target_files</span><span class="p">)</span>
-        <span class="n">line</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">line_file</span><span class="p">,</span>
-            <span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="n">line_file</span><span class="p">]))</span>
-        <span class="p">)</span>
-        <span class="n">ingredient</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">ingr_file</span><span class="p">,</span>
-            <span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="n">ingr_file</span><span class="p">]))</span>
-        <span class="p">)</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="p">(</span><span class="n">line_file</span><span class="p">,</span> <span class="n">program</span><span class="o">.</span><span class="n">select_modification_point</span><span class="p">(</span><span class="n">line_file</span><span class="p">,</span> <span class="n">method</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">del_rate</span><span class="p">:</span>
             <span class="n">ingredient</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">ingredient</span><span class="p">)</span></div></div>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ingr_file</span> <span class="o">=</span> <span class="n">ingr_file</span> <span class="ow">or</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">target_files</span><span class="p">)</span>
+            <span class="n">ingredient</span> <span class="o">=</span> <span class="p">(</span><span class="n">ingr_file</span><span class="p">,</span> <span class="n">program</span><span class="o">.</span><span class="n">select_modification_point</span><span class="p">(</span><span class="n">ingr_file</span><span class="p">,</span> <span class="s1">&#39;random&#39;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">ingredient</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="LineInsertion"><a class="viewcode-back" href="../../pyggi.atomic_operator.html#pyggi.atomic_operator.LineInsertion">[docs]</a><span class="k">class</span> <span class="nc">LineInsertion</span><span class="p">(</span><span class="n">AtomicOperator</span><span class="p">):</span>
@@ -343,53 +379,298 @@
 <span class="sd">        ======== ========</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span> <span class="n">ingredient</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">ingredient</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;before&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        :param point: The file path and the point to which the code</span>
-<span class="sd">          line should be inserted</span>
-<span class="sd">        :type point: tuple(str, int)</span>
-<span class="sd">        :param ingredient: The file path and the index of code line</span>
-<span class="sd">          which is an ingredient</span>
+<span class="sd">        :param line: The file path and position of line which is a target of modification</span>
+<span class="sd">        :type line: tuple(str, int)</span>
+<span class="sd">        :param ingredient: The file path and index of code line which is an ingredient</span>
 <span class="sd">        :type ingredient: tuple(str, int)</span>
+<span class="sd">        :param direction: *&#39;before&#39;* or *&#39;after&#39;*</span>
+<span class="sd">        :type direction: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">point</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">)</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">int</span><span class="p">)</span>
-        <span class="k">assert</span> <span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">int</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ingredient</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">)</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ingredient</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">int</span><span class="p">)</span>
         <span class="k">assert</span> <span class="n">ingredient</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">point</span> <span class="o">=</span> <span class="n">point</span>
+        <span class="k">assert</span> <span class="n">direction</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;before&#39;</span><span class="p">,</span> <span class="s1">&#39;after&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">line</span> <span class="o">=</span> <span class="n">line</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ingredient</span> <span class="o">=</span> <span class="n">ingredient</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">direction</span> <span class="o">=</span> <span class="n">direction</span>
 
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;Insert </span><span class="si">{}</span><span class="s2"> into </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ingredient</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;LineInsertion(</span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2">, &#39;</span><span class="si">{}</span><span class="s2">&#39;)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">line</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ingredient</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">direction</span><span class="p">)</span>
 
-<div class="viewcode-block" id="LineInsertion.random"><a class="viewcode-back" href="../../pyggi.atomic_operator.html#pyggi.atomic_operator.LineInsertion.random">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">random</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">program</span><span class="p">,</span> <span class="n">point_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ingr_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">modification_point</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">line</span>
+    
+<div class="viewcode-block" id="LineInsertion.is_valid_for"><a class="viewcode-back" href="../../pyggi.atomic_operator.html#pyggi.atomic_operator.LineInsertion.is_valid_for">[docs]</a>    <span class="k">def</span> <span class="nf">is_valid_for</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">program</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">.program</span> <span class="k">import</span> <span class="n">GranularityLevel</span>
+        <span class="k">if</span> <span class="n">program</span><span class="o">.</span><span class="n">granularity_level</span> <span class="o">==</span> <span class="n">GranularityLevel</span><span class="o">.</span><span class="n">LINE</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="LineInsertion.apply"><a class="viewcode-back" href="../../pyggi.atomic_operator.html#pyggi.atomic_operator.LineInsertion.apply">[docs]</a>    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">program</span><span class="p">,</span> <span class="n">new_contents</span><span class="p">,</span> <span class="n">modification_points</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;&quot;</span>
+<span class="sd">        Apply the operator to the contents of program</span>
+<span class="sd">        :param program: The original program instance</span>
+<span class="sd">        :type program: :py:class:`.Program`</span>
+<span class="sd">        :param new_contents: The new contents of program to which the edit will be applied</span>
+<span class="sd">        :type new_contents: dict(str, list(str))</span>
+<span class="sd">        :param modification_points: The original modification points</span>
+<span class="sd">        :type modification_points: list(int)</span>
+<span class="sd">        :return: success or not</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_valid_for</span><span class="p">(</span><span class="n">program</span><span class="p">)</span>
+        <span class="n">l_f</span><span class="p">,</span> <span class="n">l_n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">line</span>
+        <span class="n">i_f</span><span class="p">,</span> <span class="n">i_n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ingredient</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">direction</span> <span class="o">==</span> <span class="s1">&#39;before&#39;</span><span class="p">:</span>
+            <span class="n">new_contents</span><span class="p">[</span><span class="n">l_f</span><span class="p">]</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                <span class="n">modification_points</span><span class="p">[</span><span class="n">l_f</span><span class="p">][</span><span class="n">l_n</span><span class="p">],</span>
+                <span class="n">program</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="n">i_f</span><span class="p">][</span><span class="n">i_n</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">l_n</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">modification_points</span><span class="p">[</span><span class="n">l_f</span><span class="p">])):</span>
+                <span class="n">modification_points</span><span class="p">[</span><span class="n">l_f</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">direction</span> <span class="o">==</span> <span class="s1">&#39;after&#39;</span><span class="p">:</span>
+            <span class="n">new_contents</span><span class="p">[</span><span class="n">l_f</span><span class="p">]</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+                <span class="n">modification_points</span><span class="p">[</span><span class="n">l_f</span><span class="p">][</span><span class="n">l_n</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="n">program</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="n">i_f</span><span class="p">][</span><span class="n">i_n</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">l_n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">modification_points</span><span class="p">[</span><span class="n">l_f</span><span class="p">])):</span>
+                <span class="n">modification_points</span><span class="p">[</span><span class="n">l_f</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="LineInsertion.create"><a class="viewcode-back" href="../../pyggi.atomic_operator.html#pyggi.atomic_operator.LineInsertion.create">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">program</span><span class="p">,</span> <span class="n">line_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ingr_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;before&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;random&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param program: The program instance to which the random edit will be applied.</span>
 <span class="sd">        :type program: :py:class:`.Program`</span>
-<span class="sd">        :param str point_file: Point means the insertion point to which the ingr will be inserted.</span>
-<span class="sd">          If point_file is specified, the point will be chosen within the file.</span>
+<span class="sd">        :param str line_file: Line means the modification point of the edit.</span>
+<span class="sd">          If line_file is specified, the line will be chosen within the file.</span>
 <span class="sd">        :param str ingr_file: Ingredient is the line to be copied.</span>
 <span class="sd">          If ingr_file is specified, the target line will be chosen within the file.</span>
+<span class="sd">        :param str method: The way of choosing the modification point. **&#39;random&#39;** or **&#39;weighted&#39;**</span>
 <span class="sd">        :return: The LineInsertion instance with the randomly-selected properties:</span>
-<span class="sd">          point and ingredient.</span>
+<span class="sd">          line and ingredient.</span>
 <span class="sd">        :rtype: :py:class:`.atomic_operator.LineInsertion`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">import</span> <span class="nn">random</span>
-        <span class="n">point_file</span> <span class="o">=</span> <span class="n">point_file</span> <span class="ow">or</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">target_files</span><span class="p">)</span>
+        <span class="n">line_file</span> <span class="o">=</span> <span class="n">line_file</span> <span class="ow">or</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">target_files</span><span class="p">)</span>
         <span class="n">ingr_file</span> <span class="o">=</span> <span class="n">ingr_file</span> <span class="ow">or</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">target_files</span><span class="p">)</span>
-        <span class="n">point</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">point_file</span><span class="p">,</span>
-            <span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="n">point_file</span><span class="p">])</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">line_file</span><span class="p">,</span>
+            <span class="n">program</span><span class="o">.</span><span class="n">select_modification_point</span><span class="p">(</span><span class="n">line_file</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="n">ingredient</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">ingr_file</span><span class="p">,</span>
-            <span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="n">ingr_file</span><span class="p">]))</span>
+            <span class="n">program</span><span class="o">.</span><span class="n">select_modification_point</span><span class="p">(</span><span class="n">ingr_file</span><span class="p">,</span> <span class="s1">&#39;random&#39;</span><span class="p">)</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">ingredient</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">ingredient</span><span class="p">,</span> <span class="n">direction</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="StmtReplacement"><a class="viewcode-back" href="../../pyggi.atomic_operator.html#pyggi.atomic_operator.StmtReplacement">[docs]</a><span class="k">class</span> <span class="nc">StmtReplacement</span><span class="p">(</span><span class="n">AtomicOperator</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stmt</span><span class="p">,</span> <span class="n">ingredient</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param stmt: The file path and the node # of statement which should be replaced</span>
+<span class="sd">        :type stmt: tuple(str, int)</span>
+<span class="sd">        :param ingredient: The file path and the node # of statement which is an ingredient</span>
+<span class="sd">        :type ingredient: None or tuple(str, int)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stmt</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stmt</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">int</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">stmt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">ingredient</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ingredient</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ingredient</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">int</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">ingredient</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stmt</span> <span class="o">=</span> <span class="n">stmt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ingredient</span> <span class="o">=</span> <span class="n">ingredient</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: ``StmtReplacement([stmt], [ingredient])``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;StmtReplacement(</span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stmt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ingredient</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">modification_point</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">stmt</span>
+
+<div class="viewcode-block" id="StmtReplacement.is_valid_for"><a class="viewcode-back" href="../../pyggi.atomic_operator.html#pyggi.atomic_operator.StmtReplacement.is_valid_for">[docs]</a>    <span class="k">def</span> <span class="nf">is_valid_for</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">program</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">.program</span> <span class="k">import</span> <span class="n">GranularityLevel</span>
+        <span class="k">if</span> <span class="n">program</span><span class="o">.</span><span class="n">granularity_level</span> <span class="o">==</span> <span class="n">GranularityLevel</span><span class="o">.</span><span class="n">AST</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="StmtReplacement.apply"><a class="viewcode-back" href="../../pyggi.atomic_operator.html#pyggi.atomic_operator.StmtReplacement.apply">[docs]</a>    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">program</span><span class="p">,</span> <span class="n">new_contents</span><span class="p">,</span> <span class="n">modification_points</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;&quot;</span>
+<span class="sd">        Apply the operator to the contents of program</span>
+<span class="sd">        :param program: The original program instance</span>
+<span class="sd">        :type program: :py:class:`.Program`</span>
+<span class="sd">        :param new_contents: The new contents of program to which the edit will be applied</span>
+<span class="sd">        :type new_contents: dict(str, ?)</span>
+<span class="sd">        :param modification_points: The original modification points</span>
+<span class="sd">        :type modification_points: list(int, )</span>
+<span class="sd">        :return: success or not</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_valid_for</span><span class="p">(</span><span class="n">program</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">ingredient</span> <span class="ow">or</span> <span class="n">Program</span><span class="o">.</span><span class="n">have_the_same_file_extension</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stmt</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">ingredient</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">Program</span><span class="o">.</span><span class="n">is_python_code</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stmt</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="kn">from</span> <span class="nn">.helper</span> <span class="k">import</span> <span class="n">stmt_python</span>
+            <span class="n">dst_root</span> <span class="o">=</span> <span class="n">new_contents</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">stmt</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="n">dst_pos</span> <span class="o">=</span> <span class="n">modification_points</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">stmt</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="bp">self</span><span class="o">.</span><span class="n">stmt</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">ingredient</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">stmt_python</span><span class="o">.</span><span class="n">replace</span><span class="p">((</span><span class="n">dst_root</span><span class="p">,</span> <span class="n">dst_pos</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">ingredient</span><span class="p">)</span>
+            <span class="n">ingr_root</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ingredient</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="n">ingr_pos</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">modification_points</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ingredient</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="bp">self</span><span class="o">.</span><span class="n">ingredient</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="k">return</span> <span class="n">stmt_python</span><span class="o">.</span><span class="n">replace</span><span class="p">((</span><span class="n">dst_root</span><span class="p">,</span> <span class="n">dst_pos</span><span class="p">),</span> <span class="p">(</span><span class="n">ingr_root</span><span class="p">,</span> <span class="n">ingr_pos</span><span class="p">))</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="StmtReplacement.create"><a class="viewcode-back" href="../../pyggi.atomic_operator.html#pyggi.atomic_operator.StmtReplacement.create">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">program</span><span class="p">,</span> <span class="n">stmt_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ingr_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">del_rate</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;random&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param program: The program instance to which the random edit will be applied.</span>
+<span class="sd">        :type program: :py:class:`.Program`</span>
+<span class="sd">        :param str stmt_file: stmt is the target statement to delete.</span>
+<span class="sd">          If stmt_file is specified, the target statement will be chosen within that file.</span>
+<span class="sd">        :param str ingr_file: Ingredient is the statement to be copied.</span>
+<span class="sd">          If ingr_file is specified, the ingredient statement will be chosen within that file.</span>
+<span class="sd">        :param float del_rate: The probability of ingredient will be None. ([0,1])</span>
+<span class="sd">        :param str method: The way of choosing the modification point. **&#39;random&#39;** or **&#39;weighted&#39;**</span>
+<span class="sd">        :return: The StmtReplacement instance with the randomly-selected properties:</span>
+<span class="sd">          stmt and ingredient.</span>
+<span class="sd">        :rtype: :py:class:`.atomic_operator.StmtReplacement`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">random</span>
+        <span class="k">assert</span> <span class="n">del_rate</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">del_rate</span> <span class="o">&lt;=</span> <span class="mi">1</span>
+        <span class="n">stmt_file</span> <span class="o">=</span> <span class="n">stmt_file</span> <span class="ow">or</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">target_files</span><span class="p">)</span>
+        <span class="n">stmt</span> <span class="o">=</span> <span class="p">(</span><span class="n">stmt_file</span><span class="p">,</span> <span class="n">program</span><span class="o">.</span><span class="n">select_modification_point</span><span class="p">(</span><span class="n">stmt_file</span><span class="p">,</span> <span class="n">method</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">del_rate</span><span class="p">:</span>
+            <span class="n">ingredient</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ingr_file</span> <span class="o">=</span> <span class="n">ingr_file</span> <span class="ow">or</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">target_files</span><span class="p">)</span>
+            <span class="n">ingredient</span> <span class="o">=</span> <span class="p">(</span><span class="n">ingr_file</span><span class="p">,</span> <span class="n">program</span><span class="o">.</span><span class="n">select_modification_point</span><span class="p">(</span><span class="n">ingr_file</span><span class="p">,</span> <span class="s1">&#39;random&#39;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">stmt</span><span class="p">,</span> <span class="n">ingredient</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="StmtInsertion"><a class="viewcode-back" href="../../pyggi.atomic_operator.html#pyggi.atomic_operator.StmtInsertion">[docs]</a><span class="k">class</span> <span class="nc">StmtInsertion</span><span class="p">(</span><span class="n">AtomicOperator</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stmt</span><span class="p">,</span> <span class="n">ingredient</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;before&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param stmt: The file path and position of statement which is a target of modification</span>
+<span class="sd">        :type stmt: tuple(str, list(tuple(str, int)))</span>
+<span class="sd">        :param ingredient: The file path and the position of statement which will be inserted</span>
+<span class="sd">        :type ingredient: None or tuple(str, list(tuple(str, int)))</span>
+<span class="sd">        :param direction: *&#39;before&#39;* or *&#39;after&#39;*</span>
+<span class="sd">        :type direction: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stmt</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stmt</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">int</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">stmt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ingredient</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ingredient</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">int</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">ingredient</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+        <span class="k">assert</span> <span class="n">direction</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;before&#39;</span><span class="p">,</span> <span class="s1">&#39;after&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stmt</span> <span class="o">=</span> <span class="n">stmt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ingredient</span> <span class="o">=</span> <span class="n">ingredient</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">direction</span> <span class="o">=</span> <span class="n">direction</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: ``StmtInsertion([line], [ingredient], [direction])``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;StmtInsertion(</span><span class="si">{}</span><span class="s2">, </span><span class="si">{}</span><span class="s2">, &#39;</span><span class="si">{}</span><span class="s2">&#39;)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stmt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ingredient</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">direction</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">modification_point</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">stmt</span>
+
+<div class="viewcode-block" id="StmtInsertion.is_valid_for"><a class="viewcode-back" href="../../pyggi.atomic_operator.html#pyggi.atomic_operator.StmtInsertion.is_valid_for">[docs]</a>    <span class="k">def</span> <span class="nf">is_valid_for</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">program</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">.program</span> <span class="k">import</span> <span class="n">GranularityLevel</span>
+        <span class="k">if</span> <span class="n">program</span><span class="o">.</span><span class="n">granularity_level</span> <span class="o">==</span> <span class="n">GranularityLevel</span><span class="o">.</span><span class="n">AST</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="StmtInsertion.apply"><a class="viewcode-back" href="../../pyggi.atomic_operator.html#pyggi.atomic_operator.StmtInsertion.apply">[docs]</a>    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">program</span><span class="p">,</span> <span class="n">new_contents</span><span class="p">,</span> <span class="n">modification_points</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Apply the operator to the contents of program</span>
+
+<span class="sd">        :param program: The original program instance</span>
+<span class="sd">        :type program: :py:class:`.Program`</span>
+<span class="sd">        :param new_contents: The new contents of program to which the edit will be applied</span>
+<span class="sd">        :type new_contents: dict(str, ?)</span>
+<span class="sd">        :param modification_points: The original modification points</span>
+<span class="sd">        :type modification_points: list(int, )</span>
+<span class="sd">        :return: success or not</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_valid_for</span><span class="p">(</span><span class="n">program</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">Program</span><span class="o">.</span><span class="n">have_the_same_file_extension</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stmt</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ingredient</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">success</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">Program</span><span class="o">.</span><span class="n">is_python_code</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stmt</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="kn">from</span> <span class="nn">.helper</span> <span class="k">import</span> <span class="n">stmt_python</span>
+            <span class="n">dst_root</span> <span class="o">=</span> <span class="n">new_contents</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">stmt</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="n">dst_pos</span> <span class="o">=</span> <span class="n">modification_points</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">stmt</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="bp">self</span><span class="o">.</span><span class="n">stmt</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="n">ingr_root</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">contents</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ingredient</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="n">ingr_pos</span> <span class="o">=</span> <span class="n">stmt_python</span><span class="o">.</span><span class="n">get_modification_points</span><span class="p">(</span><span class="n">ingr_root</span><span class="p">)[</span><span class="bp">self</span><span class="o">.</span><span class="n">ingredient</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">direction</span> <span class="o">==</span> <span class="s1">&#39;before&#39;</span><span class="p">:</span>
+                <span class="n">success</span> <span class="o">=</span> <span class="n">stmt_python</span><span class="o">.</span><span class="n">insert_before</span><span class="p">((</span><span class="n">dst_root</span><span class="p">,</span> <span class="n">dst_pos</span><span class="p">),</span> <span class="p">(</span><span class="n">ingr_root</span><span class="p">,</span> <span class="n">ingr_pos</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+                    <span class="n">depth</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dst_pos</span><span class="p">)</span>
+                    <span class="n">parent</span> <span class="o">=</span> <span class="n">dst_pos</span><span class="p">[:</span><span class="n">depth</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">index</span> <span class="o">=</span> <span class="n">dst_pos</span><span class="p">[</span><span class="n">depth</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="n">modification_points</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">stmt</span><span class="p">[</span><span class="mi">0</span><span class="p">]]:</span>
+                        <span class="k">if</span> <span class="n">parent</span> <span class="o">==</span> <span class="n">pos</span><span class="p">[:</span><span class="n">depth</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">depth</span> <span class="ow">and</span> <span class="n">index</span> <span class="o">&lt;=</span> <span class="n">pos</span><span class="p">[</span><span class="n">depth</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]:</span>
+                            <span class="n">a</span><span class="p">,</span> <span class="n">i</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="n">depth</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                            <span class="n">pos</span><span class="p">[</span><span class="n">depth</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">direction</span> <span class="o">==</span> <span class="s1">&#39;after&#39;</span><span class="p">:</span>
+                <span class="n">success</span> <span class="o">=</span> <span class="n">stmt_python</span><span class="o">.</span><span class="n">insert_after</span><span class="p">((</span><span class="n">dst_root</span><span class="p">,</span> <span class="n">dst_pos</span><span class="p">),</span> <span class="p">(</span><span class="n">ingr_root</span><span class="p">,</span> <span class="n">ingr_pos</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+                    <span class="n">depth</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dst_pos</span><span class="p">)</span>
+                    <span class="n">parent</span> <span class="o">=</span> <span class="n">dst_pos</span><span class="p">[:</span><span class="n">depth</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">index</span> <span class="o">=</span> <span class="n">dst_pos</span><span class="p">[</span><span class="n">depth</span> <span class="o">-</span> <span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">pos</span> <span class="ow">in</span> <span class="n">modification_points</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">stmt</span><span class="p">[</span><span class="mi">0</span><span class="p">]]:</span>
+                        <span class="k">if</span> <span class="n">parent</span> <span class="o">==</span> <span class="n">pos</span><span class="p">[:</span><span class="n">depth</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">depth</span> <span class="ow">and</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="n">pos</span><span class="p">[</span><span class="n">depth</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]:</span>
+                            <span class="n">a</span><span class="p">,</span> <span class="n">i</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="n">depth</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                            <span class="n">pos</span><span class="p">[</span><span class="n">depth</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">success</span></div>
+
+<div class="viewcode-block" id="StmtInsertion.create"><a class="viewcode-back" href="../../pyggi.atomic_operator.html#pyggi.atomic_operator.StmtInsertion.create">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">program</span><span class="p">,</span> <span class="n">stmt_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ingr_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;before&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;random&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param program: The program instance to which the random edit will be applied.</span>
+<span class="sd">        :type program: :py:class:`.Program`</span>
+<span class="sd">        :param str line_file: stmt means the modification point of the edit.</span>
+<span class="sd">          If stmt_file is specified, the stmt will be chosen within that file.</span>
+<span class="sd">        :param str ingr_file: Ingredient is the stmt to be copied.</span>
+<span class="sd">          If ingr_file is specified, the target stmt will be chosen within that file.</span>
+<span class="sd">        :param str method: The way of choosing the modification point. **&#39;random&#39;** or **&#39;weighted&#39;**</span>
+<span class="sd">        :return: The StmtInsertion instance with the randomly-selected properties:</span>
+<span class="sd">          stmt and ingredient.</span>
+<span class="sd">        :rtype: :py:class:`.atomic_operator.StmtInsertion`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">random</span>
+        <span class="n">stmt_file</span> <span class="o">=</span> <span class="n">stmt_file</span> <span class="ow">or</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">target_files</span><span class="p">)</span>
+        <span class="n">ingr_file</span> <span class="o">=</span> <span class="n">ingr_file</span> <span class="ow">or</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">target_files</span><span class="p">)</span>
+        <span class="n">stmt</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">stmt_file</span><span class="p">,</span>
+            <span class="n">program</span><span class="o">.</span><span class="n">select_modification_point</span><span class="p">(</span><span class="n">stmt_file</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">ingredient</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">ingr_file</span><span class="p">,</span>
+            <span class="n">program</span><span class="o">.</span><span class="n">select_modification_point</span><span class="p">(</span><span class="n">ingr_file</span><span class="p">,</span> <span class="s1">&#39;random&#39;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">stmt</span><span class="p">,</span> <span class="n">ingredient</span><span class="p">,</span> <span class="n">direction</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>

@@ -92,7 +92,7 @@
             
             
               <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="pyggi.html">PYGGI package</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="pyggi.html">pyggi package</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="pyggi.html#submodules">Submodules</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="pyggi.algorithms.html">pyggi.algorithms module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pyggi.atomic_operator.html">pyggi.atomic_operator module</a></li>
@@ -179,20 +179,20 @@
 <dt id="pyggi.patch.Patch">
 <em class="property">class </em><code class="descclassname">pyggi.patch.</code><code class="descname">Patch</code><span class="sig-paren">(</span><em>program</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyggi/patch.html#Patch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyggi.patch.Patch" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>Patch is a sequence of edits such as deletion, copying, and replacement.
+<p>Patch is a sequence of edit operators: both atomic and custom.
 During search iteration, PYGGI modifies the source code of the target program
 by applying a candidate patch. Subsequently, it runs the test script to collect
 dynamic information, such as the execution time or any other user-provided
 properties, via the predefined format that PYGGI recognises.</p>
 <dl class="method">
-<dt id="pyggi.patch.Patch.add_edit">
-<code class="descname">add_edit</code><span class="sig-paren">(</span><em>edit</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyggi/patch.html#Patch.add_edit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyggi.patch.Patch.add_edit" title="Permalink to this definition">¶</a></dt>
+<dt id="pyggi.patch.Patch.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>edit</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyggi/patch.html#Patch.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyggi.patch.Patch.add" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add an edit to the edit list</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>edit</strong> (<a class="reference internal" href="pyggi.atomic_operator.html#pyggi.atomic_operator.AtomicOperator" title="pyggi.atomic_operator.AtomicOperator"><code class="xref py py-class docutils literal"><span class="pre">atomic_operator.AtomicOperator</span></code></a> or <a class="reference internal" href="pyggi.edit.html#pyggi.edit.Edit" title="pyggi.edit.Edit"><code class="xref py py-class docutils literal"><span class="pre">Edit</span></code></a>) – The edit to be added</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>edit</strong> (<a class="reference internal" href="pyggi.atomic_operator.html#pyggi.atomic_operator.AtomicOperator" title="pyggi.atomic_operator.AtomicOperator"><code class="xref py py-class docutils literal"><span class="pre">atomic_operator.AtomicOperator</span></code></a> or <code class="xref py py-class docutils literal"><span class="pre">custom_operator.CustomOperator</span></code>) – The edit to be added</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
 </tr>
@@ -221,32 +221,6 @@ but modifies the copied program within the temporary directory.</p>
 <ul class="last simple">
 <li>key: The target file name(path) related to the program root path</li>
 <li>value: The contents of the file</li>
-</ul>
-</div>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="pyggi.patch.Patch.atomics">
-<code class="descname">atomics</code><a class="headerlink" href="#pyggi.patch.Patch.atomics" title="Permalink to this definition">¶</a></dt>
-<dd><p>Combine all the atomic operators of the edits.
-An edit is originally a sequence of atomic operators,
-and a patch is a sequence of the edits.
-So this is a sort of flattening process.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The atomic operators, see <em>Hint</em>.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">dict(str, list(<a class="reference internal" href="pyggi.atomic_operator.html#pyggi.atomic_operator.AtomicOperator" title="pyggi.atomic_operator.AtomicOperator"><code class="xref py py-class docutils literal"><span class="pre">atomic_operator.AtomicOperator</span></code></a>))</td>
-</tr>
-</tbody>
-</table>
-<div class="admonition hint">
-<p class="first admonition-title">Hint</p>
-<ul class="last simple">
-<li>key: The name of the atomic operator(ex. ‘LineReplacement’)</li>
-<li>value: The list of the atomic operator instances</li>
 </ul>
 </div>
 </dd></dl>
@@ -284,94 +258,23 @@ using <em>difflib</em> module(<a class="reference external" href="https://docs.p
 </table>
 </dd></dl>
 
-<dl class="attribute">
-<dt id="pyggi.patch.Patch.edit_size">
-<code class="descname">edit_size</code><a class="headerlink" href="#pyggi.patch.Patch.edit_size" title="Permalink to this definition">¶</a></dt>
-<dd><p>Define the size of modifications made by this patch</p>
+<dl class="method">
+<dt id="pyggi.patch.Patch.get_atomics">
+<code class="descname">get_atomics</code><span class="sig-paren">(</span><em>atomic_class_name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyggi/patch.html#Patch.get_atomics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyggi.patch.Patch.get_atomics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combine all the atomic operators of the edits.
+A custom operator is originally a sequence of atomic operators,
+and a patch is a sequence of the edits.
+So this is a sort of flattening process.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The size value</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The atomic operators, see <em>Hint</em>.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">int</td>
-</tr>
-</tbody>
-</table>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<ol class="last arabic simple">
-<li>If two lines are deleted, returns -2</li>
-<li>If two lines are inserted, returns 2</li>
-<li>If one line is replaced with other, returns 0 (no change in size but in contents)</li>
-</ol>
-</div>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="pyggi.patch.Patch.line_insertions">
-<code class="descname">line_insertions</code><a class="headerlink" href="#pyggi.patch.Patch.line_insertions" title="Permalink to this definition">¶</a></dt>
-<dd><p>Extract only the line insertion information
-from the edit_list of the patch.
-For more information, see <a class="reference internal" href="pyggi.atomic_operator.html#pyggi.atomic_operator.LineInsertion" title="pyggi.atomic_operator.LineInsertion"><code class="xref py py-class docutils literal"><span class="pre">atomic_operator.LineInsertion</span></code></a></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The line insertion information, see <em>Hint</em>.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">dict(int, list(int))</td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">list(<a class="reference internal" href="pyggi.atomic_operator.html#pyggi.atomic_operator.AtomicOperator" title="pyggi.atomic_operator.AtomicOperator"><code class="xref py py-class docutils literal"><span class="pre">atomic_operator.AtomicOperator</span></code></a>)</td>
 </tr>
 </tbody>
 </table>
-<div class="admonition hint">
-<p class="first admonition-title">Hint</p>
-<ul class="last simple">
-<li>key: The index of insertion point</li>
-<li>value: The list of indices of ingredient lines</li>
-</ul>
-</div>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p>If <code class="docutils literal"><span class="pre">self.atomics</span></code> is <code class="docutils literal"><span class="pre">[LineReplacement(8,</span> <span class="pre">None),</span> <span class="pre">LineInsertion(4,</span> <span class="pre">10)]</span></code>,</p>
-<div class="last highlight-default"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">line_insertions</span><span class="p">)</span>
-<span class="o">&gt;&gt;</span> <span class="p">{</span> <span class="mi">4</span><span class="p">:</span> <span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="p">}</span>
-</pre></div>
-</div>
-</div>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="pyggi.patch.Patch.line_replacements">
-<code class="descname">line_replacements</code><a class="headerlink" href="#pyggi.patch.Patch.line_replacements" title="Permalink to this definition">¶</a></dt>
-<dd><p>Extract only the line replacement information
-from the edit_list of the patch.
-For more information, see <a class="reference internal" href="pyggi.atomic_operator.html#pyggi.atomic_operator.LineReplacement" title="pyggi.atomic_operator.LineReplacement"><code class="xref py py-class docutils literal"><span class="pre">atomic_operator.LineReplacement</span></code></a></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The line replacement information, see <em>Hint</em>.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">dict(int, int or None)</td>
-</tr>
-</tbody>
-</table>
-<div class="admonition hint">
-<p class="first admonition-title">Hint</p>
-<ul class="last simple">
-<li>key: the index of line which is supposed to be replaced</li>
-<li>value: None or the index of ingredient line</li>
-</ul>
-</div>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p>If <code class="docutils literal"><span class="pre">self.atomics</span></code> is <code class="docutils literal"><span class="pre">[LineReplacement(8,</span> <span class="pre">None),</span> <span class="pre">LineInsertion(4,</span> <span class="pre">10)]</span></code>,</p>
-<div class="last highlight-default"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">line_replacements</span><span class="p">)</span>
-<span class="o">&gt;&gt;</span> <span class="p">{</span> <span class="mi">8</span><span class="p">:</span> <span class="kc">None</span> <span class="p">}</span>
-</pre></div>
-</div>
-</div>
 </dd></dl>
 
 <dl class="method">
@@ -399,7 +302,7 @@ which is placed within the project directory.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>timeout</strong> (<em>float</em>) – The time limit of test run (unit: seconds)</li>
-<li><strong>result_parser</strong> (None or callable((str), <a class="reference internal" href="pyggi.test_result.html#pyggi.test_result.TestResult" title="pyggi.test_result.TestResult"><code class="xref py py-class docutils literal"><span class="pre">TestResult</span></code></a>)) – The parser of test output
+<li><strong>result_parser</strong> (None or callable((str, str), <a class="reference internal" href="pyggi.test_result.html#pyggi.test_result.TestResult" title="pyggi.test_result.TestResult"><code class="xref py py-class docutils literal"><span class="pre">TestResult</span></code></a>)) – The parser of test output
 (default: <a class="reference internal" href="pyggi.test_result.html#pyggi.test_result.TestResult.pyggi_result_parser" title="pyggi.test_result.TestResult.pyggi_result_parser"><code class="xref py py-meth docutils literal"><span class="pre">TestResult.pyggi_result_parser()</span></code></a>)</li>
 </ul>
 </td>

@@ -162,6 +162,7 @@
  | <a href="#D"><strong>D</strong></a>
  | <a href="#E"><strong>E</strong></a>
  | <a href="#G"><strong>G</strong></a>
+ | <a href="#H"><strong>H</strong></a>
  | <a href="#I"><strong>I</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
@@ -171,32 +172,34 @@
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
  | <a href="#W"><strong>W</strong></a>
- | <a href="#X"><strong>X</strong></a>
- | <a href="#Y"><strong>Y</strong></a>
  
 </div>
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="pyggi.patch.html#pyggi.patch.Patch.add_edit">add_edit() (pyggi.patch.Patch method)</a>
+      <li><a href="pyggi.patch.html#pyggi.patch.Patch.add">add() (pyggi.patch.Patch method)</a>
 </li>
-      <li><a href="pyggi.patch.html#pyggi.patch.Patch.apply">apply() (pyggi.patch.Patch method)</a>
-</li>
-      <li><a href="pyggi.atomic_operator.html#pyggi.atomic_operator.AtomicOperator.atomic_operators">atomic_operators (pyggi.atomic_operator.AtomicOperator attribute)</a>
+      <li><a href="pyggi.atomic_operator.html#pyggi.atomic_operator.AtomicOperator.apply">apply() (pyggi.atomic_operator.AtomicOperator method)</a>
 
       <ul>
-        <li><a href="pyggi.edit.html#pyggi.edit.Edit.atomic_operators">(pyggi.edit.Edit attribute)</a>
+        <li><a href="pyggi.atomic_operator.html#pyggi.atomic_operator.LineInsertion.apply">(pyggi.atomic_operator.LineInsertion method)</a>
 </li>
-        <li><a href="pyggi.edit.html#pyggi.edit.LineDeletion.atomic_operators">(pyggi.edit.LineDeletion attribute)</a>
+        <li><a href="pyggi.atomic_operator.html#pyggi.atomic_operator.LineReplacement.apply">(pyggi.atomic_operator.LineReplacement method)</a>
 </li>
-        <li><a href="pyggi.edit.html#pyggi.edit.LineMoving.atomic_operators">(pyggi.edit.LineMoving attribute)</a>
+        <li><a href="pyggi.atomic_operator.html#pyggi.atomic_operator.StmtInsertion.apply">(pyggi.atomic_operator.StmtInsertion method)</a>
+</li>
+        <li><a href="pyggi.atomic_operator.html#pyggi.atomic_operator.StmtReplacement.apply">(pyggi.atomic_operator.StmtReplacement method)</a>
+</li>
+        <li><a href="pyggi.patch.html#pyggi.patch.Patch.apply">(pyggi.patch.Patch method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="pyggi.atomic_operator.html#pyggi.atomic_operator.AtomicOperator">AtomicOperator (class in pyggi.atomic_operator)</a>
+      <li><a href="pyggi.program.html#pyggi.program.GranularityLevel.AST">AST (pyggi.program.GranularityLevel attribute)</a>
 </li>
-      <li><a href="pyggi.patch.html#pyggi.patch.Patch.atomics">atomics (pyggi.patch.Patch attribute)</a>
+      <li><a href="pyggi.atomic_operator.html#pyggi.atomic_operator.AtomicOperator.atomic_operators">atomic_operators (pyggi.atomic_operator.AtomicOperator attribute)</a>
+</li>
+      <li><a href="pyggi.atomic_operator.html#pyggi.atomic_operator.AtomicOperator">AtomicOperator (class in pyggi.atomic_operator)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -208,10 +211,22 @@
 </li>
       <li><a href="pyggi.patch.html#pyggi.patch.Patch.clone">clone() (pyggi.patch.Patch method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pyggi.program.html#pyggi.program.Program.CONFIG_FILE_NAME">CONFIG_FILE_NAME (pyggi.program.Program attribute)</a>
 </li>
+      <li><a href="pyggi.atomic_operator.html#pyggi.atomic_operator.AtomicOperator.create">create() (pyggi.atomic_operator.AtomicOperator class method)</a>
+
+      <ul>
+        <li><a href="pyggi.atomic_operator.html#pyggi.atomic_operator.LineInsertion.create">(pyggi.atomic_operator.LineInsertion class method)</a>
+</li>
+        <li><a href="pyggi.atomic_operator.html#pyggi.atomic_operator.LineReplacement.create">(pyggi.atomic_operator.LineReplacement class method)</a>
+</li>
+        <li><a href="pyggi.atomic_operator.html#pyggi.atomic_operator.StmtInsertion.create">(pyggi.atomic_operator.StmtInsertion class method)</a>
+</li>
+        <li><a href="pyggi.atomic_operator.html#pyggi.atomic_operator.StmtReplacement.create">(pyggi.atomic_operator.StmtReplacement class method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pyggi.logger.html#pyggi.logger.Logger.critical">critical() (pyggi.logger.Logger method)</a>
 </li>
   </ul></td>
@@ -224,8 +239,6 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="pyggi.edit.html#pyggi.edit.Edit.detail">detail (pyggi.edit.Edit attribute)</a>
-</li>
       <li><a href="pyggi.patch.html#pyggi.patch.Patch.diff">diff (pyggi.patch.Patch attribute)</a>
 </li>
   </ul></td>
@@ -234,16 +247,12 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="pyggi.edit.html#pyggi.edit.Edit">Edit (class in pyggi.edit)</a>
-</li>
-      <li><a href="pyggi.patch.html#pyggi.patch.Patch.edit_size">edit_size (pyggi.patch.Patch attribute)</a>
-</li>
       <li><a href="pyggi.logger.html#pyggi.logger.Logger.error">error() (pyggi.logger.Logger method)</a>
+</li>
+      <li><a href="example.improve.html#module-example.improve">example.improve (module)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="example.improve.html#module-example.improve">example.improve (module)</a>
-</li>
       <li><a href="example.improve_python.html#module-example.improve_python">example.improve_python (module)</a>
 </li>
       <li><a href="example.repair.html#module-example.repair">example.repair (module)</a>
@@ -256,11 +265,25 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pyggi.test_result.html#pyggi.test_result.TestResult.get">get() (pyggi.test_result.TestResult method)</a>
 </li>
+      <li><a href="pyggi.patch.html#pyggi.patch.Patch.get_atomics">get_atomics() (pyggi.patch.Patch method)</a>
+</li>
+      <li><a href="pyggi.program.html#pyggi.program.Program.get_file_extension">get_file_extension() (pyggi.program.Program static method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pyggi.algorithms.html#pyggi.algorithms.LocalSearch.get_fitness">get_fitness() (pyggi.algorithms.LocalSearch method)</a>
 </li>
       <li><a href="pyggi.algorithms.html#pyggi.algorithms.LocalSearch.get_neighbour">get_neighbour() (pyggi.algorithms.LocalSearch method)</a>
+</li>
+      <li><a href="pyggi.program.html#pyggi.program.GranularityLevel">GranularityLevel (class in pyggi.program)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="H">H</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pyggi.program.html#pyggi.program.Program.have_the_same_file_extension">have_the_same_file_extension() (pyggi.program.Program static method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -272,10 +295,26 @@
 </li>
       <li><a href="pyggi.algorithms.html#pyggi.algorithms.LocalSearch.is_better_than_the_best">is_better_than_the_best() (pyggi.algorithms.LocalSearch method)</a>
 </li>
+      <li><a href="pyggi.program.html#pyggi.program.Program.is_java_code">is_java_code() (pyggi.program.Program static method)</a>
+</li>
+      <li><a href="pyggi.program.html#pyggi.program.Program.is_python_code">is_python_code() (pyggi.program.Program static method)</a>
+</li>
+      <li><a href="pyggi.program.html#pyggi.program.GranularityLevel.is_valid">is_valid() (pyggi.program.GranularityLevel class method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="pyggi.program.html#pyggi.program.MnplLevel.is_valid">is_valid() (pyggi.program.MnplLevel class method)</a>
+      <li><a href="pyggi.atomic_operator.html#pyggi.atomic_operator.AtomicOperator.is_valid_for">is_valid_for() (pyggi.atomic_operator.AtomicOperator method)</a>
+
+      <ul>
+        <li><a href="pyggi.atomic_operator.html#pyggi.atomic_operator.LineInsertion.is_valid_for">(pyggi.atomic_operator.LineInsertion method)</a>
 </li>
+        <li><a href="pyggi.atomic_operator.html#pyggi.atomic_operator.LineReplacement.is_valid_for">(pyggi.atomic_operator.LineReplacement method)</a>
+</li>
+        <li><a href="pyggi.atomic_operator.html#pyggi.atomic_operator.StmtInsertion.is_valid_for">(pyggi.atomic_operator.StmtInsertion method)</a>
+</li>
+        <li><a href="pyggi.atomic_operator.html#pyggi.atomic_operator.StmtReplacement.is_valid_for">(pyggi.atomic_operator.StmtReplacement method)</a>
+</li>
+      </ul></li>
       <li><a href="pyggi.algorithms.html#pyggi.algorithms.LocalSearch.is_valid_patch">is_valid_patch() (pyggi.algorithms.LocalSearch method)</a>
 </li>
   </ul></td>
@@ -284,28 +323,14 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="pyggi.edit.html#pyggi.edit.Edit.length_of_args">length_of_args (pyggi.edit.Edit attribute)</a>
-
-      <ul>
-        <li><a href="pyggi.edit.html#pyggi.edit.LineDeletion.length_of_args">(pyggi.edit.LineDeletion attribute)</a>
+      <li><a href="pyggi.program.html#pyggi.program.GranularityLevel.LINE">LINE (pyggi.program.GranularityLevel attribute)</a>
 </li>
-        <li><a href="pyggi.edit.html#pyggi.edit.LineMoving.length_of_args">(pyggi.edit.LineMoving attribute)</a>
-</li>
-      </ul></li>
-      <li><a href="pyggi.patch.html#pyggi.patch.Patch.line_insertions">line_insertions (pyggi.patch.Patch attribute)</a>
-</li>
-      <li><a href="pyggi.patch.html#pyggi.patch.Patch.line_replacements">line_replacements (pyggi.patch.Patch attribute)</a>
-</li>
-      <li><a href="pyggi.edit.html#pyggi.edit.LineDeletion">LineDeletion (class in pyggi.edit)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pyggi.atomic_operator.html#pyggi.atomic_operator.LineInsertion">LineInsertion (class in pyggi.atomic_operator)</a>
-</li>
-      <li><a href="pyggi.edit.html#pyggi.edit.LineMoving">LineMoving (class in pyggi.edit)</a>
 </li>
       <li><a href="pyggi.atomic_operator.html#pyggi.atomic_operator.LineReplacement">LineReplacement (class in pyggi.atomic_operator)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pyggi.algorithms.html#pyggi.algorithms.LocalSearch">LocalSearch (class in pyggi.algorithms)</a>
 </li>
       <li><a href="pyggi.logger.html#pyggi.logger.Logger.LOG_DIR">LOG_DIR (pyggi.logger.Logger attribute)</a>
@@ -318,7 +343,21 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="pyggi.program.html#pyggi.program.MnplLevel">MnplLevel (class in pyggi.program)</a>
+      <li><a href="pyggi.atomic_operator.html#pyggi.atomic_operator.AtomicOperator.modification_point">modification_point (pyggi.atomic_operator.AtomicOperator attribute)</a>
+
+      <ul>
+        <li><a href="pyggi.atomic_operator.html#pyggi.atomic_operator.LineInsertion.modification_point">(pyggi.atomic_operator.LineInsertion attribute)</a>
+</li>
+        <li><a href="pyggi.atomic_operator.html#pyggi.atomic_operator.LineReplacement.modification_point">(pyggi.atomic_operator.LineReplacement attribute)</a>
+</li>
+        <li><a href="pyggi.atomic_operator.html#pyggi.atomic_operator.StmtInsertion.modification_point">(pyggi.atomic_operator.StmtInsertion attribute)</a>
+</li>
+        <li><a href="pyggi.atomic_operator.html#pyggi.atomic_operator.StmtReplacement.modification_point">(pyggi.atomic_operator.StmtReplacement attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pyggi.program.html#pyggi.program.Program.modification_points">modification_points (pyggi.program.Program attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -338,7 +377,7 @@
 </li>
       <li><a href="pyggi.patch.html#pyggi.patch.Patch">Patch (class in pyggi.patch)</a>
 </li>
-      <li><a href="pyggi.program.html#pyggi.program.MnplLevel.PHYSICAL_LINE">PHYSICAL_LINE (pyggi.program.MnplLevel attribute)</a>
+      <li><a href="pyggi.program.html#pyggi.program.Program.print_modification_points">print_modification_points() (pyggi.program.Program method)</a>
 </li>
       <li><a href="pyggi.program.html#pyggi.program.Program">Program (class in pyggi.program)</a>
 </li>
@@ -349,8 +388,6 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pyggi.atomic_operator.html#module-pyggi.atomic_operator">pyggi.atomic_operator (module)</a>
-</li>
-      <li><a href="pyggi.edit.html#module-pyggi.edit">pyggi.edit (module)</a>
 </li>
       <li><a href="pyggi.logger.html#module-pyggi.logger">pyggi.logger (module)</a>
 </li>
@@ -368,22 +405,12 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="pyggi.atomic_operator.html#pyggi.atomic_operator.AtomicOperator.random">random() (pyggi.atomic_operator.AtomicOperator class method)</a>
-
-      <ul>
-        <li><a href="pyggi.atomic_operator.html#pyggi.atomic_operator.LineInsertion.random">(pyggi.atomic_operator.LineInsertion class method)</a>
-</li>
-        <li><a href="pyggi.atomic_operator.html#pyggi.atomic_operator.LineReplacement.random">(pyggi.atomic_operator.LineReplacement class method)</a>
-</li>
-        <li><a href="pyggi.edit.html#pyggi.edit.LineDeletion.random">(pyggi.edit.LineDeletion class method)</a>
-</li>
-        <li><a href="pyggi.edit.html#pyggi.edit.LineMoving.random">(pyggi.edit.LineMoving class method)</a>
-</li>
-      </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pyggi.patch.html#pyggi.patch.Patch.remove">remove() (pyggi.patch.Patch method)</a>
 </li>
+      <li><a href="pyggi.program.html#pyggi.program.Program.reset_tmp_dir">reset_tmp_dir() (pyggi.program.Program method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pyggi.algorithms.html#pyggi.algorithms.LocalSearch.run">run() (pyggi.algorithms.LocalSearch method)</a>
 </li>
       <li><a href="pyggi.patch.html#pyggi.patch.Patch.run_test">run_test() (pyggi.patch.Patch method)</a>
@@ -394,6 +421,16 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pyggi.program.html#pyggi.program.Program.select_modification_point">select_modification_point() (pyggi.program.Program method)</a>
+</li>
+      <li><a href="pyggi.program.html#pyggi.program.Program.set_modification_weights">set_modification_weights() (pyggi.program.Program method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pyggi.atomic_operator.html#pyggi.atomic_operator.StmtInsertion">StmtInsertion (class in pyggi.atomic_operator)</a>
+</li>
+      <li><a href="pyggi.atomic_operator.html#pyggi.atomic_operator.StmtReplacement">StmtReplacement (class in pyggi.atomic_operator)</a>
+</li>
       <li><a href="pyggi.algorithms.html#pyggi.algorithms.LocalSearch.stopping_criterion">stopping_criterion() (pyggi.algorithms.LocalSearch method)</a>
 </li>
   </ul></td>
@@ -404,11 +441,13 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pyggi.test_result.html#pyggi.test_result.TestResult">TestResult (class in pyggi.test_result)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pyggi.program.html#pyggi.program.Program.TMP_DIR">TMP_DIR (pyggi.program.Program attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pyggi.program.html#pyggi.program.Program.tmp_path">tmp_path (pyggi.program.Program attribute)</a>
+</li>
+      <li><a href="pyggi.program.html#pyggi.program.Program.to_source">to_source() (pyggi.program.Program class method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -419,24 +458,8 @@
       <li><a href="pyggi.logger.html#pyggi.logger.Logger.warning">warning() (pyggi.logger.Logger method)</a>
 </li>
   </ul></td>
-</tr></table>
-
-<h2 id="X">X</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="pyggi.edit.html#pyggi.edit.LineDeletion.x">x (pyggi.edit.LineDeletion attribute)</a>
-
-      <ul>
-        <li><a href="pyggi.edit.html#pyggi.edit.LineMoving.x">(pyggi.edit.LineMoving attribute)</a>
-</li>
-      </ul></li>
-  </ul></td>
-</tr></table>
-
-<h2 id="Y">Y</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="pyggi.edit.html#pyggi.edit.LineMoving.y">y (pyggi.edit.LineMoving attribute)</a>
+      <li><a href="pyggi.program.html#pyggi.program.Program.write_to_tmp_dir">write_to_tmp_dir() (pyggi.program.Program method)</a>
 </li>
   </ul></td>
 </tr></table>

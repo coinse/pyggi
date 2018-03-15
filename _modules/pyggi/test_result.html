@@ -201,30 +201,33 @@
 <span class="sd">        :return: The value of the custom result</span>
 <span class="sd">        :rtype: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">assert</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom</span><span class="p">[</span><span class="n">name</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="TestResult.pyggi_result_parser"><a class="viewcode-back" href="../../pyggi.test_result.html#pyggi.test_result.TestResult.pyggi_result_parser">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">pyggi_result_parser</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">pyggi_result_parser</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">stdout</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">stderr</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The test script should print output in the predefined,</span>
+<span class="sd">        The test script should print results in the predefined,</span>
 <span class="sd">        PYGGI-recognisable format. This method parses the results.</span>
 
-<span class="sd">        :param str output: The output of the test script</span>
+<span class="sd">        :param str stdout: The stdout of the test script</span>
 
 <span class="sd">        :return: The TestResult instance. If the PYGGI output are</span>
 <span class="sd">          not detected, it is regarded as compile(execution) failure.</span>
 <span class="sd">        :rtype: :py:class:`.TestResult`</span>
 
 <span class="sd">        .. note::</span>
-<span class="sd">            When the output is</span>
+<span class="sd">            When the stdout is</span>
 
 <span class="sd">                [PYGGI_RESULT] {runtime: 7,pass_all: true}</span>
 
 <span class="sd">            , returns ``TestResult(True, {&#39;runtime&#39;: 7, &#39;pass_all&#39;: &#39;true&#39;})``</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">import</span> <span class="nn">re</span>
-        <span class="n">matched</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;\[PYGGI_RESULT\]\s*\{(.*?)\}\s&quot;</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+        <span class="n">matched</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;\[PYGGI_RESULT\]\s*\{(.*?)\}\s&quot;</span><span class="p">,</span> <span class="n">stdout</span><span class="p">)</span>
         <span class="n">compiled</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">matched</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span>
         <span class="n">custom</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">compiled</span><span class="p">:</span>
@@ -234,7 +237,7 @@
                 <span class="c1"># print(&quot;[Error] Result format is wrong!: {&quot; + matched[0] + &quot;}&quot;)</span>
                 <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">result</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
                 <span class="n">custom</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">compiled</span><span class="p">,</span> <span class="n">custom</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">compiled</span><span class="p">,</span> <span class="n">custom</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>

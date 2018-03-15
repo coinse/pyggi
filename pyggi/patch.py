@@ -2,15 +2,17 @@
 This module contains Patch class.
 """
 import os
+from copy import deepcopy
+from .program import Program, GranularityLevel
 from .atomic_operator import AtomicOperator
-from .edit import Edit
+from .custom_operator import CustomOperator
 from .test_result import TestResult
 
 
 class Patch:
     """
 
-    Patch is a sequence of edits such as deletion, copying, and replacement.
+    Patch is a sequence of edit operators: both atomic and custom.
     During search iteration, PYGGI modifies the source code of the target program
     by applying a candidate patch. Subsequently, it runs the test script to collect
     dynamic information, such as the execution time or any other user-provided
@@ -39,29 +41,10 @@ class Patch:
         :return: The created Patch
         :rtype: :py:class:`.Patch`
         """
-        import copy
         clone_patch = Patch(self.program)
-        clone_patch.edit_list = copy.deepcopy(self.edit_list)
+        clone_patch.edit_list = deepcopy(self.edit_list)
         clone_patch.test_result = None
         return clone_patch
-
-    @property
-    def edit_size(self) -> int:
-        """
-        Define the size of modifications made by this patch
-
-        :return: The size value
-        :rtype: int
-
-        .. note::
-            1. If two lines are deleted, returns -2
-            2. If two lines are inserted, returns 2
-            3. If one line is replaced with other, returns 0 (no change in size but in contents)
-        """
-        lrs = self.line_replacements.items()
-        lis = self.line_insertions.items()
-        return sum(map(lambda x: len(x[1]), lis)) - len(
-            list(filter(lambda x: x[1] is None, lrs)))
 
     @property
     def diff(self) -> str:
@@ -98,7 +81,7 @@ class Patch:
         :param float timeout: The time limit of test run (unit: seconds)
         :param result_parser: The parser of test output
           (default: :py:meth:`.TestResult.pyggi_result_parser`)
-        :type result_parser: None or callable((str), :py:class:`.TestResult`)
+        :type result_parser: None or callable((str, str), :py:class:`.TestResult`)
         :return: The parsed output of test script execution
         :rtype: :py:class:`.TestResult`
         """
@@ -115,9 +98,9 @@ class Patch:
             stderr=subprocess.PIPE)
         try:
             start = time.time()
-            stdout, _ = sprocess.communicate(timeout=timeout)
+            stdout, stderr = sprocess.communicate(timeout=timeout)
             elapsed_time = time.time() - start
-            self.test_result = result_parser(stdout.decode("ascii"))
+            self.test_result = result_parser(stdout.decode("ascii"), stderr.decode("ascii"))
             self.test_result.elapsed_time = elapsed_time
         except subprocess.TimeoutExpired:
             elapsed_time = timeout * 1000 # seconds to milliseconds
@@ -126,15 +109,16 @@ class Patch:
 
         return self.test_result
 
-    def add_edit(self, edit):
+    def add(self, edit):
         """
         Add an edit to the edit list
 
         :param edit: The edit to be added
-        :type edit: :py:class:`.atomic_operator.AtomicOperator` or :py:class:`.Edit`
+        :type edit: :py:class:`.atomic_operator.AtomicOperator` or :py:class:`.custom_operator.CustomOperator`
         :return: None
         """
-        assert isinstance(edit, (AtomicOperator, Edit))
+        assert isinstance(edit, (AtomicOperator, CustomOperator))
+        assert edit.is_valid_for(self.program)
         self.edit_list.append(edit)
 
     def remove(self, index: int):
@@ -145,83 +129,23 @@ class Patch:
         """
         del self.edit_list[index]
 
-    @property
-    def atomics(self):
+    def get_atomics(self, atomic_class_name=None):
         """
         Combine all the atomic operators of the edits.
-        An edit is originally a sequence of atomic operators,
+        A custom operator is originally a sequence of atomic operators,
         and a patch is a sequence of the edits.
         So this is a sort of flattening process.
 
         :return: The atomic operators, see *Hint*.
-        :rtype: dict(str, list(:py:class:`.atomic_operator.AtomicOperator`))
-
-        .. hint::
-            - key: The name of the atomic operator(ex. 'LineReplacement')
-            - value: The list of the atomic operator instances
+        :rtype: list(:py:class:`.atomic_operator.AtomicOperator`)
         """
-        atomics = dict()
+        atomics = []
         for edit in self.edit_list:
             for atomic in edit.atomic_operators:
-                atomic_class = atomic.__class__.__name__
-                atomics[atomic_class] = atomics.get(atomic_class, list())
-                atomics[atomic_class].append(atomic)
+                if not atomic_class_name or atomic_class_name == atomic.__class__.__name__:
+                    atomics.append(atomic)
         return atomics
-
-    @property
-    def line_replacements(self) -> dict:
-        """
-        Extract only the line replacement information
-        from the edit_list of the patch.
-        For more information, see :py:class:`.atomic_operator.LineReplacement`
-
-        :return: The line replacement information, see *Hint*.
-        :rtype: dict(int, int or None)
-
-        .. hint::
-            - key: the index of line which is supposed to be replaced
-            - value: None or the index of ingredient line
-
-        .. note::
-            If ``self.atomics`` is ``[LineReplacement(8, None), LineInsertion(4, 10)]``, ::
-
-                print(self.line_replacements)
-                >> { 8: None }
-
-        """
-        lrs = dict()
-        for _lr in self.atomics.get('LineReplacement', list()):
-            if _lr.line not in lrs or lrs[_lr.line] is not None:
-                lrs[_lr.line] = _lr.ingredient
-        return lrs
-
-    @property
-    def line_insertions(self) -> dict:
-        '''
-        Extract only the line insertion information
-        from the edit_list of the patch.
-        For more information, see :py:class:`.atomic_operator.LineInsertion`
-
-        :return: The line insertion information, see *Hint*.
-        :rtype: dict(int, list(int))
-
-        .. hint::
-            - key: The index of insertion point
-            - value: The list of indices of ingredient lines
-
-        .. note::
-            If ``self.atomics`` is ``[LineReplacement(8, None), LineInsertion(4, 10)]``, ::
-
-                print(self.line_insertions)
-                >> { 4: [10] }
-
-        '''
-        lis = dict()
-        for _li in self.atomics.get('LineInsertion', list()):
-            lis[_li.point] = lis.get(_li.point, list())
-            lis[_li.point].append(_li.ingredient)
-        return lis
-
+    
     def apply(self):
         """
         This method applies the patch to the target program.
@@ -235,37 +159,16 @@ class Patch:
             - key: The target file name(path) related to the program root path
             - value: The contents of the file
         """
-        lrs = self.line_replacements.items()
-        lis = self.line_insertions.items()
-
+        assert isinstance(self.program.granularity_level, GranularityLevel)
         target_files = self.program.contents.keys()
-        new_contents = dict()
+        modification_points = deepcopy(self.program.modification_points)
+        new_contents = deepcopy(self.program.contents)
         for target_file in target_files:
-            new_contents[target_file] = list()
-            orig_codeline_list = self.program.contents[target_file]
-            new_codeline_list = new_contents[target_file]
-
-            replacements = dict(filter(lambda x: x[0][0] == target_file, lrs))
-            insertions = dict(filter(lambda x: x[0][0] == target_file, lis))
-
-            # Gathers the codelines along with applying the patches
-            for i in range(len(orig_codeline_list) + 1):
-                if (target_file, i) in insertions:
-                    for ingredient in insertions[(target_file, i)]:
-                        new_codeline_list.append(
-                            self.program.contents[ingredient[0]][ingredient[1]])
-                if i < len(orig_codeline_list):
-                    if (target_file, i) in replacements:
-                        ingredient = replacements[(target_file, i)]
-                        if ingredient is not None:
-                            new_codeline_list.append(self.program.contents[
-                                ingredient[0]][ingredient[1]])
-                    else:
-                        new_codeline_list.append(orig_codeline_list[i])
-        for target_file_path in sorted(new_contents.keys()):
-            with open(
-                os.path.join(self.program.tmp_path, target_file_path),
-                'w') as target_file:
-                target_file.write('\n'.join(new_contents[target_file_path]) +
-                                  '\n')
+            atomics = list(filter(lambda a: a.modification_point[0] == target_file, self.get_atomics()))
+            for atomic in atomics:
+                atomic.apply(self.program, new_contents, modification_points)
+        #self.program.reset_tmp_dir()
+        for target_file in new_contents:
+            with open(os.path.join(self.program.tmp_path, target_file), 'w') as tmp_file:
+                tmp_file.write(Program.to_source(self.program.granularity_level, new_contents[target_file]))
         return new_contents

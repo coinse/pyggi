@@ -20,12 +20,12 @@ class LocalSearch(metaclass=ABCMeta):
     .. hint::
         Example of LocalSearch class. ::
 
-            from pyggi import Program, Patch, MnplLevel
+            from pyggi import Program, Patch, GranularityLevel
             from pyggi.algorithms import LocalSearch
             from pyggi.atomic_operator import LineReplacement, LineInsertion
-            from pyggi.edit import LineDeletion
+            from pyggi.custom_operator import LineDeletion
 
-            program = Program("<PROGRAM_ROOT_PATH>", MnplLevel.PHYSICAL_LINE)
+            program = Program("<PROGRAM_ROOT_PATH>", GranularityLevel.LINE)
 
             class MyLocalSearch(LocalSearch):
                 def get_neighbour(self, patch):
@@ -34,7 +34,7 @@ class LocalSearch(metaclass=ABCMeta):
                         patch.remove(random.randrange(0, len(patch)))
                     else:
                         edit_operator = random.choice([LineDeletion, LineInsertion, LineReplacement])
-                        patch.add_edit(edit_operator.random(program))
+                        patch.add(edit_operator.random(program))
                     return patch
 
                 def get_fitness(self, patch):
@@ -98,7 +98,7 @@ class LocalSearch(metaclass=ABCMeta):
         .. hint::
             An example::
 
-                return patch.add_edit(LineDeletion.random(program))
+                return patch.add(LineDeletion.random(program))
         """
         pass
 
@@ -134,7 +134,7 @@ class LocalSearch(metaclass=ABCMeta):
         :param float timeout: The time limit of test run (unit: seconds)
         :param result_parser: The parser of test output
           (default: :py:meth:`.TestResult.pyggi_result_parser`)
-        :type result_parser: None or callable((str), :py:class:`.TestResult`)
+        :type result_parser: None or callable((str, str), :py:class:`.TestResult`)
         :return: The result of searching(Time, Success, FitnessEval, CompileFailed, BestPatch)
         :rtype: dict(int, dict(str, ))
         """

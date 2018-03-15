@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 def readme():
     with open('README.md') as f:
@@ -6,7 +6,7 @@ def readme():
 
 setup(
     name='pyggi',
-    version='1.0',
+    version='1.1',
     description='Python General Framework for Genetic Improvement',
     long_description=readme(),
     classifiers=[],
@@ -15,7 +15,7 @@ setup(
     author='Coinse',
     author_email='',
     license='MIT',
-    packages=['pyggi'],
-    install_requires=['argparse'],
+    packages=find_packages(),
+    install_requires=['argparse', 'astor'],
     dependency_links=[],
     zip_safe=False)

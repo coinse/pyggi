@@ -6,14 +6,14 @@ Automated program repair ::
 import sys
 import random
 import argparse
-from pyggi import Program, Patch, GranularityLevel
+from pyggi import Program, Patch, GranularityLevel, TestResult
 from pyggi.algorithms import LocalSearch
 from pyggi.atomic_operator import LineReplacement, LineInsertion
 from pyggi.custom_operator import LineDeletion
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='PYGGI Bug Repair Example')
-    parser.add_argument('project_path', type=str, default='../sample/Triangle_bug')
+    parser.add_argument('project_path', type=str, default='../sample/Triangle_bug_python')
     parser.add_argument('--epoch', type=int, default=30,
         help='total epoch(default: 30)')
     parser.add_argument('--iter', type=int, default=10000,
@@ -21,7 +21,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     program = Program(args.project_path, GranularityLevel.LINE)
-    #program.set_modifcation_points = []
+    program.set_modification_weights('triangle.py', [1]*35)
     class MyTabuSearch(LocalSearch):
         def get_neighbour(self, patch):
             while True:
@@ -48,9 +48,23 @@ if __name__ == "__main__":
             self.tabu = []
             return True
 
+    def result_parser(stdout, stderr):
+        import re
+        m = re.findall("runtime: ([0-9.]+)", stdout)
+        if len(m) > 0:
+            runtime = m[0]
+            failed = re.findall("([0-9]+) failed", stdout)
+            pass_all = len(failed) == 0
+            failed = int(failed[0]) if not pass_all else 0
+            return TestResult(True, {'runtime': runtime, 'pass_all': pass_all, 'failed': failed})
+        else:
+            return TestResult(False, None)
+
+
     tabu_search = MyTabuSearch(program)
     tabu_search.tabu = []
-    result = tabu_search.run(warmup_reps=1, epoch=args.epoch, max_iter=args.iter)
+    result = tabu_search.run(warmup_reps=1, epoch=args.epoch, max_iter=args.iter,
+        result_parser=result_parser, timeout=10)
     for epoch in result:
         print ("Epoch #{}".format(epoch))
         for key in result[epoch]:

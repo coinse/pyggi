@@ -48,26 +48,26 @@ class TestResult:
         return self.custom[name]
 
     @classmethod
-    def pyggi_result_parser(cls, output: str):
+    def pyggi_result_parser(cls, stdout: str, stderr: str):
         """
-        The test script should print output in the predefined,
+        The test script should print results in the predefined,
         PYGGI-recognisable format. This method parses the results.
 
-        :param str output: The output of the test script
+        :param str stdout: The stdout of the test script
 
         :return: The TestResult instance. If the PYGGI output are
           not detected, it is regarded as compile(execution) failure.
         :rtype: :py:class:`.TestResult`
 
         .. note::
-            When the output is
+            When the stdout is
 
                 [PYGGI_RESULT] {runtime: 7,pass_all: true}
 
             , returns ``TestResult(True, {'runtime': 7, 'pass_all': 'true'})``
         """
         import re
-        matched = re.findall("\[PYGGI_RESULT\]\s*\{(.*?)\}\s", output)
+        matched = re.findall("\[PYGGI_RESULT\]\s*\{(.*?)\}\s", stdout)
         compiled = len(matched) != 0
         custom = None
         if compiled:

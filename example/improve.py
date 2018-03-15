@@ -6,10 +6,10 @@ Improving non-functional properties ::
 import sys
 import random
 import argparse
-from pyggi import Program, Patch, MnplLevel
+from pyggi import Program, Patch, GranularityLevel
 from pyggi.algorithms import LocalSearch
 from pyggi.atomic_operator import LineReplacement, LineInsertion
-from pyggi.edit import LineDeletion
+from pyggi.custom_operator import LineDeletion
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='PYGGI Improvment Example')
@@ -20,7 +20,7 @@ if __name__ == "__main__":
         help='total iterations per epoch(default: 100)')
     args = parser.parse_args()
     
-    program = Program(args.project_path, MnplLevel.PHYSICAL_LINE)
+    program = Program(args.project_path, GranularityLevel.LINE)
    
     class MyLocalSearch(LocalSearch):
         def get_neighbour(self, patch):
@@ -28,7 +28,7 @@ if __name__ == "__main__":
                 patch.remove(random.randrange(0, len(patch)))
             else:
                 edit_operator = random.choice([LineDeletion, LineInsertion, LineReplacement])
-                patch.add_edit(edit_operator.random(program))
+                patch.add(edit_operator.create(program))
             return patch
 
         def get_fitness(self, patch):

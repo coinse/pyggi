@@ -142,7 +142,7 @@ class LocalSearch(metaclass=ABCMeta):
         warmup = list()
         empty_patch = Patch(self.program)
         for i in range(warmup_reps):
-            empty_patch.run_test(result_parser=result_parser)
+            empty_patch.run_test(timeout=timeout, result_parser=result_parser)
             warmup.append(self.get_fitness(empty_patch))
         original_fitness = float(sum(warmup)) / len(warmup)
 

@@ -92,6 +92,7 @@ The output of the test command should look like this,
 [PYGGI_RESULT] {runtime: 7, pass_all: true, ...}
 ```
 or, you can use own result parser when generating a `TestResult` instance.
+
 See more details in [here](https://coinse.github.io/pyggi/pyggi.test_result.html).
 
 This is the example of a custom result parser,
@@ -107,7 +108,7 @@ def result_parser(stdout, stderr):
     else:
   return TestResult(False, None)
 ```
-, when the standard output is
+, when the standard output is following:
 ```
 ======================================== test session starts ========================================
 platform linux -- Python 3.6.2, pytest-3.2.3, py-1.4.34, pluggy-0.4.0
@@ -118,4 +119,4 @@ test_triangle.py ....runtime: 0.22184443473815918
 
 
 ===================================== 4 passed in 0.23 seconds ======================================
-```.
+```

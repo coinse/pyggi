@@ -86,3 +86,36 @@ rm -f *.class
 javac -cp "./junit-4.10.jar" Triangle.java TriangleTest.java TestRunner.java
 java -cp "./junit-4.10.jar:./" TestRunner TriangleTest
 ```
+
+The output of the test command should look like this,
+```
+[PYGGI_RESULT] {runtime: 7, pass_all: true, ...}
+```
+or, you can use own result parser when generating a `TestResult` instance.
+See more details in [here](https://coinse.github.io/pyggi/pyggi.test_result.html).
+
+This is the example of a custom result parser,
+```python
+def result_parser(stdout, stderr):
+    import re
+    m = re.findall("runtime: ([0-9.]+)", stdout)
+    if len(m) > 0:
+        runtime = m[0]
+        failed = re.findall("([0-9]+) failed", stdout)
+        pass_all = len(failed) == 0
+        return TestResult(True, {'runtime': runtime, 'pass_all': pass_all})
+    else:
+  return TestResult(False, None)
+```
+, when the standard output is
+```
+======================================== test session starts ========================================
+platform linux -- Python 3.6.2, pytest-3.2.3, py-1.4.34, pluggy-0.4.0
+rootdir: /media/ssd/Workspace/PYGGI, inifile:
+collected 4 items                                                                                    
+
+test_triangle.py ....runtime: 0.22184443473815918
+
+
+===================================== 4 passed in 0.23 seconds ======================================
+```.

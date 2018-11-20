@@ -18,6 +18,19 @@ such as source code manipulation and patch management.
 ## Documentation
 You can find the PYGGI's documentation [here](https://coinse.github.io/pyggi/)
 
+## Citation
+An, G., Kim, J., & Yoo, S. (2018). [Comparing Line and AST Granularity Level for Program Repair using PyGGI](https://coinse.kaist.ac.kr/publications/pdfs/An2018to.pdf). In GI. https://doi.org/10.1145/3194810.3194814
+
+```
+  @inproceedings{An2018to,
+  author = {An, Gabin and Kim, Jinhan and Yoo, Shin},
+  booktitle = {Proceedings of the 4th Genetic Improvement Workshop},
+  series = {GI@ICSE 2018},
+  title = {Comparing Line and AST Granularity Level for Program Repair using PyGGI},
+  year = {2018},
+  doi = {10.1145/3194810.3194814},
+}
+```
 
 ## Getting Started
 

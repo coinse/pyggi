@@ -8,7 +8,7 @@ import shutil
 import json
 from enum import Enum
 from distutils.dir_util import copy_tree
-from .logger import Logger
+from .utils.logger import Logger
 
 
 class GranularityLevel(Enum):
@@ -113,8 +113,8 @@ class Program(object):
         elif self.granularity_level == GranularityLevel.AST:
             for target_file in self.target_files:
                 if Program.is_python_code(target_file):
-                    from .helper import stmt_python
-                    self._modification_points[target_file] = stmt_python.get_modification_points(
+                    from .tree import astor_helper
+                    self._modification_points[target_file] = astor_helper.get_modification_points(
                         self.contents[target_file])
         return self._modification_points
 
@@ -183,9 +183,9 @@ class Program(object):
             if Program.is_python_code(target_file):
                 def print_modification_point(contents, modification_points, i):
                     import astor
-                    from .helper import stmt_python
+                    from .tree import astor_helper
                     print(title_format.format('node', i))
-                    blk, idx = stmt_python.pos_2_block_n_index(contents, modification_points[i])
+                    blk, idx = astor_helper.pos_2_block_n_index(contents, modification_points[i])
                     print(astor.to_source(blk[idx]))
         for i in indices:
             print_modification_point(self.contents[target_file], self.modification_points[target_file], i)

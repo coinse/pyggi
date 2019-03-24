@@ -1,7 +1,6 @@
 from pyggi import Program, Patch, GranularityLevel, TestResult
 from pyggi.atomic_operator import StmtReplacement, StmtInsertion
 from pyggi.custom_operator import StmtDeletion, StmtMoving
-from pyggi.helper import stmt_python
 import ast
 import astor
 import copy

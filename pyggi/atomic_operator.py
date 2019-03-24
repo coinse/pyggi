@@ -364,14 +364,14 @@ class StmtReplacement(AtomicOperator):
         assert not self.ingredient or Program.have_the_same_file_extension(
             self.stmt[0], self.ingredient[0])
         if Program.is_python_code(self.stmt[0]):
-            from .helper import stmt_python
+            from .tree import astor_helper
             dst_root = new_contents[self.stmt[0]]
             dst_pos = modification_points[self.stmt[0]][self.stmt[1]]
             if not self.ingredient:
-                return stmt_python.replace((dst_root, dst_pos), self.ingredient)
+                return astor_helper.replace((dst_root, dst_pos), self.ingredient)
             ingr_root = program.contents[self.ingredient[0]]
             ingr_pos = program.modification_points[self.ingredient[0]][self.ingredient[1]]
-            return stmt_python.replace((dst_root, dst_pos), (ingr_root, ingr_pos))
+            return astor_helper.replace((dst_root, dst_pos), (ingr_root, ingr_pos))
         return False
 
     @classmethod
@@ -458,13 +458,13 @@ class StmtInsertion(AtomicOperator):
             self.ingredient[0])
         success = False
         if Program.is_python_code(self.stmt[0]):
-            from .helper import stmt_python
+            from .tree import astor_helper
             dst_root = new_contents[self.stmt[0]]
             dst_pos = modification_points[self.stmt[0]][self.stmt[1]]
             ingr_root = program.contents[self.ingredient[0]]
-            ingr_pos = stmt_python.get_modification_points(ingr_root)[self.ingredient[1]]
+            ingr_pos = astor_helper.get_modification_points(ingr_root)[self.ingredient[1]]
             if self.direction == 'before':
-                success = stmt_python.insert_before((dst_root, dst_pos), (ingr_root, ingr_pos))
+                success = astor_helper.insert_before((dst_root, dst_pos), (ingr_root, ingr_pos))
                 if success:
                     depth = len(dst_pos)
                     parent = dst_pos[:depth-1]
@@ -474,7 +474,7 @@ class StmtInsertion(AtomicOperator):
                             a, i = pos[depth-1]
                             pos[depth-1] = (a, i + 1)
             elif self.direction == 'after':
-                success = stmt_python.insert_after((dst_root, dst_pos), (ingr_root, ingr_pos))
+                success = astor_helper.insert_after((dst_root, dst_pos), (ingr_root, ingr_pos))
                 if success:
                     depth = len(dst_pos)
                     parent = dst_pos[:depth-1]

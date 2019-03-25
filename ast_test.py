@@ -1,6 +1,7 @@
-from pyggi import Program, Patch, GranularityLevel, TestResult
+from pyggi import Program, Patch, GranularityLevel
 from pyggi.atomic_operator import StmtReplacement, StmtInsertion
 from pyggi.custom_operator import StmtDeletion, StmtMoving
+from pyggi.utils.result_parsers import InvalidPatchError
 import ast
 import astor
 import copy
@@ -14,9 +15,12 @@ def result_parser(stdout, stderr):
         runtime = m[0]
         failed = re.findall("([0-9]+) failed", stdout)
         pass_all = len(failed) == 0
-        return TestResult(True, {'runtime': runtime, 'pass_all': pass_all})
+        if pass_all:
+            return runtime
+        else:
+            raise InvalidPatchError
     else:
-        return TestResult(False, None)
+        raise InvalidPatchError
 
 # Create new Program instance for 'sample/Triangle_fast_python'
 triangle = Program(

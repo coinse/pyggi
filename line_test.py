@@ -1,8 +1,10 @@
-from pyggi import Program, Patch, GranularityLevel, TestResult
+from pyggi import Program, Patch, GranularityLevel
 from pyggi.atomic_operator import LineReplacement, LineInsertion
 from pyggi.custom_operator import LineDeletion, LineMoving
+from pyggi.utils.result_parsers import InvalidPatchError
 import copy, random
 
+# Custom parser for the results of pytest
 def result_parser(stdout, stderr):
     import re
     m = re.findall("runtime: ([0-9.]+)", stdout)
@@ -10,9 +12,12 @@ def result_parser(stdout, stderr):
         runtime = m[0]
         failed = re.findall("([0-9]+) failed", stdout)
         pass_all = len(failed) == 0
-        return TestResult(True, {'runtime': runtime, 'pass_all': pass_all})
+        if len(failed) == 0:
+            return 1
+        else:
+            return 0
     else:
-        return TestResult(False, None)
+        raise InvalidPatchError
 
 triangle = Program(
     "sample/Triangle_bug_python", granularity_level=GranularityLevel.LINE)
@@ -37,9 +42,9 @@ for i in range(1000):
         patch.add(edit_operator.create(triangle, method='weighted'))
     tabu.append(patch)
     print (patch)
-    test_result = patch.run_test(timeout=30, result_parser=result_parser)
-    print (test_result)
-    if test_result.compiled and test_result.get('pass_all'):
+    fitness = patch.run_test(timeout=30, result_parser=result_parser)
+    print (fitness)
+    if patch.compiled and patch.fitness == 1:
         print("REPAIRED")
         break
 

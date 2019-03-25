@@ -23,6 +23,9 @@ if __name__ == "__main__":
     program = Program(args.project_path, GranularityLevel.LINE)
     #program.set_modifcation_points = []
     class MyTabuSearch(LocalSearch):
+        def setup(self):
+            self.tabu = []
+
         def get_neighbour(self, patch):
             while True:
                 temp_patch = patch.clone()
@@ -43,13 +46,11 @@ if __name__ == "__main__":
             return fitness < best_fitness
 
         def stopping_criterion(self, iter, patch):
-            if not int(patch.test_result.custom['failed']) == 0:
-                return False
-            self.tabu = []
-            return True
+            if patch.fitness == 0:
+                return True
+            return False
 
     tabu_search = MyTabuSearch(program)
-    tabu_search.tabu = []
     result = tabu_search.run(warmup_reps=1, epoch=args.epoch, max_iter=args.iter)
     for epoch in result:
         print ("Epoch #{}".format(epoch))

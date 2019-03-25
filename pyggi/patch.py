@@ -6,8 +6,7 @@ from copy import deepcopy
 from .program import Program, GranularityLevel
 from .atomic_operator import AtomicOperator
 from .custom_operator import CustomOperator
-from .test_result import TestResult
-
+from .utils.result_parsers import InvalidPatchError, standard_result_parser
 
 class Patch:
     """
@@ -19,10 +18,12 @@ class Patch:
     properties, via the predefined format that PYGGI recognises.
 
     """
-
     def __init__(self, program):
         self.program = program
-        self.test_result = None
+        self.fitness = None
+        self.elapsed_time = None
+        self.timeout = False
+        self.compiled = True
         self.edit_list = []
 
     def __str__(self):
@@ -43,7 +44,8 @@ class Patch:
         """
         clone_patch = Patch(self.program)
         clone_patch.edit_list = deepcopy(self.edit_list)
-        clone_patch.test_result = None
+        clone_patch.fitness = None
+        clone_patch.elapsed_time = None
         return clone_patch
 
     @property
@@ -73,17 +75,16 @@ class Patch:
                     diffs += diff
         return diffs
 
-    def run_test(self, timeout=15, result_parser=TestResult.pyggi_result_parser):
+    def run_test(self, timeout=15, result_parser=standard_result_parser):
         """
         Run the test script provided by the user
         which is placed within the project directory.
 
         :param float timeout: The time limit of test run (unit: seconds)
         :param result_parser: The parser of test output
-          (default: :py:meth:`.TestResult.pyggi_result_parser`)
+          (default: :py:meth:`.utils.result_parsers.standard_result_parser`)
         :type result_parser: None or callable((str, str), :py:class:`.TestResult`)
-        :return: The parsed output of test script execution
-        :rtype: :py:class:`.TestResult`
+        :return: The fitness value of the patch
         """
         import time
         import subprocess
@@ -99,15 +100,18 @@ class Patch:
         try:
             start = time.time()
             stdout, stderr = sprocess.communicate(timeout=timeout)
-            elapsed_time = time.time() - start
-            self.test_result = result_parser(stdout.decode("ascii"), stderr.decode("ascii"))
-            self.test_result.elapsed_time = elapsed_time
+            print(stdout, stderr)
+            self.elapsed_time = time.time() - start
+            self.fitness = result_parser(stdout.decode("ascii"), stderr.decode("ascii"))
         except subprocess.TimeoutExpired:
-            elapsed_time = timeout * 1000 # seconds to milliseconds
-            self.test_result = TestResult(False, custom=None, elapsed_time=elapsed_time)
+            self.elapsed_time = timeout * 1000 # seconds to milliseconds
+            self.timeout = True
+        except InvalidPatchError:
+            self.compiled = False
+
         os.chdir(cwd)
 
-        return self.test_result
+        return self.fitness
 
     def add(self, edit):
         """

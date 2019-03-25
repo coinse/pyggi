@@ -6,13 +6,14 @@ Improving non-functional properties ::
 import sys
 import random
 import argparse
-from pyggi import Program, Patch, GranularityLevel, TestResult
+from pyggi import Program, Patch, GranularityLevel
 from pyggi.algorithms import LocalSearch
 from pyggi.atomic_operator import LineReplacement, LineInsertion
 from pyggi.custom_operator import LineDeletion
+from pyggi.utils.result_parsers import InvalidPatchError
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='PYGGI Improvment Example')
+    parser = argparse.ArgumentParser(description='PYGGI Improvement Example')
     parser.add_argument('project_path', type=str, default='../sample/Triangle_fast_python')
     parser.add_argument('--epoch', type=int, default=30,
         help='total epoch(default: 30)')
@@ -31,14 +32,8 @@ if __name__ == "__main__":
                 patch.add(edit_operator.create(program))
             return patch
 
-        def get_fitness(self, patch):
-            return float(patch.test_result.get('runtime'))
-
-        def is_valid_patch(self, patch):
-            return patch.test_result.compiled and patch.test_result.custom['pass_all']
-
         def stopping_criterion(self, iter, patch):
-            return float(patch.test_result.get('runtime')) < 0.05
+            return patch.fitness < 0.05
 
     def result_parser(stdout, stderr):
         import re
@@ -47,9 +42,12 @@ if __name__ == "__main__":
             runtime = m[0]
             failed = re.findall("([0-9]+) failed", stdout)
             pass_all = len(failed) == 0
-            return TestResult(True, {'runtime': runtime, 'pass_all': pass_all})
+            if pass_all:
+                return round(float(runtime), 3)
+            else:
+                raise InvalidPatchError
         else:
-            return TestResult(False, None)
+            raise InvalidPatchError
 
     local_search = MyLocalSearch(program)
     result = local_search.run(warmup_reps=5, epoch=args.epoch, max_iter=args.iter, timeout=15, result_parser=result_parser)

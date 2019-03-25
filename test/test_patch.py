@@ -19,7 +19,9 @@ class TestPatch(object):
         patch, program = setup
 
         assert patch.program == program
-        assert patch.test_result == None
+        assert patch.fitness == None
+        assert patch.elapsed_time == None
+        assert patch.compiled == True
         assert len(patch.edit_list) == 0
 
     def test_str(self, setup):
@@ -45,7 +47,7 @@ class TestPatch(object):
 
         assert cloned_patch.program == patch.program
         assert cloned_patch == patch
-        assert cloned_patch.test_result == None
+        assert cloned_patch.fitness == None
 
     def test_add(self, setup):
         patch, program = setup
@@ -85,10 +87,11 @@ class TestPatch(object):
 
     def test_run_test(self, setup):
         patch, program = setup
-        test_result = patch.run_test()
-
-        assert test_result.compiled in [True, False]
-        assert test_result.elapsed_time > 0
+        patch.run_test()
+        
+        assert len(patch) > 0
+        assert patch.compiled in [True, False]
+        assert patch.elapsed_time > 0
 
     def test_remove(self, setup):
         patch, program = setup

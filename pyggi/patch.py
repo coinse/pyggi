@@ -100,7 +100,6 @@ class Patch:
         try:
             start = time.time()
             stdout, stderr = sprocess.communicate(timeout=timeout)
-            print(stdout, stderr)
             self.elapsed_time = time.time() - start
             self.fitness = result_parser(stdout.decode("ascii"), stderr.decode("ascii"))
         except subprocess.TimeoutExpired:

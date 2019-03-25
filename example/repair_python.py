@@ -33,8 +33,7 @@ if __name__ == "__main__":
                 if len(temp_patch) > 0 and random.random() < 0.5:
                     temp_patch.remove(random.randrange(0, len(temp_patch)))
                 else:
-                    #edit_operator = random.choice([LineDeletion, LineInsertion, LineReplacement])
-                    edit_operator = random.choice([LineReplacement])
+                    edit_operator = random.choice([LineDeletion, LineInsertion, LineReplacement])
                     temp_patch.add(edit_operator.create(program, method="weighted"))
                 if not any(item == temp_patch for item in self.tabu):
                     self.tabu.append(temp_patch)

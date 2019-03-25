@@ -1,13 +1,8 @@
-"""
-
-This module contains meta-heuristic search algorithms.
-
-"""
 import time
 from abc import ABCMeta, abstractmethod
-from .base.algorithm import Algorithm
-from .patch import Patch
-from .utils.result_parsers import InvalidPatchError, standard_result_parser
+from ..base.algorithm import Algorithm
+from ..patch import Patch
+from ..utils.result_parsers import InvalidPatchError, standard_result_parser
 
 class LocalSearch(Algorithm):
     """

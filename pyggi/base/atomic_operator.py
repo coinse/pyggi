@@ -5,7 +5,6 @@ and several classes inherit the AtomicOperator class.
 
 """
 from abc import ABCMeta, abstractmethod
-from .program import Program
 import ast
 
 
@@ -361,9 +360,9 @@ class StmtReplacement(AtomicOperator):
         :rtype: bool
         """
         assert self.is_valid_for(program)
-        assert not self.ingredient or Program.have_the_same_file_extension(
+        assert not self.ingredient or program.__class__.have_the_same_file_extension(
             self.stmt[0], self.ingredient[0])
-        if Program.is_python_code(self.stmt[0]):
+        if program.__class__.is_python_code(self.stmt[0]):
             from ..tree import astor_helper
             dst_root = new_contents[self.stmt[0]]
             dst_pos = modification_points[self.stmt[0]][self.stmt[1]]
@@ -454,10 +453,10 @@ class StmtInsertion(AtomicOperator):
         :rtype: bool
         """
         assert self.is_valid_for(program)
-        assert Program.have_the_same_file_extension(self.stmt[0],
+        assert program.__class__.have_the_same_file_extension(self.stmt[0],
             self.ingredient[0])
         success = False
-        if Program.is_python_code(self.stmt[0]):
+        if program.__class__.is_python_code(self.stmt[0]):
             from ..tree import astor_helper
             dst_root = new_contents[self.stmt[0]]
             dst_pos = modification_points[self.stmt[0]][self.stmt[1]]

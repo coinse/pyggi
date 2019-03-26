@@ -3,7 +3,6 @@ This module contains Patch class.
 """
 import os
 from copy import deepcopy
-from .program import Program
 from .atomic_operator import AtomicOperator
 from .custom_operator import CustomOperator
 from ..utils.result_parsers import InvalidPatchError, standard_result_parser

@@ -25,12 +25,12 @@ class TestProgram(object):
     def test_tmp_path(self, setup):
         program = setup
 
-        assert program.tmp_path == os.path.join(Program.TMP_DIR, program.name)
+        assert program.tmp_path == os.path.join(program.TMP_DIR, program.name)
 
     def test_clean_tmp_dir(self, setup):
         program = setup
         os.mkdir(os.path.join(program.tmp_path, 'test_dir'))
-        Program.clean_tmp_dir(program.tmp_path)
+        program.clean_tmp_dir()
 
         assert not os.listdir(program.tmp_path)
 

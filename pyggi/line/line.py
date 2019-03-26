@@ -1,8 +1,8 @@
 import os
 from abc import abstractmethod
-from ..base import Program
+from ..base import AbstractProgram
 
-class LineProgram(Program):
+class LineProgram(AbstractProgram):
     def __str__(self):
         code = ''
         for k in sorted(self.contents.keys()):

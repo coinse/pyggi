@@ -2,10 +2,10 @@ import os
 import ast
 import astor
 from abc import abstractmethod
-from ..base import Program
+from ..base import AbstractProgram
 from . import astor_helper
 
-class TreeProgram(Program):
+class TreeProgram(AbstractProgram):
     def __str__(self):
         return self.target_files
 
@@ -16,7 +16,7 @@ class TreeProgram(Program):
 
         self._modification_points = dict()
         for target_file in self.target_files:
-            if Program.is_python_code(target_file):
+            if self.__class__.is_python_code(target_file):
                 from ..tree import astor_helper
                 self._modification_points[target_file] = astor_helper.get_modification_points(
                     self.contents[target_file])
@@ -35,7 +35,7 @@ class TreeProgram(Program):
         if not indices:
             indices = range(len(self.modification_points[target_file]))
 
-        if Program.is_python_code(target_file):
+        if self.__class__.is_python_code(target_file):
             def print_modification_point(contents, modification_points, i):
                 import astor
                 from ..tree import astor_helper

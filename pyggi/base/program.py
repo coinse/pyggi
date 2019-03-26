@@ -11,7 +11,7 @@ from enum import Enum
 from distutils.dir_util import copy_tree
 from ..utils.logger import Logger
 
-class Program(ABC):
+class AbstractProgram(ABC):
     """
 
     Program encapsulates the original source code.
@@ -23,9 +23,9 @@ class Program(ABC):
 
     """
     CONFIG_FILE_NAME = 'PYGGI_CONFIG'
-    TMP_DIR = "./pyggi_tmp/"
 
     def __init__(self, path, config_file_name=CONFIG_FILE_NAME):
+        self.TMP_DIR = "./pyggi_tmp/"
         self.path = path.strip()
         if self.path.endswith('/'):
             self.path = self.path[:-1]
@@ -35,8 +35,7 @@ class Program(ABC):
             config = json.load(config_file)
             self.test_command = config['test_command']
             self.target_files = config['target_files']
-        Program.clean_tmp_dir(self.tmp_path)
-        copy_tree(self.path, self.tmp_path)
+        self.reset_tmp_dir()
         self.contents = self.parse(self.path, self.target_files)
         self.modification_weights = dict()
         self._modification_points = None
@@ -45,8 +44,21 @@ class Program(ABC):
     def __str__(self):
         pass
 
+    def clean_tmp_dir(self):
+        """
+        Clean the temporary project directory if it exists.
+
+        :param str tmp_path: The path of directory to clean.
+        :return: None
+        """
+        if os.path.exists(self.tmp_path):
+            shutil.rmtree(self.tmp_path)
+        if not os.path.exists(self.TMP_DIR):
+            os.mkdir(self.TMP_DIR)
+        os.mkdir(self.tmp_path)
+
     def reset_tmp_dir(self):
-        Program.clean_tmp_dir(self.tmp_path)
+        self.clean_tmp_dir()
         copy_tree(self.path, self.tmp_path)
 
     @property
@@ -55,7 +67,7 @@ class Program(ABC):
         :return: The path of the temporary dirctory
         :rtype: str
         """
-        return os.path.join(Program.TMP_DIR, self.name)
+        return os.path.join(self.TMP_DIR, self.name)
 
     @property
     @abstractmethod
@@ -109,7 +121,7 @@ class Program(ABC):
         """
         for target_file in new_contents:
             with open(os.path.join(self.tmp_path, target_file), 'w') as tmp_file:
-                tmp_file.write(Program.to_source(new_contents[target_file]))
+                tmp_file.write(self.__class__.to_source(new_contents[target_file]))
 
     @abstractmethod
     def print_modification_points(self, target_file, indices=None):
@@ -135,20 +147,6 @@ class Program(ABC):
         :rtype: str
         """
         pass
-
-    @classmethod
-    def clean_tmp_dir(cls, tmp_path):
-        """
-        Clean the temporary project directory if it exists.
-
-        :param str tmp_path: The path of directory to clean.
-        :return: None
-        """
-        if os.path.exists(tmp_path):
-            shutil.rmtree(tmp_path)
-        if not os.path.exists(Program.TMP_DIR):
-            os.mkdir(Program.TMP_DIR)
-        os.mkdir(tmp_path)
 
     @abstractmethod
     def parse(self, path, target_files):
@@ -209,4 +207,4 @@ class Program(ABC):
         :return: same or not
         :rtype: bool
         """
-        return Program.get_file_extension(file_path_1) == Program.get_file_extension(file_path_2)
+        return AbstractProgram.get_file_extension(file_path_1) == AbstractProgram.get_file_extension(file_path_2)

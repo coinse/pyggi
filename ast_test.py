@@ -1,6 +1,6 @@
-from pyggi import Program, Patch, GranularityLevel
-from pyggi.atomic_operator import StmtReplacement, StmtInsertion
-from pyggi.custom_operator import StmtDeletion, StmtMoving
+from pyggi.base import Program, Patch, GranularityLevel
+from pyggi.base.atomic_operator import StmtReplacement, StmtInsertion
+from pyggi.base.custom_operator import StmtDeletion, StmtMoving
 from pyggi.utils.result_parsers import InvalidPatchError
 import ast
 import astor

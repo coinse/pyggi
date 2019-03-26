@@ -6,11 +6,11 @@ Improving non-functional properties ::
 import sys
 import random
 import argparse
-from pyggi import Program, Patch, GranularityLevel
-from pyggi.algorithms import LocalSearch
-from pyggi.atomic_operator import LineReplacement, LineInsertion
-from pyggi.custom_operator import LineDeletion
+from pyggi.base import Program, Patch, GranularityLevel
+from pyggi.base.atomic_operator import LineReplacement, LineInsertion
+from pyggi.base.custom_operator import LineDeletion
 from pyggi.utils.result_parsers import InvalidPatchError
+from pyggi.algorithms import LocalSearch
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='PYGGI Improvement Example')

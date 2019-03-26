@@ -364,7 +364,7 @@ class StmtReplacement(AtomicOperator):
         assert not self.ingredient or Program.have_the_same_file_extension(
             self.stmt[0], self.ingredient[0])
         if Program.is_python_code(self.stmt[0]):
-            from .tree import astor_helper
+            from ..tree import astor_helper
             dst_root = new_contents[self.stmt[0]]
             dst_pos = modification_points[self.stmt[0]][self.stmt[1]]
             if not self.ingredient:
@@ -458,7 +458,7 @@ class StmtInsertion(AtomicOperator):
             self.ingredient[0])
         success = False
         if Program.is_python_code(self.stmt[0]):
-            from .tree import astor_helper
+            from ..tree import astor_helper
             dst_root = new_contents[self.stmt[0]]
             dst_pos = modification_points[self.stmt[0]][self.stmt[1]]
             ingr_root = program.contents[self.ingredient[0]]

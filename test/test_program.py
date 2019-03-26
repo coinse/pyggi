@@ -1,6 +1,6 @@
 import pytest
 import os
-from pyggi import Program, GranularityLevel
+from pyggi.base import Program, GranularityLevel
 
 
 @pytest.fixture(scope='session')

@@ -1,7 +1,7 @@
 import pytest
-from pyggi import Program, GranularityLevel
-from pyggi.custom_operator import LineDeletion, LineMoving
-from pyggi.atomic_operator import LineReplacement, LineInsertion
+from pyggi.base import Program, GranularityLevel
+from pyggi.base.custom_operator import LineDeletion, LineMoving
+from pyggi.base.atomic_operator import LineReplacement, LineInsertion
 
 
 @pytest.fixture(scope='session')

@@ -1,6 +1,6 @@
-from pyggi import Program, Patch, GranularityLevel
-from pyggi.atomic_operator import LineReplacement, LineInsertion
-from pyggi.custom_operator import LineDeletion, LineMoving
+from pyggi.base import Program, Patch, GranularityLevel
+from pyggi.base.atomic_operator import LineReplacement, LineInsertion
+from pyggi.base.custom_operator import LineDeletion, LineMoving
 from pyggi.utils.result_parsers import InvalidPatchError
 import copy, random
 
@@ -43,7 +43,6 @@ for i in range(1000):
     tabu.append(patch)
     print (patch)
     fitness = patch.run_test(timeout=30, result_parser=result_parser)
-    print (fitness)
     if patch.compiled and patch.fitness == 1:
         print("REPAIRED")
         break

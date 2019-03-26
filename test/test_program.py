@@ -1,22 +1,15 @@
 import pytest
 import os
-from pyggi.base import Program, GranularityLevel
+from pyggi.line import LineProgram as Program
 
 
 @pytest.fixture(scope='session')
 def setup():
-    program = Program('./resource/Triangle_bug', GranularityLevel.LINE)
+    program = Program('./resource/Triangle_bug')
     assert len(program.target_files) == 1
     assert program.target_files[0] == 'Triangle.java'
 
     return program
-
-
-class TestGranularityLevel(object):
-
-    def test_is_valid(self):
-        assert GranularityLevel.is_valid('line')
-        assert not GranularityLevel.is_valid('random_text')
 
 
 class TestProgram(object):
@@ -26,7 +19,6 @@ class TestProgram(object):
 
         assert not program.path.endswith('/')
         assert program.name == os.path.basename(program.path)
-        assert program.granularity_level == GranularityLevel.LINE
         assert program.test_command is not None
         assert program.target_files is not None
 
@@ -44,7 +36,6 @@ class TestProgram(object):
 
     def test_parse(self, setup):
         program = setup
-        contents = Program.parse(program.granularity_level, program.path,
-                                 program.target_files)
+        contents = program.parse(program.path, program.target_files)
         assert 'Triangle.java' in contents
         assert len(contents['Triangle.java']) > 0

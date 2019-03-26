@@ -148,8 +148,8 @@ class LineReplacement(AtomicOperator):
         return self.line
 
     def is_valid_for(self, program):
-        from .program import GranularityLevel
-        if program.granularity_level == GranularityLevel.LINE:
+        from ..line import LineProgram
+        if isinstance(program, LineProgram):
             return True
         return False
 
@@ -248,8 +248,8 @@ class LineInsertion(AtomicOperator):
         return self.line
     
     def is_valid_for(self, program):
-        from .program import GranularityLevel
-        if program.granularity_level == GranularityLevel.LINE:
+        from ..line import LineProgram
+        if isinstance(program, LineProgram):
             return True
         return False
 
@@ -343,8 +343,8 @@ class StmtReplacement(AtomicOperator):
         return self.stmt
 
     def is_valid_for(self, program):
-        from .program import GranularityLevel
-        if program.granularity_level == GranularityLevel.AST:
+        from ..tree import TreeProgram
+        if isinstance(program, TreeProgram):
             return True
         return False
 
@@ -435,8 +435,8 @@ class StmtInsertion(AtomicOperator):
         return self.stmt
 
     def is_valid_for(self, program):
-        from .program import GranularityLevel
-        if program.granularity_level == GranularityLevel.AST:
+        from ..tree import TreeProgram
+        if isinstance(program, TreeProgram):
             return True
         return False
 

@@ -1,4 +1,5 @@
-from pyggi.base import Program, Patch, GranularityLevel
+from pyggi.base import Patch
+from pyggi.line import LineProgram as Program
 from pyggi.base.atomic_operator import LineReplacement, LineInsertion
 from pyggi.base.custom_operator import LineDeletion, LineMoving
 from pyggi.utils.result_parsers import InvalidPatchError
@@ -19,8 +20,7 @@ def result_parser(stdout, stderr):
     else:
         raise InvalidPatchError
 
-triangle = Program(
-    "sample/Triangle_bug_python", granularity_level=GranularityLevel.LINE)
+triangle = Program("sample/Triangle_bug_python")
 # triangle.print_modification_points('triangle.py')
 
 # See sample/Triangle_bug_python/get_spectrum.py

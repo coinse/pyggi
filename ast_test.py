@@ -1,4 +1,5 @@
-from pyggi.base import Program, Patch, GranularityLevel
+from pyggi.base import Patch
+from pyggi.tree import TreeProgram as Program
 from pyggi.base.atomic_operator import StmtReplacement, StmtInsertion
 from pyggi.base.custom_operator import StmtDeletion, StmtMoving
 from pyggi.utils.result_parsers import InvalidPatchError
@@ -23,8 +24,7 @@ def result_parser(stdout, stderr):
         raise InvalidPatchError
 
 # Create new Program instance for 'sample/Triangle_fast_python'
-triangle = Program(
-    "sample/Triangle_fast_python", granularity_level=GranularityLevel.AST)
+triangle = Program("sample/Triangle_fast_python")
 triangle.print_modification_points('triangle.py')
 
 # Set modification weights

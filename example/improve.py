@@ -6,7 +6,8 @@ Improving non-functional properties ::
 import sys
 import random
 import argparse
-from pyggi.base import Program, Patch, GranularityLevel
+from pyggi.base import Patch
+from pyggi.line import LineProgram as Program
 from pyggi.base.atomic_operator import LineReplacement, LineInsertion
 from pyggi.base.custom_operator import LineDeletion
 from pyggi.utils.result_parsers import InvalidPatchError
@@ -21,7 +22,7 @@ if __name__ == "__main__":
         help='total iterations per epoch(default: 100)')
     args = parser.parse_args()
     
-    program = Program(args.project_path, GranularityLevel.LINE)
+    program = Program(args.project_path)
    
     class MyLocalSearch(LocalSearch):
         def get_neighbour(self, patch):

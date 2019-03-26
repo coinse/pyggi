@@ -3,7 +3,7 @@ This module contains Patch class.
 """
 import os
 from copy import deepcopy
-from .program import Program, GranularityLevel
+from .program import Program
 from .atomic_operator import AtomicOperator
 from .custom_operator import CustomOperator
 from ..utils.result_parsers import InvalidPatchError, standard_result_parser
@@ -162,7 +162,6 @@ class Patch:
             - key: The target file name(path) related to the program root path
             - value: The contents of the file
         """
-        assert isinstance(self.program.granularity_level, GranularityLevel)
         target_files = self.program.contents.keys()
         modification_points = deepcopy(self.program.modification_points)
         new_contents = deepcopy(self.program.contents)
@@ -173,5 +172,5 @@ class Patch:
         #self.program.reset_tmp_dir()
         for target_file in new_contents:
             with open(os.path.join(self.program.tmp_path, target_file), 'w') as tmp_file:
-                tmp_file.write(Program.to_source(self.program.granularity_level, new_contents[target_file]))
+                tmp_file.write(self.program.__class__.to_source(new_contents[target_file]))
         return new_contents

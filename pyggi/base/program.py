@@ -6,12 +6,12 @@ This module contains GranularityLevel and Program class.
 import os
 import shutil
 import json
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from enum import Enum
 from distutils.dir_util import copy_tree
 from ..utils.logger import Logger
 
-class Program(object):
+class Program(ABC):
     """
 
     Program encapsulates the original source code.

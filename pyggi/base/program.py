@@ -66,6 +66,9 @@ class AbstractProgram(ABC):
         pathlib.Path(self.tmp_path).mkdir(parents=True, exist_ok=True)
         copy_tree(self.path, self.tmp_path)
 
+    def remove_tmp_variant(self):
+        shutil.rmtree(self.tmp_path)
+
     @property
     @abstractmethod
     def modification_points(self):

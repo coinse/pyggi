@@ -25,14 +25,14 @@ class TestProgram(object):
     def test_tmp_path(self, setup):
         program = setup
 
-        assert program.tmp_path == os.path.join(program.TMP_DIR, program.name)
+        assert program.tmp_path.startswith(os.path.join(program.TMP_DIR, program.name))
 
-    def test_clean_tmp_dir(self, setup):
+    def test_create_tmp_variant(self, setup):
         program = setup
         os.mkdir(os.path.join(program.tmp_path, 'test_dir'))
-        program.clean_tmp_dir()
+        program.create_tmp_variant()
 
-        assert not os.listdir(program.tmp_path)
+        assert os.listdir(program.tmp_path)
 
     def test_parse(self, setup):
         program = setup

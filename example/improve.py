@@ -6,11 +6,10 @@ Improving non-functional properties ::
 import sys
 import random
 import argparse
-from pyggi.base import Patch
-from pyggi.line import LineProgram as Program
+from pyggi.base import Patch, InvalidPatchError
+from pyggi.line import LineProgram
 from pyggi.base.atomic_operator import LineReplacement, LineInsertion
 from pyggi.base.custom_operator import LineDeletion
-from pyggi.utils.result_parsers import InvalidPatchError
 from pyggi.algorithms import LocalSearch
 
 if __name__ == "__main__":
@@ -22,7 +21,17 @@ if __name__ == "__main__":
         help='total iterations per epoch(default: 100)')
     args = parser.parse_args()
     
-    program = Program(args.project_path)
+    class MyProgram(LineProgram):
+        def result_parser(self, stdout, stderr):
+            try:
+                runtime, pass_all = stdout.strip().split(',')
+                runtime = float(runtime)
+                if not pass_all == 'true':
+                    raise InvalidPatchError
+                else:
+                    return runtime
+            except:
+                raise InvalidPatchError
    
     class MyLocalSearch(LocalSearch):
         def get_neighbour(self, patch):
@@ -36,19 +45,9 @@ if __name__ == "__main__":
         def stopping_criterion(self, iter, patch):
             return patch.fitness < 100
 
-    def result_parser(stdout, stderr):
-        try:
-            runtime, pass_all = stdout.strip().split(',')
-            runtime = float(runtime)
-            if not pass_all == 'true':
-                raise InvalidPatchError
-            else:
-                return runtime
-        except:
-            raise InvalidPatchError
-
+    program = MyProgram(args.project_path)
     local_search = MyLocalSearch(program)
-    result = local_search.run(warmup_reps=5, epoch=args.epoch, max_iter=args.iter, timeout=15, result_parser=result_parser)
+    result = local_search.run(warmup_reps=5, epoch=args.epoch, max_iter=args.iter, timeout=15)
 
     for epoch in result:
         print ("Epoch #{}".format(epoch))

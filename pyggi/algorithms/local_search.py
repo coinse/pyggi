@@ -1,7 +1,6 @@
 import time
 from abc import ABCMeta, abstractmethod
-from ..base import Patch, Algorithm
-from ..utils.result_parsers import InvalidPatchError, standard_result_parser
+from ..base import Patch, Algorithm, InvalidPatchError
 
 class LocalSearch(Algorithm):
     """
@@ -73,8 +72,7 @@ class LocalSearch(Algorithm):
         """
         pass
 
-    def run(self, warmup_reps=1, epoch=5, max_iter=100, timeout=15,
-            result_parser=standard_result_parser):
+    def run(self, warmup_reps=1, epoch=5, max_iter=100, timeout=15):
         """
         It starts from a randomly generated candidate solution
         and iteratively moves to its neighbouring solution with
@@ -89,9 +87,6 @@ class LocalSearch(Algorithm):
         :param int epoch: The total epoch
         :param int max_iter: The maximum iterations per epoch
         :param float timeout: The time limit of test run (unit: seconds)
-        :param result_parser: The parser of test output
-          (default: :py:meth:`.utils.result_parsers.standard_result_parser`)
-        :type result_parser: None or callable((str, str), any)
         :return: The result of searching(Time, Success, FitnessEval, InvalidPatch, BestPatch)
         :rtype: dict(int, dict(str, ))
         """
@@ -99,7 +94,7 @@ class LocalSearch(Algorithm):
         warmup = list()
         empty_patch = Patch(self.program)
         for i in range(warmup_reps):
-            empty_patch.run_test(timeout=timeout, result_parser=result_parser)
+            empty_patch.run_test(timeout=timeout)
             warmup.append(empty_patch.fitness)
         original_fitness = float(sum(warmup)) / len(warmup)
 
@@ -122,7 +117,7 @@ class LocalSearch(Algorithm):
             start = time.time()
             for cur_iter in range(1, max_iter + 1):
                 patch = self.get_neighbour(best_patch.clone())
-                patch.run_test(timeout=timeout, result_parser=result_parser)
+                patch.run_test(timeout=timeout)
                 result[cur_epoch]['FitnessEval'] += 1
                 fitness = patch.fitness
                 if not fitness:

@@ -6,12 +6,11 @@ Automated program repair ::
 import sys
 import random
 import argparse
-from pyggi.base import Patch
-from pyggi.line import LineProgram as Program
+from pyggi.base import Patch, InvalidPatchError
+from pyggi.line import LineProgram
 from pyggi.base.atomic_operator import LineReplacement, LineInsertion
 from pyggi.base.custom_operator import LineDeletion
 from pyggi.algorithms import LocalSearch
-from pyggi.utils.result_parsers import InvalidPatchError
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='PYGGI Bug Repair Example')
@@ -21,8 +20,19 @@ if __name__ == "__main__":
     parser.add_argument('--iter', type=int, default=100,
         help='total iterations per epoch(default: 100)')
     args = parser.parse_args()
-    
-    program = Program(args.project_path)
+
+    class MyProgram(LineProgram):
+        def result_parser(self, stdout, stderr):
+            import re
+            m = re.findall("runtime: ([0-9.]+)", stdout)
+            if len(m) > 0:
+                runtime = m[0]
+                failed = re.findall("([0-9]+) failed", stdout)
+                pass_all = len(failed) == 0
+                failed = int(failed[0]) if not pass_all else 0
+                return failed
+            else:
+                raise InvalidPatchError
 
     class MyTabuSearch(LocalSearch):
         def setup(self):
@@ -49,21 +59,9 @@ if __name__ == "__main__":
                 return True
             return False
 
-    def result_parser(stdout, stderr):
-        import re
-        m = re.findall("runtime: ([0-9.]+)", stdout)
-        if len(m) > 0:
-            runtime = m[0]
-            failed = re.findall("([0-9]+) failed", stdout)
-            pass_all = len(failed) == 0
-            failed = int(failed[0]) if not pass_all else 0
-            return failed
-        else:
-            raise InvalidPatchError
-
+    program = MyProgram(args.project_path)
     tabu_search = MyTabuSearch(program)
-    result = tabu_search.run(warmup_reps=1, epoch=args.epoch, max_iter=args.iter,
-        result_parser=result_parser, timeout=10)
+    result = tabu_search.run(warmup_reps=1, epoch=args.epoch, max_iter=args.iter, timeout=10)
     for epoch in result:
         print ("Epoch #{}".format(epoch))
         for key in result[epoch]:

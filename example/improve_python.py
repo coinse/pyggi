@@ -6,11 +6,10 @@ Improving non-functional properties ::
 import sys
 import random
 import argparse
-from pyggi.base import Patch
+from pyggi.base import Patch, InvalidPatchError
 from pyggi.base.atomic_operator import LineReplacement, LineInsertion
 from pyggi.base.custom_operator import LineDeletion
-from pyggi.line import LineProgram as Program
-from pyggi.utils.result_parsers import InvalidPatchError
+from pyggi.line import LineProgram
 from pyggi.algorithms import LocalSearch
 
 if __name__ == "__main__":
@@ -22,8 +21,21 @@ if __name__ == "__main__":
         help='total iterations per epoch(default: 100)')
     args = parser.parse_args()
     
-    program = Program(args.project_path)
-   
+    class MyProgram(LineProgram):
+        def result_parser(self, stdout, stderr):
+            import re
+            m = re.findall("runtime: ([0-9.]+)", stdout)
+            if len(m) > 0:
+                runtime = m[0]
+                failed = re.findall("([0-9]+) failed", stdout)
+                pass_all = len(failed) == 0
+                if pass_all:
+                    return round(float(runtime), 3)
+                else:
+                    raise InvalidPatchError
+            else:
+                raise InvalidPatchError
+
     class MyLocalSearch(LocalSearch):
         def get_neighbour(self, patch):
             if len(patch) > 0 and random.random() < 0.5:
@@ -36,22 +48,9 @@ if __name__ == "__main__":
         def stopping_criterion(self, iter, patch):
             return patch.fitness < 0.05
 
-    def result_parser(stdout, stderr):
-        import re
-        m = re.findall("runtime: ([0-9.]+)", stdout)
-        if len(m) > 0:
-            runtime = m[0]
-            failed = re.findall("([0-9]+) failed", stdout)
-            pass_all = len(failed) == 0
-            if pass_all:
-                return round(float(runtime), 3)
-            else:
-                raise InvalidPatchError
-        else:
-            raise InvalidPatchError
-
+    program = MyProgram(args.project_path)
     local_search = MyLocalSearch(program)
-    result = local_search.run(warmup_reps=5, epoch=args.epoch, max_iter=args.iter, timeout=15, result_parser=result_parser)
+    result = local_search.run(warmup_reps=5, epoch=args.epoch, max_iter=args.iter, timeout=15)
     for epoch in result:
         print ("Epoch #{}".format(epoch))
         for key in result[epoch]:

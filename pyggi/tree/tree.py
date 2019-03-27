@@ -2,8 +2,9 @@ import os
 import ast
 import astor
 from abc import abstractmethod
-from ..base import AbstractProgram
 from . import astor_helper
+from ..base import AbstractProgram
+from ..utils import check_file_extension, get_file_extension
 
 class TreeProgram(AbstractProgram):
     def __str__(self):
@@ -16,7 +17,7 @@ class TreeProgram(AbstractProgram):
 
         self._modification_points = dict()
         for target_file in self.target_files:
-            if self.__class__.is_python_code(target_file):
+            if check_file_extension(target_file, 'py'):
                 from ..tree import astor_helper
                 self._modification_points[target_file] = astor_helper.get_modification_points(
                     self.contents[target_file])
@@ -35,7 +36,7 @@ class TreeProgram(AbstractProgram):
         if not indices:
             indices = range(len(self.modification_points[target_file]))
 
-        if self.__class__.is_python_code(target_file):
+        if check_file_extension(target_file, 'py'):
             def print_modification_point(contents, modification_points, i):
                 import astor
                 from ..tree import astor_helper
@@ -64,9 +65,9 @@ class TreeProgram(AbstractProgram):
     def parse(cls, path, target_files):
         contents = {}
         for target in target_files:
-            if cls.is_python_code(target):
+            if check_file_extension(target, 'py'):
                 root = astor.parse_file(os.path.join(path, target))
                 contents[target] = root
             else:
-                raise Exception('Program', '{} file is not supported'.format(cls.get_file_extension(target)))
+                raise Exception('Program', '{} file is not supported'.format(get_file_extension(target)))
         return contents

@@ -1,26 +1,25 @@
-from pyggi.base import Patch
-from pyggi.line import LineProgram as Program
+from pyggi.base import Patch, InvalidPatchError
+from pyggi.line import LineProgram
 from pyggi.base.atomic_operator import LineReplacement, LineInsertion
 from pyggi.base.custom_operator import LineDeletion, LineMoving
-from pyggi.utils.result_parsers import InvalidPatchError
 import copy, random
 
-# Custom parser for the results of pytest
-def result_parser(stdout, stderr):
-    import re
-    m = re.findall("runtime: ([0-9.]+)", stdout)
-    if len(m) > 0:
-        runtime = m[0]
-        failed = re.findall("([0-9]+) failed", stdout)
-        pass_all = len(failed) == 0
-        if len(failed) == 0:
-            return 1
+class MyProgram(LineProgram):
+    def result_parser(self, stdout, stderr):
+        import re
+        m = re.findall("runtime: ([0-9.]+)", stdout)
+        if len(m) > 0:
+            runtime = m[0]
+            failed = re.findall("([0-9]+) failed", stdout)
+            pass_all = len(failed) == 0
+            if len(failed) == 0:
+                return 1
+            else:
+                return 0
         else:
-            return 0
-    else:
-        raise InvalidPatchError
+            raise InvalidPatchError
 
-triangle = Program("sample/Triangle_bug_python")
+triangle = MyProgram("sample/Triangle_bug_python")
 # triangle.print_modification_points('triangle.py')
 
 # See sample/Triangle_bug_python/get_spectrum.py
@@ -42,7 +41,7 @@ for i in range(1000):
         patch.add(edit_operator.create(triangle, method='weighted'))
     tabu.append(patch)
     print (patch)
-    fitness = patch.run_test(timeout=30, result_parser=result_parser)
+    fitness = patch.run_test(timeout=30)
     if patch.compiled and patch.fitness == 1:
         print("REPAIRED")
         break

@@ -1,30 +1,30 @@
-from pyggi.base import Patch
-from pyggi.tree import TreeProgram as Program
+from pyggi.base import Patch, InvalidPatchError
+from pyggi.tree import TreeProgram
 from pyggi.base.atomic_operator import StmtReplacement, StmtInsertion
 from pyggi.base.custom_operator import StmtDeletion, StmtMoving
-from pyggi.utils.result_parsers import InvalidPatchError
 import ast
 import astor
 import copy
 import random
 
-# Custom parser for the results of pytest
-def result_parser(stdout, stderr):
-    import re
-    m = re.findall("runtime: ([0-9.]+)", stdout)
-    if len(m) > 0:
-        runtime = m[0]
-        failed = re.findall("([0-9]+) failed", stdout)
-        pass_all = len(failed) == 0
-        if pass_all:
-            return runtime
+class MyProgram(TreeProgram):
+    # Custom parser for the results of pytest
+    def result_parser(self, stdout, stderr):
+        import re
+        m = re.findall("runtime: ([0-9.]+)", stdout)
+        if len(m) > 0:
+            runtime = m[0]
+            failed = re.findall("([0-9]+) failed", stdout)
+            pass_all = len(failed) == 0
+            if pass_all:
+                return runtime
+            else:
+                raise InvalidPatchError
         else:
             raise InvalidPatchError
-    else:
-        raise InvalidPatchError
 
 # Create new Program instance for 'sample/Triangle_fast_python'
-triangle = Program("sample/Triangle_fast_python")
+triangle = MyProgram("sample/Triangle_fast_python")
 triangle.print_modification_points('triangle.py')
 
 # Set modification weights
@@ -40,5 +40,5 @@ patch.add(edit_operator.create(triangle, method='weighted'))
 
 # Print the patch's info, test results, and line differences made by the patch
 print (patch)
-print (patch.run_test(timeout=30, result_parser=result_parser))
+print (patch.run_test(timeout=30))
 print (patch.diff)

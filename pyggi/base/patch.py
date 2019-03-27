@@ -5,7 +5,12 @@ import os
 from copy import deepcopy
 from .atomic_operator import AtomicOperator
 from .custom_operator import CustomOperator
-from ..utils.result_parsers import InvalidPatchError, standard_result_parser
+
+class TimeoutError(Exception):
+    pass
+
+class InvalidPatchError(Exception):
+    pass
 
 class Patch:
     """
@@ -74,15 +79,12 @@ class Patch:
                     diffs += diff
         return diffs
 
-    def run_test(self, timeout=15, result_parser=standard_result_parser):
+    def run_test(self, timeout=15):
         """
         Run the test script provided by the user
         which is placed within the project directory.
 
         :param float timeout: The time limit of test run (unit: seconds)
-        :param result_parser: The parser of test output
-          (default: :py:meth:`.utils.result_parsers.standard_result_parser`)
-        :type result_parser: None or callable((str, str), :py:class:`.TestResult`)
         :return: The fitness value of the patch
         """
         import time
@@ -100,7 +102,7 @@ class Patch:
             start = time.time()
             stdout, stderr = sprocess.communicate(timeout=timeout)
             self.elapsed_time = time.time() - start
-            self.fitness = result_parser(stdout.decode("ascii"), stderr.decode("ascii"))
+            self.fitness = self.program.result_parser(stdout.decode("ascii"), stderr.decode("ascii"))
         except subprocess.TimeoutExpired:
             self.elapsed_time = timeout * 1000 # seconds to milliseconds
             self.timeout = True

@@ -4,8 +4,9 @@ This module contains AtomicOperator class which is an abstact base class,
 and several classes inherit the AtomicOperator class.
 
 """
-from abc import ABCMeta, abstractmethod
 import ast
+from abc import ABCMeta, abstractmethod
+from ..utils import have_the_same_file_extension, check_file_extension
 
 
 class AtomicOperator(metaclass=ABCMeta):
@@ -360,9 +361,9 @@ class StmtReplacement(AtomicOperator):
         :rtype: bool
         """
         assert self.is_valid_for(program)
-        assert not self.ingredient or program.__class__.have_the_same_file_extension(
+        assert not self.ingredient or have_the_same_file_extension(
             self.stmt[0], self.ingredient[0])
-        if program.__class__.is_python_code(self.stmt[0]):
+        if check_file_extension(self.stmt[0], 'py'):
             from ..tree import astor_helper
             dst_root = new_contents[self.stmt[0]]
             dst_pos = modification_points[self.stmt[0]][self.stmt[1]]
@@ -453,10 +454,9 @@ class StmtInsertion(AtomicOperator):
         :rtype: bool
         """
         assert self.is_valid_for(program)
-        assert program.__class__.have_the_same_file_extension(self.stmt[0],
-            self.ingredient[0])
+        assert have_the_same_file_extension(self.stmt[0], self.ingredient[0])
         success = False
-        if program.__class__.is_python_code(self.stmt[0]):
+        if check_file_extension(self.stmt[0], 'py'):
             from ..tree import astor_helper
             dst_root = new_contents[self.stmt[0]]
             dst_pos = modification_points[self.stmt[0]][self.stmt[1]]

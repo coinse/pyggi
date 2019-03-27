@@ -7,7 +7,7 @@ import sys
 import random
 import argparse
 from pyggi.base import Patch
-from pyggi.line import LineProgram as Program
+from pyggi.line import LineProgram
 from pyggi.base.atomic_operator import LineReplacement, LineInsertion
 from pyggi.base.custom_operator import LineDeletion
 from pyggi.algorithms import LocalSearch
@@ -21,7 +21,8 @@ if __name__ == "__main__":
         help='total iterations per epoch(default: 10000)')
     args = parser.parse_args()
     
-    program = Program(args.project_path)
+    program = LineProgram(args.project_path)
+
     #program.set_modifcation_points = []
     class MyTabuSearch(LocalSearch):
         def setup(self):

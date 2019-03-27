@@ -9,6 +9,7 @@ import json
 from abc import ABC, abstractmethod
 from enum import Enum
 from distutils.dir_util import copy_tree
+from . import InvalidPatchError
 from ..utils.logger import Logger
 
 class AbstractProgram(ABC):
@@ -164,47 +165,8 @@ class AbstractProgram(ABC):
         """
         pass
 
-    @staticmethod
-    def is_python_code(source_path):
-        """
-        :param source_path: The path of the source file
-        :type source_path: str
-        :return: whether the file's extention is *.py* or not
-        :rtype: bool
-        """
-        _, file_extension = os.path.splitext(source_path)
-        return file_extension == '.py'
-
-    @staticmethod
-    def is_java_code(source_path):
-        """
-        :param source_path: The path of the source file
-        :type source_path: str
-        :return: whether the file's extention is *.java* or not
-        :rtype: bool
-        """
-        _, file_extension = os.path.splitext(source_path)
-        return file_extension == '.java'
-
-    @staticmethod
-    def get_file_extension(file_path):
-        """
-        :param file_path: The path of file
-        :type file_path: str
-        :return: file extension
-        :rtype: str
-        """
-        _, file_extension = os.path.splitext(file_path)
-        return file_extension
-
-    @staticmethod
-    def have_the_same_file_extension(file_path_1, file_path_2):
-        """
-        :param file_path_1: The path of file 1
-        :type file_path_1: str
-        :param file_path_2: The path of file 2
-        :type file_path_2: str
-        :return: same or not
-        :rtype: bool
-        """
-        return AbstractProgram.get_file_extension(file_path_1) == AbstractProgram.get_file_extension(file_path_2)
+    def result_parser(self, stdout: str, stderr: str):
+        try:
+            return float(stdout.strip())
+        except:
+            raise InvalidPatchError

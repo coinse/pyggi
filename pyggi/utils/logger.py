@@ -3,7 +3,10 @@
 This module contains Logger class.
 
 """
+import os
+import pathlib
 import logging
+from .. import PYGGI_DIR
 
 class Logger(object):
     """
@@ -13,7 +16,7 @@ class Logger(object):
     5 logging levels are available: debug, info, warning, error, critial.
     For more information, see https://docs.python.org/3.6/library/logging.html .
     """
-    LOG_DIR = './pyggi_log'
+    LOG_DIR = os.path.join(PYGGI_DIR, 'logs')
 
     def __init__(self, name):
         import time
@@ -24,10 +27,9 @@ class Logger(object):
         formatter = logging.Formatter('%(asctime)s\t[%(levelname)s]\t%(message)s')
         # log directory
         if not os.path.exists(Logger.LOG_DIR):
-            os.mkdir(Logger.LOG_DIR)
+            pathlib.Path(Logger.LOG_DIR).mkdir(parents=True)
         # file handler
-        self.log_file_path = os.path.join(Logger.LOG_DIR,
-                                          "{}_{}.log".format(name, int(time.time())))
+        self.log_file_path = os.path.join(Logger.LOG_DIR, "{}.log".format(name))
         file_handler = logging.FileHandler(self.log_file_path)
         file_handler.setFormatter(formatter)
         file_handler.setLevel(logging.DEBUG)

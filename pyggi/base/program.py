@@ -6,11 +6,13 @@ This module contains GranularityLevel and Program class.
 import os
 import shutil
 import json
+import time
+import pathlib
 from abc import ABC, abstractmethod
-from enum import Enum
 from distutils.dir_util import copy_tree
 from . import InvalidPatchError
-from ..utils.logger import Logger
+from .. import PYGGI_DIR
+from ..utils import Logger
 
 class AbstractProgram(ABC):
     """
@@ -24,43 +26,27 @@ class AbstractProgram(ABC):
 
     """
     CONFIG_FILE_NAME = 'PYGGI_CONFIG'
+    TMP_DIR = os.path.join(PYGGI_DIR, 'tmp_variants')
+    SAVE_DIR = os.path.join(PYGGI_DIR, 'saved_variants')
 
     def __init__(self, path, config_file_name=CONFIG_FILE_NAME):
-        self.TMP_DIR = "./pyggi_tmp/"
-        self.path = path.strip()
-        if self.path.endswith('/'):
-            self.path = self.path[:-1]
+        self.timestamp = str(int(time.time()))
+        self.path = os.path.abspath(path.strip())
         self.name = os.path.basename(self.path)
-        self.logger = Logger(self.name)
+        self.logger = Logger(self.name + '_' + self.timestamp)
         with open(os.path.join(self.path, config_file_name)) as config_file:
             config = json.load(config_file)
             self.test_command = config['test_command']
             self.target_files = config['target_files']
-        self.reset_tmp_dir()
+        self.logger.info("Path to the temporal program variants: {}".format(self.tmp_path))
         self.contents = self.parse(self.path, self.target_files)
         self.modification_weights = dict()
         self._modification_points = None
+        self.create_tmp_variant()
 
     @abstractmethod
     def __str__(self):
         pass
-
-    def clean_tmp_dir(self):
-        """
-        Clean the temporary project directory if it exists.
-
-        :param str tmp_path: The path of directory to clean.
-        :return: None
-        """
-        if os.path.exists(self.tmp_path):
-            shutil.rmtree(self.tmp_path)
-        if not os.path.exists(self.TMP_DIR):
-            os.mkdir(self.TMP_DIR)
-        os.mkdir(self.tmp_path)
-
-    def reset_tmp_dir(self):
-        self.clean_tmp_dir()
-        copy_tree(self.path, self.tmp_path)
 
     @property
     def tmp_path(self):
@@ -68,7 +54,17 @@ class AbstractProgram(ABC):
         :return: The path of the temporary dirctory
         :rtype: str
         """
-        return os.path.join(self.TMP_DIR, self.name)
+        return os.path.join(self.__class__.TMP_DIR, self.name, self.timestamp)
+
+    def create_tmp_variant(self):
+        """
+        Clean the temporary project directory if it exists.
+
+        :param str tmp_path: The path of directory to clean.
+        :return: None
+        """
+        pathlib.Path(self.tmp_path).mkdir(parents=True, exist_ok=True)
+        copy_tree(self.path, self.tmp_path)
 
     @property
     @abstractmethod

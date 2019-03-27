@@ -22,7 +22,7 @@ class TestPatch(object):
         assert patch.program == program
         assert patch.fitness == None
         assert patch.elapsed_time == None
-        assert patch.compiled == True
+        assert patch.valid == True
         assert len(patch.edit_list) == 0
 
     def test_str(self, setup):
@@ -91,7 +91,10 @@ class TestPatch(object):
         patch.run_test()
         
         assert len(patch) > 0
-        assert patch.compiled in [True, False]
+        if patch.valid:
+            assert patch.fitness is not None
+        else:
+            assert patch.fitness is None
         assert patch.elapsed_time > 0
 
     def test_remove(self, setup):

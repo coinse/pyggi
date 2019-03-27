@@ -6,9 +6,6 @@ from copy import deepcopy
 from .atomic_operator import AtomicOperator
 from .custom_operator import CustomOperator
 
-class TimeoutError(Exception):
-    pass
-
 class InvalidPatchError(Exception):
     pass
 
@@ -27,7 +24,7 @@ class Patch:
         self.fitness = None
         self.elapsed_time = None
         self.timeout = False
-        self.compiled = True
+        self.valid = True
         self.edit_list = []
 
     def __str__(self):
@@ -107,7 +104,7 @@ class Patch:
             self.elapsed_time = timeout * 1000 # seconds to milliseconds
             self.timeout = True
         except InvalidPatchError:
-            self.compiled = False
+            self.valid = False
 
         os.chdir(cwd)
 
@@ -170,7 +167,6 @@ class Patch:
             atomics = list(filter(lambda a: a.modification_point[0] == target_file, self.get_atomics()))
             for atomic in atomics:
                 atomic.apply(self.program, new_contents, modification_points)
-        #self.program.reset_tmp_dir()
         for target_file in new_contents:
             with open(os.path.join(self.program.tmp_path, target_file), 'w') as tmp_file:
                 tmp_file.write(self.program.__class__.to_source(new_contents[target_file]))

@@ -42,7 +42,7 @@ for i in range(1000):
     tabu.append(patch)
     print (patch)
     fitness = patch.run_test(timeout=30)
-    if patch.compiled and patch.fitness == 1:
+    if patch.valid and patch.fitness == 1:
         print("REPAIRED")
         break
 

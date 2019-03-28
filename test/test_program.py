@@ -32,7 +32,7 @@ class TestProgram(object):
         os.mkdir(os.path.join(program.tmp_path, 'test_dir'))
         program.create_tmp_variant()
 
-        assert os.listdir(program.tmp_path)
+        assert os.path.exists(program.tmp_path)
 
     def test_parse(self, setup):
         program = setup

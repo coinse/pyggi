@@ -1,7 +1,6 @@
 from pyggi.base import Patch, InvalidPatchError
 from pyggi.line import LineProgram
-from pyggi.base.atomic_operator import LineReplacement, LineInsertion
-from pyggi.base.custom_operator import LineDeletion, LineMoving
+from pyggi.line import LineReplacement, LineInsertion, LineDeletion, LineMoving
 import copy, random
 
 class MyProgram(LineProgram):

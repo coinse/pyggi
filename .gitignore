@@ -9,8 +9,8 @@ paper/
 # Python egg metadata, regenerated from source files by setuptools.
 /*.egg-info
 
-pyggi_tmp/*
-*/pyggi_tmp/*
+.pyggi/*
+*/.pyggi/*
 
 # Pyenv
 .python-version

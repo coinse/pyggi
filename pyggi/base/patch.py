@@ -3,8 +3,7 @@ This module contains Patch class.
 """
 import os
 from copy import deepcopy
-from .atomic_operator import AtomicOperator
-from .custom_operator import CustomOperator
+from .edit import AtomicOperator, CustomOperator
 
 class InvalidPatchError(Exception):
     pass

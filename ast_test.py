@@ -1,7 +1,6 @@
 from pyggi.base import Patch, InvalidPatchError
 from pyggi.tree import TreeProgram
-from pyggi.base.atomic_operator import StmtReplacement, StmtInsertion
-from pyggi.base.custom_operator import StmtDeletion, StmtMoving
+from pyggi.tree import StmtReplacement, StmtInsertion, StmtDeletion, StmtMoving
 import ast
 import astor
 import copy

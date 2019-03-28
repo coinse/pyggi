@@ -1,7 +1,7 @@
 import pytest
 from pyggi.base import Patch
 from pyggi.line import LineProgram as Program
-from pyggi.base.custom_operator import LineDeletion, LineMoving
+from pyggi.line import LineDeletion, LineMoving
 
 
 @pytest.fixture(scope='session')

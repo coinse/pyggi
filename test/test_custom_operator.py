@@ -1,8 +1,6 @@
 import pytest
 from pyggi.line import LineProgram as Program
-from pyggi.base.custom_operator import LineDeletion, LineMoving
-from pyggi.base.atomic_operator import LineReplacement, LineInsertion
-
+from pyggi.line import LineDeletion, LineMoving, LineReplacement, LineInsertion
 
 @pytest.fixture(scope='session')
 def setup_deletion():

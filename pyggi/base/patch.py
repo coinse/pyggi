@@ -163,7 +163,7 @@ class Patch:
         modification_points = deepcopy(self.program.modification_points)
         new_contents = deepcopy(self.program.contents)
         for target_file in target_files:
-            atomics = list(filter(lambda a: a.modification_point[0] == target_file, self.get_atomics()))
+            atomics = list(filter(lambda a: a.target[0] == target_file, self.get_atomics()))
             for atomic in atomics:
                 atomic.apply(self.program, new_contents, modification_points)
         for target_file in new_contents:

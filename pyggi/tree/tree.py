@@ -7,7 +7,24 @@ from . import astor_helper
 from ..base import AbstractProgram, AtomicOperator, CustomOperator
 from ..utils import check_file_extension, get_file_extension, have_the_same_file_extension
 
-class TreeProgram(AbstractProgram):
+class AbstractTreeProgram(AbstractProgram):
+    @abstractmethod
+    def do_replace(self, target, ingredient):
+        pass
+
+    @abstractmethod
+    def do_insert(self, target, ingredient, direction='before'):
+        pass
+
+    @abstractmethod
+    def do_delete(self, target):
+        pass
+
+    @abstractmethod
+    def do_moving(self, target, ingredient, direction='before'):
+        pass
+
+class TreeProgram(AbstractTreeProgram):
     def __str__(self):
         return self.target_files
 
@@ -70,36 +87,44 @@ class TreeProgram(AbstractProgram):
                 raise Exception('Program', '{} file is not supported'.format(get_file_extension(target)))
         return contents
 
+    def do_replace(self, target, ingredient):
+        pass
+
+    def do_insert(self, target, ingredient, direction='before'):
+        pass
+
+    def do_delete(self, target):
+        pass
+
+    def do_moving(self, target, ingredient, direction='before'):
+        pass
+
 
 class StmtReplacement(AtomicOperator):
 
-    def __init__(self, stmt, ingredient=None):
+    def __init__(self, target, ingredient=None):
         """
-        :param stmt: The file path and the node # of statement which should be replaced
-        :type stmt: tuple(str, int)
+        :param target: The file path and the node # of statement which should be replaced
+        :type target: tuple(str, int)
         :param ingredient: The file path and the node # of statement which is an ingredient
         :type ingredient: None or tuple(str, int)
         """
         super().__init__()
-        assert isinstance(stmt[0], str)
-        assert isinstance(stmt[1], int)
-        assert stmt[1] >= 0
+        assert isinstance(target[0], str)
+        assert isinstance(target[1], int)
+        assert target[1] >= 0
         if ingredient:
             assert isinstance(ingredient[0], str)
             assert isinstance(ingredient[1], int)
             assert ingredient[1] >= 0
-        self.stmt = stmt
+        self.target = target
         self.ingredient = ingredient
 
     def __str__(self):
         """
-        :return: ``StmtReplacement([stmt], [ingredient])``
+        :return: ``StmtReplacement([target], [ingredient])``
         """
-        return "StmtReplacement({}, {})".format(self.stmt, self.ingredient)
-
-    @property
-    def modification_point(self):
-        return self.stmt
+        return "StmtReplacement({}, {})".format(self.target, self.ingredient)
 
     def is_valid_for(self, program):
         if isinstance(program, TreeProgram):
@@ -120,10 +145,10 @@ class StmtReplacement(AtomicOperator):
         """
         assert self.is_valid_for(program)
         assert not self.ingredient or have_the_same_file_extension(
-            self.stmt[0], self.ingredient[0])
-        if check_file_extension(self.stmt[0], 'py'):
-            dst_root = new_contents[self.stmt[0]]
-            dst_pos = modification_points[self.stmt[0]][self.stmt[1]]
+            self.target[0], self.ingredient[0])
+        if check_file_extension(self.target[0], 'py'):
+            dst_root = new_contents[self.target[0]]
+            dst_pos = modification_points[self.target[0]][self.target[1]]
             if not self.ingredient:
                 return astor_helper.replace((dst_root, dst_pos), self.ingredient)
             ingr_root = program.contents[self.ingredient[0]]
@@ -132,12 +157,12 @@ class StmtReplacement(AtomicOperator):
         return False
 
     @classmethod
-    def create(cls, program, stmt_file=None, ingr_file=None, del_rate=0, method='random'):
+    def create(cls, program, target_file=None, ingr_file=None, del_rate=0, method='random'):
         """
         :param program: The program instance to which the random edit will be applied.
         :type program: :py:class:`.Program`
-        :param str stmt_file: stmt is the target statement to delete.
-          If stmt_file is specified, the target statement will be chosen within that file.
+        :param str target_file: stmt is the target statement to delete.
+          If target_file is specified, the target statement will be chosen within that file.
         :param str ingr_file: Ingredient is the statement to be copied.
           If ingr_file is specified, the ingredient statement will be chosen within that file.
         :param float del_rate: The probability of ingredient will be None. ([0,1])
@@ -147,36 +172,36 @@ class StmtReplacement(AtomicOperator):
         :rtype: :py:class:`.atomic_operator.StmtReplacement`
         """
         assert del_rate >= 0 and del_rate <= 1
-        stmt_file = stmt_file or random.choice(program.target_files)
-        stmt = (stmt_file, program.select_modification_point(stmt_file, method))
+        target_file = target_file or random.choice(program.target_files)
+        target = (target_file, program.select_modification_point(target_file, method))
         if random.random() < del_rate:
             ingredient = None
         else:
             ingr_file = ingr_file or random.choice(program.target_files)
             ingredient = (ingr_file, program.select_modification_point(ingr_file, 'random'))
-        return cls(stmt, ingredient)
+        return cls(target, ingredient)
 
 
 class StmtInsertion(AtomicOperator):
 
-    def __init__(self, stmt, ingredient, direction='before'):
+    def __init__(self, target, ingredient, direction='before'):
         """
-        :param stmt: The file path and position of statement which is a target of modification
-        :type stmt: tuple(str, list(tuple(str, int)))
+        :param target: The file path and position of statement which is a target of modification
+        :type target: tuple(str, list(tuple(str, int)))
         :param ingredient: The file path and the position of statement which will be inserted
         :type ingredient: None or tuple(str, list(tuple(str, int)))
         :param direction: *'before'* or *'after'*
         :type direction: str
         """
         super().__init__()
-        assert isinstance(stmt[0], str)
-        assert isinstance(stmt[1], int)
-        assert stmt[1] >= 0
+        assert isinstance(target[0], str)
+        assert isinstance(target[1], int)
+        assert target[1] >= 0
         assert isinstance(ingredient[0], str)
         assert isinstance(ingredient[1], int)
         assert ingredient[1] >= 0
         assert direction in ['before', 'after']
-        self.stmt = stmt
+        self.target = target
         self.ingredient = ingredient
         self.direction = direction
 
@@ -184,11 +209,7 @@ class StmtInsertion(AtomicOperator):
         """
         :return: ``StmtInsertion([line], [ingredient], [direction])``
         """
-        return "StmtInsertion({}, {}, '{}')".format(self.stmt, self.ingredient, self.direction)
-
-    @property
-    def modification_point(self):
-        return self.stmt
+        return "StmtInsertion({}, {}, '{}')".format(self.target, self.ingredient, self.direction)
 
     def is_valid_for(self, program):
         if isinstance(program, TreeProgram):
@@ -209,11 +230,11 @@ class StmtInsertion(AtomicOperator):
         :rtype: bool
         """
         assert self.is_valid_for(program)
-        assert have_the_same_file_extension(self.stmt[0], self.ingredient[0])
+        assert have_the_same_file_extension(self.target[0], self.ingredient[0])
         success = False
-        if check_file_extension(self.stmt[0], 'py'):
-            dst_root = new_contents[self.stmt[0]]
-            dst_pos = modification_points[self.stmt[0]][self.stmt[1]]
+        if check_file_extension(self.target[0], 'py'):
+            dst_root = new_contents[self.target[0]]
+            dst_pos = modification_points[self.target[0]][self.target[1]]
             ingr_root = program.contents[self.ingredient[0]]
             ingr_pos = astor_helper.get_modification_points(ingr_root)[self.ingredient[1]]
             if self.direction == 'before':
@@ -222,7 +243,7 @@ class StmtInsertion(AtomicOperator):
                     depth = len(dst_pos)
                     parent = dst_pos[:depth-1]
                     index = dst_pos[depth-1][1]
-                    for pos in modification_points[self.stmt[0]]:
+                    for pos in modification_points[self.target[0]]:
                         if parent == pos[:depth-1] and len(pos) >= depth and index <= pos[depth-1][1]:
                             a, i = pos[depth-1]
                             pos[depth-1] = (a, i + 1)
@@ -232,19 +253,19 @@ class StmtInsertion(AtomicOperator):
                     depth = len(dst_pos)
                     parent = dst_pos[:depth-1]
                     index = dst_pos[depth - 1][1]
-                    for pos in modification_points[self.stmt[0]]:
+                    for pos in modification_points[self.target[0]]:
                         if parent == pos[:depth-1] and len(pos) >= depth and index < pos[depth-1][1]:
                             a, i = pos[depth-1]
                             pos[depth-1] = (a, i + 1)
         return success
 
     @classmethod
-    def create(cls, program, stmt_file=None, ingr_file=None, direction='before', method='random'):
+    def create(cls, program, target_file=None, ingr_file=None, direction='before', method='random'):
         """
         :param program: The program instance to which the random edit will be applied.
         :type program: :py:class:`.Program`
-        :param str line_file: stmt means the modification point of the edit.
-          If stmt_file is specified, the stmt will be chosen within that file.
+        :param str target_file: stmt means the modification point of the edit.
+          If target_file is specified, the stmt will be chosen within that file.
         :param str ingr_file: Ingredient is the stmt to be copied.
           If ingr_file is specified, the target stmt will be chosen within that file.
         :param str method: The way of choosing the modification point. **'random'** or **'weighted'**
@@ -252,17 +273,17 @@ class StmtInsertion(AtomicOperator):
           stmt and ingredient.
         :rtype: :py:class:`.atomic_operator.StmtInsertion`
         """
-        stmt_file = stmt_file or random.choice(program.target_files)
+        target_file = target_file or random.choice(program.target_files)
         ingr_file = ingr_file or random.choice(program.target_files)
-        stmt = (
-            stmt_file,
-            program.select_modification_point(stmt_file, method)
+        target = (
+            target_file,
+            program.select_modification_point(target_file, method)
         )
         ingredient = (
             ingr_file,
             program.select_modification_point(ingr_file, 'random')
         )
-        return cls(stmt, ingredient, direction)
+        return cls(target, ingredient, direction)
 
 class StmtDeletion(CustomOperator):
     """
@@ -303,22 +324,22 @@ class StmtDeletion(CustomOperator):
         return [StmtReplacement(self.x, None)]
 
     @classmethod
-    def create(cls, program, stmt_file=None, method='random'):
+    def create(cls, program, target_file=None, method='random'):
         """
         :param program: The program instance to which the created custom operator will be applied.
         :type program: :py:class:`.Program`
-        :param str stmt_file: stmt is the target statement to delete.
-          If stmt_file is specified, the target statement will be chosen within that file.
+        :param str target_file: stmt is the target statement to delete.
+          If target_file is specified, the target statement will be chosen within that file.
         :param str method: The way of choosing the modification point. **'random'** or **'weighted'**
         :return: The StmtDeletion instance with the randomly-selected modification point.
         :rtype: :py:class:`.custom_operator.StmtDeletion`
         """
-        stmt_file = stmt_file or random.choice(program.target_files)
-        stmt = (
-            stmt_file,
-            program.select_modification_point(stmt_file, method)
+        target_file = target_file or random.choice(program.target_files)
+        target = (
+            target_file,
+            program.select_modification_point(target_file, method)
         )
-        return cls(stmt)
+        return cls(target)
 
 class StmtMoving(CustomOperator):
     """
@@ -379,26 +400,26 @@ class StmtMoving(CustomOperator):
         return [StmtInsertion(self.y, self.x, self.direction), StmtReplacement(self.x, None)]
 
     @classmethod
-    def create(cls, program, stmt_file=None, ingr_file=None, direction='before', method='random'):
+    def create(cls, program, target_file=None, ingr_file=None, direction='before', method='random'):
         """
         :param program: The program instance to which the created custom operator will be applied.
         :type program: :py:class:`.Program`
-        :param str stmt_file: stmt means the modification point of the edit.
-          If stmt_file is specified, the statement will be chosen within that file.
+        :param str target_file: stmt means the modification point of the edit.
+          If target_file is specified, the statement will be chosen within that file.
         :param str ingr_file: Ingredient is the statement to be moved.
           If ingr_file is specified, the ingredient statement will be chosen within that file.
         :param str method: The way of choosing the modification point. **'random'** or **'weighted'**
         :return: The StmtMoving instance with the randomly-selected stmt & ingr.
         :rtype: :py:class:`.custom_operator.StmtMoving`
         """
-        stmt_file = stmt_file or random.choice(program.target_files)
+        target_file = target_file or random.choice(program.target_files)
         ingr_file = ingr_file or random.choice(program.target_files)
-        stmt = (
-            stmt_file,
-            program.select_modification_point(stmt_file, method)
+        target = (
+            target_file,
+            program.select_modification_point(target_file, method)
         )
         ingredient = (
             ingr_file,
             program.select_modification_point(ingr_file, 'random')
         )
-        return cls(ingredient, stmt, direction)
+        return cls(ingredient, target, direction)

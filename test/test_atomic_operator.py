@@ -5,20 +5,20 @@ from pyggi.line import LineReplacement, LineInsertion
 
 @pytest.fixture(scope='session')
 def setup_replacement():
-    line_file = 'Triangle.java'
+    target_file = 'Triangle.java'
     ingr_file = 'Triangle.java'
-    line = (line_file, 1)
+    target = (target_file, 1)
     ingredient = (ingr_file, 2)
-    return LineReplacement(line, ingredient), line, ingredient
+    return LineReplacement(target, ingredient), target, ingredient
 
 
 @pytest.fixture(scope='session')
 def setup_insertion():
-    line_file = 'Triangle.java'
+    target_file = 'Triangle.java'
     ingr_file = 'Triangle.java'
-    line = (line_file, 1)
+    target = (target_file, 1)
     ingredient = (ingr_file, 2)
-    return LineInsertion(line, ingredient), line, ingredient
+    return LineInsertion(target, ingredient), target, ingredient
 
 
 class TestAtomicOperator(object):
@@ -26,16 +26,16 @@ class TestAtomicOperator(object):
     class TestLineReplacement(object):
 
         def test_init(self, setup_replacement):
-            line_replacement, line, ingredient = setup_replacement
+            line_replacement, target, ingredient = setup_replacement
 
-            assert line_replacement.line == line
+            assert line_replacement.target == target
             assert line_replacement.ingredient == ingredient
 
         def test_create(self):
             program = Program('./resource/Triangle_bug')
             random_line_deletion_0 = LineReplacement.create(
                 program,
-                line_file='Triangle.java',
+                target_file='Triangle.java',
                 ingr_file='Triangle.java',
                 del_rate=0)
             assert isinstance(random_line_deletion_0, LineReplacement)
@@ -43,7 +43,7 @@ class TestAtomicOperator(object):
 
             random_line_deletion_1 = LineReplacement.create(
                 program,
-                line_file='Triangle.java',
+                target_file='Triangle.java',
                 ingr_file='Triangle.java',
                 del_rate=1)
             assert isinstance(random_line_deletion_1, LineReplacement)
@@ -52,14 +52,14 @@ class TestAtomicOperator(object):
     class TestLineInsertion(object):
 
         def test_init(self, setup_insertion):
-            line_insertion, line, ingredient = setup_insertion
+            line_insertion, target, ingredient = setup_insertion
 
-            assert line_insertion.line == line
+            assert line_insertion.target == target
             assert line_insertion.ingredient == ingredient
 
         def test_create(self):
             program = Program('./resource/Triangle_bug')
             random_line_insertion = LineInsertion.create(
-                program, line_file='Triangle.java', ingr_file='Triangle.java')
+                program, target_file='Triangle.java', ingr_file='Triangle.java')
 
             assert isinstance(random_line_insertion, LineInsertion)

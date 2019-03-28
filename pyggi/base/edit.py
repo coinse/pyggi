@@ -44,11 +44,6 @@ class AtomicOperator(ABC):
     def __str__(self):
         pass
 
-    @property
-    @abstractmethod
-    def modification_point(self):
-        pass
-
     @abstractmethod
     def is_valid_for(self, program):
         """

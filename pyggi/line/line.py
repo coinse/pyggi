@@ -3,7 +3,24 @@ import random
 from abc import abstractmethod
 from ..base import AbstractProgram, AtomicOperator, CustomOperator
 
-class LineProgram(AbstractProgram):
+class AbstractLineProgram(AbstractProgram):
+    @abstractmethod
+    def do_replace(self, target, ingredient):
+        pass
+
+    @abstractmethod
+    def do_insert(self, target, ingredient, direction='before'):
+        pass
+
+    @abstractmethod
+    def do_delete(self, target):
+        pass
+
+    @abstractmethod
+    def do_moving(self, target, ingredient, direction='before'):
+        pass
+
+class LineProgram(AbstractLineProgram):
     def __str__(self):
         code = ''
         for k in sorted(self.contents.keys()):
@@ -45,6 +62,18 @@ class LineProgram(AbstractProgram):
     def to_source(self, contents_of_file):
         return '\n'.join(contents_of_file) + '\n'
 
+    def do_replace(self, target, ingredient):
+        pass
+
+    def do_insert(self, target, ingredient, direction='before'):
+        pass
+
+    def do_delete(self, target):
+        pass
+
+    def do_moving(self, target, ingredient, direction='before'):
+        pass
+
 
 class LineReplacement(AtomicOperator):
     """
@@ -74,33 +103,29 @@ class LineReplacement(AtomicOperator):
         ======== ========
     """
 
-    def __init__(self, line, ingredient=None):
+    def __init__(self, target, ingredient=None):
         """
-        :param line: The file path and index of line which should be replaced
-        :type line: tuple(str, int)
+        :param target: The file path and index of line which should be replaced
+        :type target: tuple(str, int)
         :param ingredient: The file path and index of code line which is an ingredient
         :type ingredient: None or tuple(str, int)
         """
         super().__init__()
-        assert isinstance(line[0], str)
-        assert isinstance(line[1], int)
-        assert line[1] >= 0
+        assert isinstance(target[0], str)
+        assert isinstance(target[1], int)
+        assert target[1] >= 0
         if ingredient:
             assert isinstance(ingredient[0], str)
             assert isinstance(ingredient[1], int)
             assert ingredient[1] >= 0
-        self.line = line
+        self.target = target
         self.ingredient = ingredient
 
     def __str__(self):
         """
-        :return: ``LineReplacement([line], [ingredient])``
+        :return: ``LineReplacement([target], [ingredient])``
         """
-        return "LineReplacement({}, {})".format(self.line, self.ingredient)
-
-    @property
-    def modification_point(self):
-        return self.line
+        return "LineReplacement({}, {})".format(self.target, self.ingredient)
 
     def is_valid_for(self, program):
         if isinstance(program, LineProgram):
@@ -120,7 +145,7 @@ class LineReplacement(AtomicOperator):
         :rtype: bool
         """
         assert self.is_valid_for(program)
-        l_f, l_n = self.line # line file and line number
+        l_f, l_n = self.target # line file and line number
         if self.ingredient:
             i_f, i_n = self.ingredient
             new_contents[l_f][modification_points[l_f][l_n]] = program.contents[i_f][i_n]
@@ -129,12 +154,12 @@ class LineReplacement(AtomicOperator):
         return modification_points
 
     @classmethod
-    def create(cls, program, line_file=None, ingr_file=None, del_rate=0, method='random'):
+    def create(cls, program, target_file=None, ingr_file=None, del_rate=0, method='random'):
         """
         :param program: The program instance to which the random edit will be applied.
         :type program: :py:class:`.Program`
-        :param str line_file: Line is the target line to delete.
-          If line_file is specified, the target line will be chosen within the file.
+        :param str target_file: Line is the target line to delete.
+          If target_file is specified, the target line will be chosen within the file.
         :param str ingr_file: Ingredient is the line to be copied.
           If ingr_file is specified, the target line will be chosen within the file.
         :param float del_rate: The probability of that line is deleted
@@ -145,14 +170,14 @@ class LineReplacement(AtomicOperator):
         :rtype: :py:class:`.atomic_operator.LineReplacement`
         """
         assert del_rate >= 0 and del_rate <= 1
-        line_file = line_file or random.choice(program.target_files)
-        line = (line_file, program.select_modification_point(line_file, method))
+        target_file = target_file or random.choice(program.target_files)
+        target = (target_file, program.select_modification_point(target_file, method))
         if random.random() < del_rate:
             ingredient = None
         else:
             ingr_file = ingr_file or random.choice(program.target_files)
             ingredient = (ingr_file, program.select_modification_point(ingr_file, 'random'))
-        return cls(line, ingredient)
+        return cls(target, ingredient)
 
 
 class LineInsertion(AtomicOperator):
@@ -172,33 +197,29 @@ class LineInsertion(AtomicOperator):
         ======== ========
     """
 
-    def __init__(self, line, ingredient, direction='before'):
+    def __init__(self, target, ingredient, direction='before'):
         """
-        :param line: The file path and position of line which is a target of modification
-        :type line: tuple(str, int)
+        :param target: The file path and position of line which is a target of modification
+        :type target: tuple(str, int)
         :param ingredient: The file path and index of code line which is an ingredient
         :type ingredient: tuple(str, int)
         :param direction: *'before'* or *'after'*
         :type direction: str
         """
         super().__init__()
-        assert isinstance(line[0], str)
-        assert isinstance(line[1], int)
-        assert line[1] >= 0
+        assert isinstance(target[0], str)
+        assert isinstance(target[1], int)
+        assert target[1] >= 0
         assert isinstance(ingredient[0], str)
         assert isinstance(ingredient[1], int)
         assert ingredient[1] >= 0
         assert direction in ['before', 'after']
-        self.line = line
+        self.target = target
         self.ingredient = ingredient
         self.direction = direction
 
     def __str__(self):
-        return "LineInsertion({}, {}, '{}')".format(self.line, self.ingredient, self.direction)
-
-    @property
-    def modification_point(self):
-        return self.line
+        return "LineInsertion({}, {}, '{}')".format(self.target, self.ingredient, self.direction)
     
     def is_valid_for(self, program):
         if isinstance(program, LineProgram):
@@ -218,7 +239,7 @@ class LineInsertion(AtomicOperator):
         :rtype: bool
         """
         assert self.is_valid_for(program)
-        l_f, l_n = self.line
+        l_f, l_n = self.target
         i_f, i_n = self.ingredient
         if self.direction == 'before':
             new_contents[l_f].insert(
@@ -237,12 +258,12 @@ class LineInsertion(AtomicOperator):
         return True
 
     @classmethod
-    def create(cls, program, line_file=None, ingr_file=None, direction='before', method='random'):
+    def create(cls, program, target_file=None, ingr_file=None, direction='before', method='random'):
         """
         :param program: The program instance to which the random edit will be applied.
         :type program: :py:class:`.Program`
-        :param str line_file: Line means the modification point of the edit.
-          If line_file is specified, the line will be chosen within the file.
+        :param str target_file: Line means the modification point of the edit.
+          If target_file is specified, the line will be chosen within the file.
         :param str ingr_file: Ingredient is the line to be copied.
           If ingr_file is specified, the target line will be chosen within the file.
         :param str method: The way of choosing the modification point. **'random'** or **'weighted'**
@@ -250,17 +271,17 @@ class LineInsertion(AtomicOperator):
           line and ingredient.
         :rtype: :py:class:`.atomic_operator.LineInsertion`
         """
-        line_file = line_file or random.choice(program.target_files)
+        target_file = target_file or random.choice(program.target_files)
         ingr_file = ingr_file or random.choice(program.target_files)
-        line = (
-            line_file,
-            program.select_modification_point(line_file, method)
+        target = (
+            target_file,
+            program.select_modification_point(target_file, method)
         )
         ingredient = (
             ingr_file,
             program.select_modification_point(ingr_file, 'random')
         )
-        return cls(line, ingredient, direction)
+        return cls(target, ingredient, direction)
 
 class LineDeletion(CustomOperator):
     """
@@ -303,22 +324,22 @@ class LineDeletion(CustomOperator):
         return [LineReplacement(self.x, None)]
 
     @classmethod
-    def create(cls, program, line_file=None, method='random'):
+    def create(cls, program, target_file=None, method='random'):
         """
         :param program: The program instance to which the random custom operator will be applied.
         :type program: :py:class:`.Program`
-        :param str line_file: Line is the target line to delete.
-          If line_file is specified, the target line will be chosen within the file.
+        :param str target_file: Line is the target line to delete.
+          If target_file is specified, the target line will be chosen within the file.
         :param str method: The way of choosing the modification point. **'random'** or **'weighted'**
         :return: The LineDeletion instance with the randomly-selected line index.
         :rtype: :py:class:`.custom_operator.LineDeletion`
         """
-        line_file = line_file or random.choice(program.target_files)
-        line = (
-            line_file,
-            program.select_modification_point(line_file, method)
+        target_file = target_file or random.choice(program.target_files)
+        target = (
+            target_file,
+            program.select_modification_point(target_file, method)
         )
-        return cls(line)
+        return cls(target)
 
 class LineMoving(CustomOperator):
     """
@@ -379,25 +400,25 @@ class LineMoving(CustomOperator):
         return [LineInsertion(self.y, self.x, self.direction), LineReplacement(self.x, None)]
 
     @classmethod
-    def create(cls, program, line_file=None, ingr_file=None, direction='before', method='random'):
+    def create(cls, program, target_file=None, ingr_file=None, direction='before', method='random'):
         """
         :param program: The program instance to which the created custom operator will be applied.
         :type program: :py:class:`.Program`
-        :param str line_file: Line means the modification point of the edit. If line_file is specified, the line will be chosen within the file.
+        :param str target_file: Line means the modification point of the edit. If target_file is specified, the line will be chosen within the file.
         :param str ingr_file: Ingredient is the line to be moved.
           If ingr_file is specified, the ingredient line will be chosen within the file.
         :param str method: The way of choosing the modification point. **'random'** or **'weighted'**
         :return: The LineMoving instance with the randomly-selected line & ingr.
         :rtype: :py:class:`.custom_operator.LineMoving`
         """
-        line_file = line_file or random.choice(program.target_files)
+        target_file = target_file or random.choice(program.target_files)
         ingr_file = ingr_file or random.choice(program.target_files)
-        line = (
-            line_file,
-            program.select_modification_point(line_file, method)
+        target = (
+            target_file,
+            program.select_modification_point(target_file, method)
         )
         ingredient = (
             ingr_file,
             program.select_modification_point(ingr_file, 'random')
         )
-        return cls(ingredient, line, direction)
+        return cls(ingredient, target, direction)

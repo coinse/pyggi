@@ -20,10 +20,6 @@ class AbstractTreeProgram(AbstractProgram):
     def do_delete(self, target):
         pass
 
-    @abstractmethod
-    def do_moving(self, target, ingredient, direction='before'):
-        pass
-
 class TreeProgram(AbstractTreeProgram):
     def __str__(self):
         return self.target_files
@@ -126,10 +122,9 @@ class StmtReplacement(AtomicOperator):
         """
         return "StmtReplacement({}, {})".format(self.target, self.ingredient)
 
-    def is_valid_for(self, program):
-        if isinstance(program, TreeProgram):
-            return True
-        return False
+    @property
+    def domain(self):
+        return AbstractTreeProgram
 
     def apply(self, program, new_contents, modification_points):
         """"
@@ -143,7 +138,6 @@ class StmtReplacement(AtomicOperator):
         :return: success or not
         :rtype: bool
         """
-        assert self.is_valid_for(program)
         assert not self.ingredient or have_the_same_file_extension(
             self.target[0], self.ingredient[0])
         if check_file_extension(self.target[0], 'py'):
@@ -211,10 +205,9 @@ class StmtInsertion(AtomicOperator):
         """
         return "StmtInsertion({}, {}, '{}')".format(self.target, self.ingredient, self.direction)
 
-    def is_valid_for(self, program):
-        if isinstance(program, TreeProgram):
-            return True
-        return False
+    @property
+    def domain(self):
+        return AbstractTreeProgram
 
     def apply(self, program, new_contents, modification_points):
         """
@@ -229,7 +222,6 @@ class StmtInsertion(AtomicOperator):
         :return: success or not
         :rtype: bool
         """
-        assert self.is_valid_for(program)
         assert have_the_same_file_extension(self.target[0], self.ingredient[0])
         success = False
         if check_file_extension(self.target[0], 'py'):
@@ -292,10 +284,9 @@ class StmtDeletion(CustomOperator):
     def __str__(self):
         return "StmtDeletion({})".format(self.x)
 
-    def is_valid_for(self, program):
-        if isinstance(program, TreeProgram):
-            return True
-        return False
+    @property
+    def domain(self):
+        return AbstractTreeProgram
 
     @property
     def x(self):
@@ -348,10 +339,9 @@ class StmtMoving(CustomOperator):
     def __str__(self):
         return "StmtMoving({}, {}, '{}')".format(self.y, self.x, self.direction)
 
-    def is_valid_for(self, program):
-        if isinstance(program, TreeProgram):
-            return True
-        return False
+    @property
+    def domain(self):
+        return AbstractTreeProgram
 
     @property
     def x(self):

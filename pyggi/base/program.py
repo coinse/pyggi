@@ -8,6 +8,7 @@ import shutil
 import json
 import time
 import pathlib
+import random
 from abc import ABC, abstractmethod
 from distutils.dir_util import copy_tree
 from . import InvalidPatchError
@@ -78,23 +79,24 @@ class AbstractProgram(ABC):
         """
         pass
 
-    def select_modification_point(self, target_file, method="random"):
+    def random_target(self, target_file, method="random"):
         """
         :param str target_file: The modification point is chosen within target_file
         :param str method: The way how to choose a modification point, *'random'* or *'weighted'*
         :return: The **index** of modification point
         :rtype: int
         """
-        import random
+        if target_file is None:
+            target_file = target_file or random.choice(self.target_files)
         assert target_file in self.target_files
         assert method in ['random', 'weighted']
         candidates = self.modification_points[target_file]
         if method == 'random' or target_file not in self.modification_weights:
-            return random.randrange(len(candidates))
+            return (target_file, random.randrange(len(candidates)))
         elif method == 'weighted':
             cumulated_weights = sum(self.modification_weights[target_file])
             list_of_prob = list(map(lambda w: float(w)/cumulated_weights, self.modification_weights[target_file]))
-            return random.choices(list(range(len(candidates))), weights=list_of_prob, k=1)[0]
+            return (target_file, random.choices(list(range(len(candidates))), weights=list_of_prob, k=1)[0])
 
     def set_modification_weights(self, target_file, weights):
         """

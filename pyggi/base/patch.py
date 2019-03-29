@@ -118,7 +118,7 @@ class Patch:
         :return: None
         """
         assert isinstance(edit, (AtomicOperator, CustomOperator))
-        assert edit.is_valid_for(self.program)
+        assert isinstance(self.program, edit.domain)
         self.edit_list.append(edit)
 
     def remove(self, index: int):

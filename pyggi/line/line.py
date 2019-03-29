@@ -1,7 +1,7 @@
 import os
 import random
 from abc import abstractmethod
-from ..base import AbstractProgram, AtomicOperator, CustomOperator
+from ..base import AbstractProgram, AbstractEdit, CustomOperator
 
 class AbstractLineProgram(AbstractProgram):
     @abstractmethod
@@ -14,10 +14,6 @@ class AbstractLineProgram(AbstractProgram):
 
     @abstractmethod
     def do_delete(self, target):
-        pass
-
-    @abstractmethod
-    def do_moving(self, target, ingredient, direction='before'):
         pass
 
 class LineProgram(AbstractLineProgram):
@@ -62,20 +58,40 @@ class LineProgram(AbstractLineProgram):
     def to_source(self, contents_of_file):
         return '\n'.join(contents_of_file) + '\n'
 
-    def do_replace(self, target, ingredient):
-        pass
+    def do_replace(self, op, new_contents, modification_points):
+        l_f, l_n = op.target # line file and line number
+        if op.ingredient:
+            i_f, i_n = op.ingredient
+            new_contents[l_f][modification_points[l_f][l_n]] = self.contents[i_f][i_n]
+        else:
+            new_contents[l_f][modification_points[l_f][l_n]] = ''
+        return modification_points
 
-    def do_insert(self, target, ingredient, direction='before'):
-        pass
+    def do_insert(self, op, new_contents, modification_points):
+        l_f, l_n = op.target
+        i_f, i_n = op.ingredient
+        if op.direction == 'before':
+            new_contents[l_f].insert(
+                modification_points[l_f][l_n],
+                self.contents[i_f][i_n]
+            )
+            for i in range(l_n, len(modification_points[l_f])):
+                modification_points[l_f][i] += 1
+        elif op.direction == 'after':
+            new_contents[l_f].insert(
+                modification_points[l_f][l_n] + 1,
+                self.contents[i_f][i_n]
+            )
+            for i in range(l_n + 1, len(modification_points[l_f])):
+                modification_points[l_f][i] += 1
+        return True
 
-    def do_delete(self, target):
-        pass
+    def do_delete(self, op, new_contents, modification_points):
+        l_f, l_n = op.target # line file and line number
+        new_contents[l_f][modification_points[l_f][l_n]] = ''
+        return modification_points
 
-    def do_moving(self, target, ingredient, direction='before'):
-        pass
-
-
-class LineReplacement(AtomicOperator):
+class LineReplacement(AbstractEdit):
     """
     .. note::
         1. LineReplacement((*[file_path]*, 3), (*[file_path]*, 2))
@@ -104,83 +120,25 @@ class LineReplacement(AtomicOperator):
     """
 
     def __init__(self, target, ingredient=None):
-        """
-        :param target: The file path and index of line which should be replaced
-        :type target: tuple(str, int)
-        :param ingredient: The file path and index of code line which is an ingredient
-        :type ingredient: None or tuple(str, int)
-        """
-        super().__init__()
-        assert isinstance(target[0], str)
-        assert isinstance(target[1], int)
-        assert target[1] >= 0
+        self.__class__.is_modi(target)
         if ingredient:
-            assert isinstance(ingredient[0], str)
-            assert isinstance(ingredient[1], int)
-            assert ingredient[1] >= 0
+            self.__class__.is_modi(ingredient)
         self.target = target
         self.ingredient = ingredient
 
-    def __str__(self):
-        """
-        :return: ``LineReplacement([target], [ingredient])``
-        """
-        return "LineReplacement({}, {})".format(self.target, self.ingredient)
-
-    def is_valid_for(self, program):
-        if isinstance(program, LineProgram):
-            return True
-        return False
+    @property
+    def domain(self):
+        return AbstractLineProgram
 
     def apply(self, program, new_contents, modification_points):
-        """"
-        Apply the operator to the contents of program
-        :param program: The original program instance
-        :type program: :py:class:`.Program`
-        :param new_contents: The new contents of program to which the edit will be applied
-        :type new_contents: dict(str, list(str))
-        :param modification_points: The original modification points
-        :type modification_points: list(int)
-        :return: success or not
-        :rtype: bool
-        """
-        assert self.is_valid_for(program)
-        l_f, l_n = self.target # line file and line number
-        if self.ingredient:
-            i_f, i_n = self.ingredient
-            new_contents[l_f][modification_points[l_f][l_n]] = program.contents[i_f][i_n]
-        else:
-            new_contents[l_f][modification_points[l_f][l_n]] = ''
-        return modification_points
+        return program.do_replace(self, new_contents, modification_points)
 
     @classmethod
-    def create(cls, program, target_file=None, ingr_file=None, del_rate=0, method='random'):
-        """
-        :param program: The program instance to which the random edit will be applied.
-        :type program: :py:class:`.Program`
-        :param str target_file: Line is the target line to delete.
-          If target_file is specified, the target line will be chosen within the file.
-        :param str ingr_file: Ingredient is the line to be copied.
-          If ingr_file is specified, the target line will be chosen within the file.
-        :param float del_rate: The probability of that line is deleted
-          instead of replaced with another line
-        :param str method: The way of choosing the modification point. **'random'** or **'weighted'**
-        :return: The LineReplacement instance with the randomly-selected properties:
-          line and ingredient.
-        :rtype: :py:class:`.atomic_operator.LineReplacement`
-        """
-        assert del_rate >= 0 and del_rate <= 1
-        target_file = target_file or random.choice(program.target_files)
-        target = (target_file, program.select_modification_point(target_file, method))
-        if random.random() < del_rate:
-            ingredient = None
-        else:
-            ingr_file = ingr_file or random.choice(program.target_files)
-            ingredient = (ingr_file, program.select_modification_point(ingr_file, 'random'))
-        return cls(target, ingredient)
+    def create(cls, program, target_file=None, ingr_file=None, method='random'):
+        return cls(program.random_target(target_file, method),
+                   program.random_target(ingr_file, 'random'))
 
-
-class LineInsertion(AtomicOperator):
+class LineInsertion(AbstractEdit):
     """
     .. note::
         1. LineInsertion((*[file_path]*, 4), (*[file_path]*, 2))
@@ -198,227 +156,78 @@ class LineInsertion(AtomicOperator):
     """
 
     def __init__(self, target, ingredient, direction='before'):
-        """
-        :param target: The file path and position of line which is a target of modification
-        :type target: tuple(str, int)
-        :param ingredient: The file path and index of code line which is an ingredient
-        :type ingredient: tuple(str, int)
-        :param direction: *'before'* or *'after'*
-        :type direction: str
-        """
         super().__init__()
-        assert isinstance(target[0], str)
-        assert isinstance(target[1], int)
-        assert target[1] >= 0
-        assert isinstance(ingredient[0], str)
-        assert isinstance(ingredient[1], int)
-        assert ingredient[1] >= 0
+        self.__class__.is_modi(target, ingredient)
         assert direction in ['before', 'after']
         self.target = target
         self.ingredient = ingredient
         self.direction = direction
 
-    def __str__(self):
-        return "LineInsertion({}, {}, '{}')".format(self.target, self.ingredient, self.direction)
-    
-    def is_valid_for(self, program):
-        if isinstance(program, LineProgram):
-            return True
-        return False
+    @property
+    def domain(self):
+        return AbstractLineProgram
 
     def apply(self, program, new_contents, modification_points):
-        """"
-        Apply the operator to the contents of program
-        :param program: The original program instance
-        :type program: :py:class:`.Program`
-        :param new_contents: The new contents of program to which the edit will be applied
-        :type new_contents: dict(str, list(str))
-        :param modification_points: The original modification points
-        :type modification_points: list(int)
-        :return: success or not
-        :rtype: bool
-        """
-        assert self.is_valid_for(program)
-        l_f, l_n = self.target
-        i_f, i_n = self.ingredient
-        if self.direction == 'before':
-            new_contents[l_f].insert(
-                modification_points[l_f][l_n],
-                program.contents[i_f][i_n]
-            )
-            for i in range(l_n, len(modification_points[l_f])):
-                modification_points[l_f][i] += 1
-        elif self.direction == 'after':
-            new_contents[l_f].insert(
-                modification_points[l_f][l_n] + 1,
-                program.contents[i_f][i_n]
-            )
-            for i in range(l_n + 1, len(modification_points[l_f])):
-                modification_points[l_f][i] += 1
-        return True
+        return program.do_insert(self, new_contents, modification_points)
 
     @classmethod
     def create(cls, program, target_file=None, ingr_file=None, direction='before', method='random'):
-        """
-        :param program: The program instance to which the random edit will be applied.
-        :type program: :py:class:`.Program`
-        :param str target_file: Line means the modification point of the edit.
-          If target_file is specified, the line will be chosen within the file.
-        :param str ingr_file: Ingredient is the line to be copied.
-          If ingr_file is specified, the target line will be chosen within the file.
-        :param str method: The way of choosing the modification point. **'random'** or **'weighted'**
-        :return: The LineInsertion instance with the randomly-selected properties:
-          line and ingredient.
-        :rtype: :py:class:`.atomic_operator.LineInsertion`
-        """
-        target_file = target_file or random.choice(program.target_files)
-        ingr_file = ingr_file or random.choice(program.target_files)
-        target = (
-            target_file,
-            program.select_modification_point(target_file, method)
-        )
-        ingredient = (
-            ingr_file,
-            program.select_modification_point(ingr_file, 'random')
-        )
-        return cls(target, ingredient, direction)
+        return cls(program.random_target(target_file, 'random'),
+                   program.random_target(ingr_file, 'random'),
+                   direction)
 
-class LineDeletion(CustomOperator):
-    """
-    LineDeletion: Delete x
-    
-    It replaces the code line with an empty line.
-    """
-    def __str__(self):
-        return "LineDeletion({})".format(self.x)
-
-    def is_valid_for(self, program):
-        if isinstance(program, LineProgram):
-            return True
-        return False
+class LineDeletion(AbstractEdit):
+    def __init__(self, target):
+        super().__init__()
+        self.__class__.is_modi(target)
+        self.target = target
 
     @property
-    def x(self):
-        """
-        Delete **x**
+    def domain(self):
+        return AbstractLineProgram
 
-        :return: The file path and the index of target line to be deleted.
-        :rtype: tuple(str, int)
-        """
-        return self.args[0]
-
-    @property
-    def length_of_args(self):
-        """
-        :return: ``1``
-        :rtype: int
-        """
-        return 1
-
-    @property
-    def atomic_operators(self):
-        """
-        :return: ``[LineReplacement(self.x, None)]``
-        :rtype: list(:py:class:`.atomic_operator.AtomicOperator`)
-        """
-        return [LineReplacement(self.x, None)]
+    def apply(self, program, new_contents, modification_points):
+        return program.do_delete(self, new_contents, modification_points)
 
     @classmethod
     def create(cls, program, target_file=None, method='random'):
-        """
-        :param program: The program instance to which the random custom operator will be applied.
-        :type program: :py:class:`.Program`
-        :param str target_file: Line is the target line to delete.
-          If target_file is specified, the target line will be chosen within the file.
-        :param str method: The way of choosing the modification point. **'random'** or **'weighted'**
-        :return: The LineDeletion instance with the randomly-selected line index.
-        :rtype: :py:class:`.custom_operator.LineDeletion`
-        """
-        target_file = target_file or random.choice(program.target_files)
-        target = (
-            target_file,
-            program.select_modification_point(target_file, method)
-        )
-        return cls(target)
+        return cls(program.random_target(target_file, method))
 
-class LineMoving(CustomOperator):
+class LineMoving(AbstractEdit):
     """
-    LineMoving: Move x [before|after] y
+    .. note::
+        1. LineInsertion((*[file_path]*, 4), (*[file_path]*, 2))
+
+        ======== ========
+        Before   After
+        ======== ========
+        0        0
+        1        1
+        2        2
+        3        3
+        4        2
+        ...      4
+        ======== ========
     """
-    def __str__(self):
-        return "LineMoving({}, {}, '{}')".format(self.y, self.x, self.direction)
 
-    def is_valid_for(self, program):
-        if isinstance(program, LineProgram):
-            return True
-        return False
-
-    @property
-    def x(self):
-        """
-        Move **x** [before|after] y
-
-        :return: The file path and the index of target line to be moved.
-        :rtype: tuple(str, int)
-        """
-        return self.args[1]
+    def __init__(self, target, ingredient, direction='before'):
+        super().__init__()
+        self.__class__.is_modi(target, ingredient)
+        assert direction in ['before', 'after']
+        self.target = target
+        self.ingredient = ingredient
+        self.direction = direction
 
     @property
-    def y(self):
-        """
-        Move x [before|after] **y**
+    def domain(self):
+        return AbstractLineProgram
 
-        :return: The file path and the index of the point to which line x is inserted.
-        :rtype: tuple(str, int)
-        """
-        return self.args[0]
-
-    @property
-    def direction(self):
-        """
-        Move x **[before|after]** y
-
-        :return: **'before'** or **'after'**
-        :rtype: str
-        """
-        return self.args[2]
-
-    @property
-    def length_of_args(self):
-        """
-        :return: ``3``
-        :rtype: int
-        """
-        return 3
-
-    @property
-    def atomic_operators(self):
-        """
-        :return: ``[LineInsertion(self.y, self.x, self.direction), LineReplacement(self.x, None)]``
-        :rtype: list(:py:class:`.atomic_operator.AtomicOperator`)
-        """
-        return [LineInsertion(self.y, self.x, self.direction), LineReplacement(self.x, None)]
+    def apply(self, program, new_contents, modification_points):
+        program.do_insert(self, new_contents, modification_points)
+        program.do_delete(self, new_contents, modification_points)
 
     @classmethod
     def create(cls, program, target_file=None, ingr_file=None, direction='before', method='random'):
-        """
-        :param program: The program instance to which the created custom operator will be applied.
-        :type program: :py:class:`.Program`
-        :param str target_file: Line means the modification point of the edit. If target_file is specified, the line will be chosen within the file.
-        :param str ingr_file: Ingredient is the line to be moved.
-          If ingr_file is specified, the ingredient line will be chosen within the file.
-        :param str method: The way of choosing the modification point. **'random'** or **'weighted'**
-        :return: The LineMoving instance with the randomly-selected line & ingr.
-        :rtype: :py:class:`.custom_operator.LineMoving`
-        """
-        target_file = target_file or random.choice(program.target_files)
-        ingr_file = ingr_file or random.choice(program.target_files)
-        target = (
-            target_file,
-            program.select_modification_point(target_file, method)
-        )
-        ingredient = (
-            ingr_file,
-            program.select_modification_point(ingr_file, 'random')
-        )
-        return cls(ingredient, target, direction)
+        return cls(program.random_target(target_file, method),
+                   program.random_target(ingr_file, 'random'),
+                   direction)

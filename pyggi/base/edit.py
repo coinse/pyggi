@@ -19,6 +19,9 @@ class AtomicOperator(ABC):
     * StmtInsertion
 
     """
+    @abstractmethod
+    def __init__(self):
+        pass
 
     def __eq__(self, other):
         if self.__class__.__name__ != other.__class__.__name__:
@@ -29,6 +32,11 @@ class AtomicOperator(ABC):
         return True
 
     @property
+    @abstractmethod
+    def domain(self):
+        pass
+
+    @property
     def atomic_operators(self):
         """
         :return: ``[self]``, the list that only contains the AtomicOperator instance itself.
@@ -36,23 +44,11 @@ class AtomicOperator(ABC):
         """
         return [self]
 
-    @abstractmethod
-    def __init__(self):
-        pass
-
-    @abstractmethod
     def __str__(self):
-        pass
-
-    @abstractmethod
-    def is_valid_for(self, program):
         """
-        :param program: The program instance to which this edit will be applied
-        :type program: :py:class:`.Program`
-        :return: Whether the edit is able to be applied to the program
-        :rtype: bool
+        :return: ``LineReplacement([target], [ingredient])``
         """
-        pass
+        return "{}({})".format(self.__class__.__name__, self.__dict__)
 
     @abstractmethod
     def apply(self, program, new_contents, modification_points):
@@ -78,6 +74,13 @@ class AtomicOperator(ABC):
         """
         pass
 
+    @classmethod
+    def is_modi(cls, *targets):
+        for target in targets:
+            assert isinstance(target[0], str)
+            assert isinstance(target[1], int)
+            assert target[1] >= 0
+
 class CustomOperator(ABC):
     """
     CustomOperator is an abstact class which is designed to be used
@@ -102,6 +105,11 @@ class CustomOperator(ABC):
         return self.atomic_operators == other.atomic_operators
 
     @property
+    @abstractmethod
+    def domain(self):
+        pass
+
+    @property
     def detail(self) -> str:
         """
         :return: The detail of this custom edit
@@ -122,16 +130,6 @@ class CustomOperator(ABC):
 
     @abstractmethod
     def __str__(self):
-        pass
-
-    @abstractmethod
-    def is_valid_for(self, program):
-        """
-        :param program: The program instance to which this edit will be applied
-        :type program: :py:class:`.Program`
-        :return: Whether the edit is able to be applied to the program
-        :rtype: bool
-        """
         pass
 
     @property

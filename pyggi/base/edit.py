@@ -2,7 +2,7 @@ import ast
 from abc import ABC, abstractmethod
 from ..utils import have_the_same_file_extension, check_file_extension
 
-class AtomicOperator(ABC):
+class AbstractEdit(ABC):
     """
     
     PYGGI-defined Atomic Operator:
@@ -81,71 +81,68 @@ class AtomicOperator(ABC):
             assert isinstance(target[1], int)
             assert target[1] >= 0
 
-class CustomOperator(ABC):
-    """
-    CustomOperator is an abstact class which is designed to be used
-    as a basic structure of custom edit operators.
+class Replacement(AbstractEdit):
+    def __init__(self, target, ingredient=None):
+        self.__class__.is_modi(target)
+        if ingredient:
+            self.__class__.is_modi(ingredient)
+        self.target = target
+        self.ingredient = ingredient
 
-    Every class that inherits CustomOperator class must override the
-    methods marked with ``@abstractmethod`` to create instances.
+    def apply(self, program, new_contents, modification_points):
+        return program.do_replace(self, new_contents, modification_points)
 
-    * :py:meth:`__str__`
-    * :py:meth:`length_of_args`
-    * :py:meth:`atomic_operators`
-    """
-    def __init__(self, *args):
-        if len(args) != self.length_of_args:
-            raise Exception("{} takes {} positional argument but {} were given.".format(
-                self.__class__.__name__, self.length_of_args, len(args)))
-        self.args = args
-        assert isinstance(self.atomic_operators, list)
-        assert all(isinstance(op, AtomicOperator) for op in self.atomic_operators)
+    @classmethod
+    def create(cls, program, target_file=None, ingr_file=None, method='random'):
+        return cls(program.random_target(target_file, method),
+                   program.random_target(ingr_file, 'random'))
 
-    def __eq__(self, other):
-        return self.atomic_operators == other.atomic_operators
+class Insertion(AbstractEdit):
+    def __init__(self, target, ingredient, direction='before'):
+        super().__init__()
+        self.__class__.is_modi(target, ingredient)
+        assert direction in ['before', 'after']
+        self.target = target
+        self.ingredient = ingredient
+        self.direction = direction
 
-    @property
-    @abstractmethod
-    def domain(self):
-        pass
+    def apply(self, program, new_contents, modification_points):
+        return program.do_insert(self, new_contents, modification_points)
 
-    @property
-    def detail(self) -> str:
-        """
-        :return: The detail of this custom edit
-        :rtype: str
+    @classmethod
+    def create(cls, program, target_file=None, ingr_file=None, direction='before', method='random'):
+        return cls(program.random_target(target_file, 'random'),
+                   program.random_target(ingr_file, 'random'),
+                   direction)
 
-        .. note::
-            If the edit is ``LineMoving(('Triangle.java', 10), ('Triangle.java', 4))``
+class Deletion(AbstractEdit):
+    def __init__(self, target):
+        super().__init__()
+        self.__class__.is_modi(target)
+        self.target = target
 
-            returns::
+    def apply(self, program, new_contents, modification_points):
+        return program.do_delete(self, new_contents, modification_points)
 
-                1) Insert ('Triangle.java', 4) before ('Triangle.java', 10)
-                2) Replace ('Triangle.java', 4) with None
-        """
-        return "\n".join(
-            list(
-                map(lambda x: "{}) {}".format(x[0] + 1, x[1]),
-                    enumerate(self.atomic_operators))))
+    @classmethod
+    def create(cls, program, target_file=None, method='random'):
+        return cls(program.random_target(target_file, method))
 
-    @abstractmethod
-    def __str__(self):
-        pass
+class Moving(AbstractEdit):
+    def __init__(self, target, ingredient, direction='before'):
+        super().__init__()
+        self.__class__.is_modi(target, ingredient)
+        assert direction in ['before', 'after']
+        self.target = target
+        self.ingredient = ingredient
+        self.direction = direction
 
-    @property
-    @abstractmethod
-    def length_of_args(self):
-        """
-        :return: The length of args the edit operator should take
-        :rtype: int
-        """
-        pass
+    def apply(self, program, new_contents, modification_points):
+        program.do_insert(self, new_contents, modification_points)
+        program.do_delete(self, new_contents, modification_points)
 
-    @property
-    @abstractmethod
-    def atomic_operators(self):
-        """
-        :return: The list of instances of AtomicOperator.
-        :rtype: list(:py:class:`.atomic_operator.AtomicOperator`)
-        """
-        pass
+    @classmethod
+    def create(cls, program, target_file=None, ingr_file=None, direction='before', method='random'):
+        return cls(program.random_target(target_file, method),
+                   program.random_target(ingr_file, 'random'),
+                   direction)

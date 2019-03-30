@@ -3,7 +3,7 @@ This module contains Patch class.
 """
 import os
 from copy import deepcopy
-from .edit import AtomicOperator, CustomOperator
+from .edit import AbstractEdit
 
 class InvalidPatchError(Exception):
     pass
@@ -114,10 +114,10 @@ class Patch:
         Add an edit to the edit list
 
         :param edit: The edit to be added
-        :type edit: :py:class:`.atomic_operator.AtomicOperator` or :py:class:`.custom_operator.CustomOperator`
+        :type edit: :py:class:`.base.AbstractEdit`
         :return: None
         """
-        assert isinstance(edit, (AtomicOperator, CustomOperator))
+        assert isinstance(edit, AbstractEdit)
         assert isinstance(self.program, edit.domain)
         self.edit_list.append(edit)
 
@@ -128,23 +128,6 @@ class Patch:
         :param int index: The index of edit to delete
         """
         del self.edit_list[index]
-
-    def get_atomics(self, atomic_class_name=None):
-        """
-        Combine all the atomic operators of the edits.
-        A custom operator is originally a sequence of atomic operators,
-        and a patch is a sequence of the edits.
-        So this is a sort of flattening process.
-
-        :return: The atomic operators, see *Hint*.
-        :rtype: list(:py:class:`.atomic_operator.AtomicOperator`)
-        """
-        atomics = []
-        for edit in self.edit_list:
-            for atomic in edit.atomic_operators:
-                if not atomic_class_name or atomic_class_name == atomic.__class__.__name__:
-                    atomics.append(atomic)
-        return atomics
     
     def apply(self):
         """
@@ -163,9 +146,9 @@ class Patch:
         modification_points = deepcopy(self.program.modification_points)
         new_contents = deepcopy(self.program.contents)
         for target_file in target_files:
-            atomics = list(filter(lambda a: a.target[0] == target_file, self.get_atomics()))
-            for atomic in atomics:
-                atomic.apply(self.program, new_contents, modification_points)
+            edits = list(filter(lambda a: a.target[0] == target_file, self.edit_list))
+            for edit in edits:
+                edit.apply(self.program, new_contents, modification_points)
         for target_file in new_contents:
             with open(os.path.join(self.program.tmp_path, target_file), 'w') as tmp_file:
                 tmp_file.write(self.program.__class__.to_source(new_contents[target_file]))

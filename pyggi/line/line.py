@@ -1,7 +1,7 @@
 import os
 import random
 from abc import abstractmethod
-from ..base import AbstractProgram, AbstractEdit, CustomOperator
+from ..base import AbstractProgram, AbstractEdit, Replacement, Insertion, Deletion, Moving
 
 class AbstractLineProgram(AbstractProgram):
     @abstractmethod
@@ -91,143 +91,22 @@ class LineProgram(AbstractLineProgram):
         new_contents[l_f][modification_points[l_f][l_n]] = ''
         return modification_points
 
-class LineReplacement(AbstractEdit):
-    """
-    .. note::
-        1. LineReplacement((*[file_path]*, 3), (*[file_path]*, 2))
-
-        ======== ========
-        Before   After
-        ======== ========
-        0        0
-        1        1
-        2        2
-        3        2
-        4        4
-        ======== ========
-
-        2. LineReplacement((*[file_path]*, 3), None)
-
-        ======== ========
-        Before   After
-        ======== ========
-        0        0
-        1        1
-        2        2
-        3        4
-        4
-        ======== ========
-    """
-
-    def __init__(self, target, ingredient=None):
-        self.__class__.is_modi(target)
-        if ingredient:
-            self.__class__.is_modi(ingredient)
-        self.target = target
-        self.ingredient = ingredient
-
+class LineReplacement(Replacement):
     @property
     def domain(self):
         return AbstractLineProgram
 
-    def apply(self, program, new_contents, modification_points):
-        return program.do_replace(self, new_contents, modification_points)
-
-    @classmethod
-    def create(cls, program, target_file=None, ingr_file=None, method='random'):
-        return cls(program.random_target(target_file, method),
-                   program.random_target(ingr_file, 'random'))
-
-class LineInsertion(AbstractEdit):
-    """
-    .. note::
-        1. LineInsertion((*[file_path]*, 4), (*[file_path]*, 2))
-
-        ======== ========
-        Before   After
-        ======== ========
-        0        0
-        1        1
-        2        2
-        3        3
-        4        2
-        ...      4
-        ======== ========
-    """
-
-    def __init__(self, target, ingredient, direction='before'):
-        super().__init__()
-        self.__class__.is_modi(target, ingredient)
-        assert direction in ['before', 'after']
-        self.target = target
-        self.ingredient = ingredient
-        self.direction = direction
-
+class LineInsertion(Insertion):
     @property
     def domain(self):
         return AbstractLineProgram
 
-    def apply(self, program, new_contents, modification_points):
-        return program.do_insert(self, new_contents, modification_points)
-
-    @classmethod
-    def create(cls, program, target_file=None, ingr_file=None, direction='before', method='random'):
-        return cls(program.random_target(target_file, 'random'),
-                   program.random_target(ingr_file, 'random'),
-                   direction)
-
-class LineDeletion(AbstractEdit):
-    def __init__(self, target):
-        super().__init__()
-        self.__class__.is_modi(target)
-        self.target = target
-
+class LineDeletion(Deletion):
     @property
     def domain(self):
         return AbstractLineProgram
 
-    def apply(self, program, new_contents, modification_points):
-        return program.do_delete(self, new_contents, modification_points)
-
-    @classmethod
-    def create(cls, program, target_file=None, method='random'):
-        return cls(program.random_target(target_file, method))
-
-class LineMoving(AbstractEdit):
-    """
-    .. note::
-        1. LineInsertion((*[file_path]*, 4), (*[file_path]*, 2))
-
-        ======== ========
-        Before   After
-        ======== ========
-        0        0
-        1        1
-        2        2
-        3        3
-        4        2
-        ...      4
-        ======== ========
-    """
-
-    def __init__(self, target, ingredient, direction='before'):
-        super().__init__()
-        self.__class__.is_modi(target, ingredient)
-        assert direction in ['before', 'after']
-        self.target = target
-        self.ingredient = ingredient
-        self.direction = direction
-
+class LineMoving(Moving):
     @property
     def domain(self):
         return AbstractLineProgram
-
-    def apply(self, program, new_contents, modification_points):
-        program.do_insert(self, new_contents, modification_points)
-        program.do_delete(self, new_contents, modification_points)
-
-    @classmethod
-    def create(cls, program, target_file=None, ingr_file=None, direction='before', method='random'):
-        return cls(program.random_target(target_file, method),
-                   program.random_target(ingr_file, 'random'),
-                   direction)

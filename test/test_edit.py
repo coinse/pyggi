@@ -1,6 +1,6 @@
 import pytest
 from pyggi.line import LineProgram as Program
-from pyggi.line import LineReplacement, LineInsertion
+from pyggi.line import LineReplacement, LineInsertion, LineDeletion
 
 
 @pytest.fixture(scope='session')
@@ -33,21 +33,12 @@ class TestAtomicOperator(object):
 
         def test_create(self):
             program = Program('./resource/Triangle_bug')
-            random_line_deletion_0 = LineReplacement.create(
+            random_line_replacement = LineReplacement.create(
                 program,
                 target_file='Triangle.java',
-                ingr_file='Triangle.java',
-                del_rate=0)
-            assert isinstance(random_line_deletion_0, LineReplacement)
-            assert random_line_deletion_0.ingredient is not None
-
-            random_line_deletion_1 = LineReplacement.create(
-                program,
-                target_file='Triangle.java',
-                ingr_file='Triangle.java',
-                del_rate=1)
-            assert isinstance(random_line_deletion_1, LineReplacement)
-            assert random_line_deletion_1.ingredient is None
+                ingr_file='Triangle.java')
+            assert isinstance(random_line_replacement, LineReplacement)
+            assert random_line_replacement.ingredient is not None
 
     class TestLineInsertion(object):
 

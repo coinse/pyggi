@@ -37,14 +37,6 @@ class TreeProgram(AbstractTreeProgram):
         return self._modification_points
 
     def print_modification_points(self, target_file, indices=None):
-        """
-        Print the source of each modification points
-
-        :param target_file: The path to target file
-        :type target_file: str
-        :return: None
-        :rtype: None
-        """
         title_format = "=" * 25 + " {} {} " + "=" * 25
         if not indices:
             indices = range(len(self.modification_points[target_file]))
@@ -60,16 +52,6 @@ class TreeProgram(AbstractTreeProgram):
 
     @classmethod
     def to_source(cls, contents_of_file):
-        """
-        Change contents of file to the source code
-
-        :param granularity_level: The parsing level of the program
-        :type granularity_level: :py:class:`GranularityLevel`
-        :param contents_of_file: The contents of the file which is the parsed form of source code
-        :type contents_of_file: ?
-        :return: The source code
-        :rtype: str
-        """
         return astor.to_source(contents_of_file)
 
     @classmethod

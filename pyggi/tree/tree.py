@@ -4,7 +4,7 @@ import astor
 import random
 from abc import abstractmethod
 from . import astor_helper
-from ..base import AbstractProgram, AbstractEdit, Replacement, Insertion, Deletion, Moving
+from ..base import AbstractProgram, Replacement, Insertion, Deletion, Moving
 from ..utils import check_file_extension, get_file_extension, have_the_same_file_extension
 
 class AbstractTreeProgram(AbstractProgram):
@@ -19,6 +19,26 @@ class AbstractTreeProgram(AbstractProgram):
     @abstractmethod
     def do_delete(self, op, new_contents, modification_points):
         pass
+
+class StmtReplacement(Replacement):
+    @property
+    def domain(self):
+        return AbstractTreeProgram
+
+class StmtInsertion(Insertion):
+    @property
+    def domain(self):
+        return AbstractTreeProgram
+
+class StmtDeletion(Deletion):
+    @property
+    def domain(self):
+        return AbstractTreeProgram
+
+class StmtMoving(Moving):
+    @property
+    def domain(self):
+        return AbstractTreeProgram
 
 class TreeProgram(AbstractTreeProgram):
     def __str__(self):
@@ -109,26 +129,5 @@ class TreeProgram(AbstractTreeProgram):
         if check_file_extension(op.target[0], 'py'):
             dst_root = new_contents[op.target[0]]
             dst_pos = modification_points[op.target[0]][op.target[1]]
-            if not op.ingredient:
-                return astor_helper.replace((dst_root, dst_pos), op.ingredient)
+            return astor_helper.replace((dst_root, dst_pos), None)
         return False
-
-class StmtReplacement(Replacement):
-    @property
-    def domain(self):
-        return AbstractTreeProgram
-
-class StmtInsertion(Insertion):
-    @property
-    def domain(self):
-        return AbstractTreeProgram
-
-class StmtDeletion(Deletion):
-    @property
-    def domain(self):
-        return AbstractTreeProgram
-
-class StmtMoving(Moving):
-    @property
-    def domain(self):
-        return AbstractTreeProgram

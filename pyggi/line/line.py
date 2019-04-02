@@ -1,7 +1,7 @@
 import os
 import random
 from abc import abstractmethod
-from ..base import AbstractProgram, AbstractEdit, Replacement, Insertion, Deletion, Moving
+from ..base import AbstractProgram, Replacement, Insertion, Deletion, Moving
 
 class AbstractLineProgram(AbstractProgram):
     @abstractmethod
@@ -15,6 +15,26 @@ class AbstractLineProgram(AbstractProgram):
     @abstractmethod
     def do_delete(self, target):
         pass
+
+class LineReplacement(Replacement):
+    @property
+    def domain(self):
+        return AbstractLineProgram
+
+class LineInsertion(Insertion):
+    @property
+    def domain(self):
+        return AbstractLineProgram
+
+class LineDeletion(Deletion):
+    @property
+    def domain(self):
+        return AbstractLineProgram
+
+class LineMoving(Moving):
+    @property
+    def domain(self):
+        return AbstractLineProgram
 
 class LineProgram(AbstractLineProgram):
     def __str__(self):
@@ -90,23 +110,3 @@ class LineProgram(AbstractLineProgram):
         l_f, l_n = op.target # line file and line number
         new_contents[l_f][modification_points[l_f][l_n]] = ''
         return modification_points
-
-class LineReplacement(Replacement):
-    @property
-    def domain(self):
-        return AbstractLineProgram
-
-class LineInsertion(Insertion):
-    @property
-    def domain(self):
-        return AbstractLineProgram
-
-class LineDeletion(Deletion):
-    @property
-    def domain(self):
-        return AbstractLineProgram
-
-class LineMoving(Moving):
-    @property
-    def domain(self):
-        return AbstractLineProgram

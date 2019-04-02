@@ -26,7 +26,7 @@ class AbstractProgram(ABC):
     (for example, by parsing and storing the AST).
 
     """
-    CONFIG_FILE_NAME = 'PYGGI_CONFIG'
+    CONFIG_FILE_NAME = '.pyggi.config'
     TMP_DIR = os.path.join(PYGGI_DIR, 'tmp_variants')
     SAVE_DIR = os.path.join(PYGGI_DIR, 'saved_variants')
 

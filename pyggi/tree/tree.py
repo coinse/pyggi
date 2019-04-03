@@ -5,7 +5,7 @@ import random
 from abc import abstractmethod
 from .ast_engine import Astor#, SrcML
 from ..base import AbstractProgram, Replacement, Insertion, Deletion, Moving
-from ..utils import check_file_extension, get_file_extension, have_the_same_file_extension
+from ..utils import get_file_extension
 
 class AbstractTreeProgram(AbstractProgram):
     @abstractmethod
@@ -73,12 +73,12 @@ class TreeProgram(AbstractTreeProgram):
         return ast_engine.dump(contents[file_name])
 
     def do_replace(self, op, new_contents, modification_points):
-        assert have_the_same_file_extension(op.target[0], op.ingredient[0])
+        assert get_file_extension(op.target[0]) == get_file_extension(op.ingredient[0])
         ast_engine = self.__class__.get_ast_engine(op.target[0])
         return ast_engine.do_replace(self, op, new_contents, modification_points)
 
     def do_insert(self, op, new_contents, modification_points):
-        assert have_the_same_file_extension(op.target[0], op.ingredient[0])
+        assert get_file_extension(op.target[0]) == get_file_extension(op.ingredient[0])
         ast_engine = self.__class__.get_ast_engine(op.target[0])
         return ast_engine.do_insert(self, op, new_contents, modification_points)
 

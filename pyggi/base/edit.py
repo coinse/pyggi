@@ -1,6 +1,5 @@
 import ast
 from abc import ABC, abstractmethod
-from ..utils import have_the_same_file_extension, check_file_extension
 
 class AbstractEdit(ABC):
     @abstractmethod

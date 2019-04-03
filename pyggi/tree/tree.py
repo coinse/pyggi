@@ -47,7 +47,7 @@ class TreeProgram(AbstractTreeProgram):
         if get_file_extension(file_name) in ['.py']:
             return Astor()
         #elif get_file_extension(target) in ['.java', '.cpp']:
-        #    return srcml_helper
+        #    return SrcML()
         else:
             raise Exception('TreeProgram', '{} file is not supported'.format(get_file_extension(file_name)))
 

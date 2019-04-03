@@ -240,3 +240,27 @@ class Astor(ASTEngine):
         src_block, src_index = self.pos_2_block_n_index(*src)
         dst_block.insert(dst_index + 1, deepcopy(src_block[src_index]))
         return True
+
+"""
+class SrcML(ASTEngine):
+    def get_contents(self, file_path):
+        pass
+
+    def get_modification_points(self, contents_of_file):
+        pass
+
+    def get_source(self, program, file_name, index):
+        pass
+
+    def dump(self, contents_of_file):
+        pass
+
+    def do_replace(self, program, op, new_contents, modification_points):
+        pass
+
+    def do_insert(self, program, op, new_contents, modification_points):
+        pass
+
+    def do_delete(self, program, op, new_contents, modification_points):
+        pass
+"""

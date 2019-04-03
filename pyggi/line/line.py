@@ -37,38 +37,24 @@ class LineMoving(Moving):
         return AbstractLineProgram
 
 class LineProgram(AbstractLineProgram):
-    def __str__(self):
-        code = ''
-        for k in sorted(self.contents.keys()):
-            idx = 0
-            for line in self.contents[k]:
-                code += "{}\t: {}\t: {}\n".format(k, idx, line)
-                idx += 1
-        return code
-
     def load_contents(self):
         self.contents = {}
         self.modification_points = dict()
         self.modification_weights = dict()
-        for target in self.target_files:
-            with open(os.path.join(self.path, target), 'r') as target_file:
-                self.contents[target] = list(
+        for file_name in self.target_files:
+            with open(os.path.join(self.path, file_name), 'r') as target_file:
+                self.contents[file_name] = list(
                     map(str.rstrip, target_file.readlines()))
-            self.modification_points[target] = list(range(len(self.contents[target])))
-            self.modification_weights[target] = [1.0] * len(self.modification_points[target])
+            self.modification_points[file_name] = list(range(len(self.contents[file_name])))
+            self.modification_weights[file_name] = [1.0] * len(self.modification_points[file_name])
 
-    def print_modification_points(self, target_file, indices=None):
-        def print_modification_point(contents, modification_points, i):
-            print(title_format.format('line', i))
-            print(contents[modification_points[i]])
-        title_format = "=" * 25 + " {} {} " + "=" * 25
+    def get_source(self, target_file, indices=None):
         if not indices:
             indices = range(len(self.modification_points[target_file]))
-        for i in indices:
-            print_modification_point(self.contents[target_file], self.modification_points[target_file], i)
+        return { i: self.contents[modification_points[i]] for i in indices }
 
     @classmethod
-    def to_source(cls, contents, file_name):
+    def dump(cls, contents, file_name):
         return '\n'.join(contents[file_name]) + '\n'
 
     def do_replace(self, op, new_contents, modification_points):

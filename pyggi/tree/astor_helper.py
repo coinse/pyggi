@@ -1,5 +1,9 @@
 import ast
+import astor
 from copy import deepcopy
+
+def get_contents(file_path):
+    return astor.parse_file(file_path)
 
 def is_pos_type(pos):
     """
@@ -30,6 +34,53 @@ def get_modification_points(root):
                     visit_node(current_pos, node.__dict__[attr][i])
     visit_node([], root)
     return modification_points
+
+def get_source(program, file_name, i):
+    blk, idx = pos_2_block_n_index(program.contents[file_name],
+                                   program.modification_points[file_name][i])
+    return astor.to_source(blk[idx])
+
+def dump(contents_of_file):
+    return astor.to_source(contents_of_file)
+
+def do_replace(program, op, new_contents, modification_points):
+    dst_root = new_contents[op.target[0]]
+    dst_pos = modification_points[op.target[0]][op.target[1]]
+    ingr_root = program.contents[op.ingredient[0]]
+    ingr_pos = program.modification_points[op.ingredient[0]][op.ingredient[1]]
+    return replace((dst_root, dst_pos), (ingr_root, ingr_pos))
+
+def do_insert(program, op, new_contents, modification_points):
+    dst_root = new_contents[op.target[0]]
+    dst_pos = modification_points[op.target[0]][op.target[1]]
+    ingr_root = program.contents[op.ingredient[0]]
+    ingr_pos = program.modification_points[op.ingredient[0]][op.ingredient[1]]
+    if op.direction == 'before':
+        success = insert_before((dst_root, dst_pos), (ingr_root, ingr_pos))
+        if success:
+            depth = len(dst_pos)
+            parent = dst_pos[:depth-1]
+            index = dst_pos[depth-1][1]
+            for pos in modification_points[op.target[0]]:
+                if parent == pos[:depth-1] and len(pos) >= depth and index <= pos[depth-1][1]:
+                    a, i = pos[depth-1]
+                    pos[depth-1] = (a, i + 1)
+    elif op.direction == 'after':
+        success = insert_after((dst_root, dst_pos), (ingr_root, ingr_pos))
+        if success:
+            depth = len(dst_pos)
+            parent = dst_pos[:depth-1]
+            index = dst_pos[depth - 1][1]
+            for pos in modification_points[op.target[0]]:
+                if parent == pos[:depth-1] and len(pos) >= depth and index < pos[depth-1][1]:
+                    a, i = pos[depth-1]
+                    pos[depth-1] = (a, i + 1)
+    return success
+
+def do_delete(program, op, new_contents, modification_points):
+    dst_root = new_contents[op.target[0]]
+    dst_pos = modification_points[op.target[0]][op.target[1]]
+    return replace((dst_root, dst_pos), None)
 
 def is_valid_pos(root, pos):
     """

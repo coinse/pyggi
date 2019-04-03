@@ -41,85 +41,47 @@ class StmtMoving(Moving):
         return AbstractTreeProgram
 
 class TreeProgram(AbstractTreeProgram):
-    def __str__(self):
-        return self.target_files
+    @classmethod
+    def get_ast_engine(cls, file_name):
+        # get_contents, get_modification_points, get_source, dump
+        if get_file_extension(file_name) in ['.py']:
+            return astor_helper
+        #elif get_file_extension(target) in ['.java', '.cpp']:
+            return srcml_helper
+        else:
+            raise Exception('TreeProgram', '{} file is not supported'.format(get_file_extension(file_name)))
 
     def load_contents(self):
         self.contents = {}
         self.modification_points = dict()
         self.modification_weights = dict()
-        for target in self.target_files:
-            if check_file_extension(target, 'py'):
-                root = astor.parse_file(os.path.join(self.path, target))
-                self.contents[target] = root
-                self.modification_points[target] = astor_helper.get_modification_points(
-                    self.contents[target])
-                self.modification_weights[target] = [1.0] * len(self.modification_points[target])
-            else:
-                raise Exception('Program', '{} file is not supported'.format(get_file_extension(target)))
+        for file_name in self.target_files:
+            ast_engine = self.__class__.get_ast_engine(file_name)
+            self.contents[file_name] = ast_engine.get_contents(os.path.join(self.path, file_name))
+            self.modification_points[file_name] = ast_engine.get_modification_points(self.contents[file_name])
+            self.modification_weights[file_name] = [1.0] * len(self.modification_points[file_name])
 
-    def print_modification_points(self, target_file, indices=None):
-        title_format = "=" * 25 + " {} {} " + "=" * 25
+    def get_source(self, file_name, indices=None):
+        ast_engine = self.__class__.get_ast_engine(file_name)
         if not indices:
-            indices = range(len(self.modification_points[target_file]))
-        if check_file_extension(target_file, 'py'):
-            def print_modification_point(contents, modification_points, i):
-                print(title_format.format('node', i))
-                blk, idx = astor_helper.pos_2_block_n_index(contents, modification_points[i])
-                print(astor.to_source(blk[idx]))
-        
-            for i in indices:
-                print_modification_point(self.contents[target_file], self.modification_points[target_file], i)
+            indices = range(len(self.modification_points[file_name]))
+        return { i: ast_engine.get_source(self, file_name, i) for i in indices }
 
     @classmethod
-    def to_source(cls, contents, file_name):
-        if check_file_extension(file_name, 'py'):
-            return astor.to_source(contents[file_name])
-        return None
+    def dump(cls, contents, file_name):
+        ast_engine = cls.get_ast_engine(file_name)
+        return ast_engine.dump(contents[file_name])
 
     def do_replace(self, op, new_contents, modification_points):
         assert have_the_same_file_extension(op.target[0], op.ingredient[0])
-        if check_file_extension(op.target[0], 'py'):
-            dst_root = new_contents[op.target[0]]
-            dst_pos = modification_points[op.target[0]][op.target[1]]
-            ingr_root = self.contents[op.ingredient[0]]
-            ingr_pos = self.modification_points[op.ingredient[0]][op.ingredient[1]]
-            return astor_helper.replace((dst_root, dst_pos), (ingr_root, ingr_pos))
-        return False
+        ast_engine = self.__class__.get_ast_engine(op.target[0])
+        return ast_engine.do_replace(self, op, new_contents, modification_points)
 
     def do_insert(self, op, new_contents, modification_points):
         assert have_the_same_file_extension(op.target[0], op.ingredient[0])
-        success = False
-        if check_file_extension(op.target[0], 'py'):
-            dst_root = new_contents[op.target[0]]
-            dst_pos = modification_points[op.target[0]][op.target[1]]
-            ingr_root = self.contents[op.ingredient[0]]
-            ingr_pos = astor_helper.get_modification_points(ingr_root)[op.ingredient[1]]
-            if op.direction == 'before':
-                success = astor_helper.insert_before((dst_root, dst_pos), (ingr_root, ingr_pos))
-                if success:
-                    depth = len(dst_pos)
-                    parent = dst_pos[:depth-1]
-                    index = dst_pos[depth-1][1]
-                    for pos in modification_points[op.target[0]]:
-                        if parent == pos[:depth-1] and len(pos) >= depth and index <= pos[depth-1][1]:
-                            a, i = pos[depth-1]
-                            pos[depth-1] = (a, i + 1)
-            elif op.direction == 'after':
-                success = astor_helper.insert_after((dst_root, dst_pos), (ingr_root, ingr_pos))
-                if success:
-                    depth = len(dst_pos)
-                    parent = dst_pos[:depth-1]
-                    index = dst_pos[depth - 1][1]
-                    for pos in modification_points[op.target[0]]:
-                        if parent == pos[:depth-1] and len(pos) >= depth and index < pos[depth-1][1]:
-                            a, i = pos[depth-1]
-                            pos[depth-1] = (a, i + 1)
-        return success
+        ast_engine = self.__class__.get_ast_engine(op.target[0])
+        return ast_engine.do_insert(self, op, new_contents, modification_points)
 
     def do_delete(self, op, new_contents, modification_points):
-        if check_file_extension(op.target[0], 'py'):
-            dst_root = new_contents[op.target[0]]
-            dst_pos = modification_points[op.target[0]][op.target[1]]
-            return astor_helper.replace((dst_root, dst_pos), None)
-        return False
+        ast_engine = self.__class__.get_ast_engine(op.target[0])
+        return ast_engine.do_delete(self, op, new_contents, modification_points)

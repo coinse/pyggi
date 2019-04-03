@@ -47,9 +47,8 @@ class AbstractProgram(ABC):
         self.create_tmp_variant()
         self.logger.info("Path to the temporal program variants: {}".format(self.tmp_path))
 
-    @abstractmethod
     def __str__(self):
-        pass
+        return "{}({}):{}".format(self.__class__.__name__, self.path, ",".join(self.target_files))
 
     @property
     def tmp_path(self):
@@ -89,14 +88,13 @@ class AbstractProgram(ABC):
         self.modification_weights[file][index] = weight
 
     @abstractmethod
-    def print_modification_points(self, target_file, indices=None):
+    def get_source(self, target_file, indices=None):
         """
-        Print the source of each modification points
-
         :param target_file: The path to target file
+        :param indices: the indices of modification points
         :type target_file: str
-        :return: None
-        :rtype: None
+        :return: the sources of each modification point
+        :rtype: str
         """
         pass
 
@@ -130,13 +128,13 @@ class AbstractProgram(ABC):
         """
         for target_file in new_contents:
             with open(os.path.join(self.tmp_path, target_file), 'w') as tmp_file:
-                tmp_file.write(self.__class__.to_source(new_contents[target_file]))
+                tmp_file.write(self.__class__.dump(new_contents[target_file]))
 
     @classmethod
     @abstractmethod
-    def to_source(cls, contents, file_name):
+    def dump(cls, contents, file_name):
         """
-        Change contents of file to the source code
+        Convert contents of file to the source code
 
         :param contents_of_file: The contents of the file which is the parsed form of source code
         :type contents_of_file: ?

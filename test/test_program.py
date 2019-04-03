@@ -34,8 +34,7 @@ class TestProgram(object):
 
         assert os.path.exists(program.tmp_path)
 
-    def test_parse(self, setup):
+    def test_load_contents(self, setup):
         program = setup
-        contents = program.parse(program.path, program.target_files)
-        assert 'Triangle.java' in contents
-        assert len(contents['Triangle.java']) > 0
+        assert 'Triangle.java' in program.contents
+        assert len(program.contents['Triangle.java']) > 0

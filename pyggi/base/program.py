@@ -134,7 +134,7 @@ class AbstractProgram(ABC):
 
     @classmethod
     @abstractmethod
-    def to_source(self, contents_of_file):
+    def to_source(cls, contents, file_name):
         """
         Change contents of file to the source code
 
@@ -150,12 +150,3 @@ class AbstractProgram(ABC):
             return float(stdout.strip())
         except:
             raise InvalidPatchError
-
-    """
-    @classmethod
-    def is_modi(cls, *targets):
-        for target in targets:
-            assert isinstance(target[0], str)
-            assert isinstance(target[1], int)
-            assert target[1] >= 0
-    """

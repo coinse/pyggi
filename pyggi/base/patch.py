@@ -151,5 +151,5 @@ class Patch:
                 edit.apply(self.program, new_contents, modification_points)
         for target_file in new_contents:
             with open(os.path.join(self.program.tmp_path, target_file), 'w') as tmp_file:
-                tmp_file.write(self.program.__class__.to_source(new_contents[target_file]))
+                tmp_file.write(self.program.__class__.to_source(new_contents, target_file))
         return new_contents

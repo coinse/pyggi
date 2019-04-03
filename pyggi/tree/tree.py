@@ -72,8 +72,10 @@ class TreeProgram(AbstractTreeProgram):
                 print_modification_point(self.contents[target_file], self.modification_points[target_file], i)
 
     @classmethod
-    def to_source(cls, contents_of_file):
-        return astor.to_source(contents_of_file)
+    def to_source(cls, contents, file_name):
+        if check_file_extension(file_name, 'py'):
+            return astor.to_source(contents[file_name])
+        return None
 
     def do_replace(self, op, new_contents, modification_points):
         assert have_the_same_file_extension(op.target[0], op.ingredient[0])

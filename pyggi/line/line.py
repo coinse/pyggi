@@ -68,8 +68,8 @@ class LineProgram(AbstractLineProgram):
             print_modification_point(self.contents[target_file], self.modification_points[target_file], i)
 
     @classmethod
-    def to_source(self, contents_of_file):
-        return '\n'.join(contents_of_file) + '\n'
+    def to_source(cls, contents, file_name):
+        return '\n'.join(contents[file_name]) + '\n'
 
     def do_replace(self, op, new_contents, modification_points):
         l_f, l_n = op.target # line file and line number
@@ -78,7 +78,7 @@ class LineProgram(AbstractLineProgram):
             new_contents[l_f][modification_points[l_f][l_n]] = self.contents[i_f][i_n]
         else:
             new_contents[l_f][modification_points[l_f][l_n]] = ''
-        return modification_points
+        return True
 
     def do_insert(self, op, new_contents, modification_points):
         l_f, l_n = op.target
@@ -102,4 +102,4 @@ class LineProgram(AbstractLineProgram):
     def do_delete(self, op, new_contents, modification_points):
         l_f, l_n = op.target # line file and line number
         new_contents[l_f][modification_points[l_f][l_n]] = ''
-        return modification_points
+        return True

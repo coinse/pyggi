@@ -3,22 +3,6 @@ from abc import ABC, abstractmethod
 from ..utils import have_the_same_file_extension, check_file_extension
 
 class AbstractEdit(ABC):
-    """
-    
-    PYGGI-defined Atomic Operator:
-    User can generate the own custom edit operators
-    which can be converted into a list of atomic operators.
-    For example, **MOVE x -> y** operator can be represented as
-    **[LineReplacement(x, None),LineInsertion(x, y)]**
-
-    **Available List**
-
-    * LineReplacement
-    * LineInsertion
-    * StmtReplacement
-    * StmtInsertion
-
-    """
     @abstractmethod
     def __init__(self):
         pass
@@ -35,14 +19,6 @@ class AbstractEdit(ABC):
     @abstractmethod
     def domain(self):
         pass
-
-    @property
-    def atomic_operators(self):
-        """
-        :return: ``[self]``, the list that only contains the AtomicOperator instance itself.
-        :rtype: list(:py:class:`.atomic_operator.AtomicOperator`)
-        """
-        return [self]
 
     def __str__(self):
         """
@@ -70,7 +46,6 @@ class AbstractEdit(ABC):
     def create(cls):
         """
         :return: The operator instance with randomly-selected properties.
-        :rtype: :py:class:`.atomic_operator.AtomicOperator`
         """
         pass
 

@@ -27,9 +27,9 @@ triangle = MyProgram("sample/Triangle_fast_python")
 triangle.print_modification_points('triangle.py')
 
 # Set modification weights
-weights = [0.01] * len(triangle.modification_points['triangle.py'])
-weights[7] = 1.0 # delay() 
-triangle.set_modification_weights('triangle.py', weights)
+for i in range(len(triangle.modification_weights['triangle.py'])):
+    if i != 7:
+        triangle.set_weight(('triangle.py', i), 0.01)
 
 # Create new Patch
 patch = Patch(triangle)

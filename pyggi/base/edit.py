@@ -74,18 +74,8 @@ class AbstractEdit(ABC):
         """
         pass
 
-    @classmethod
-    def is_modi(cls, *targets):
-        for target in targets:
-            assert isinstance(target[0], str)
-            assert isinstance(target[1], int)
-            assert target[1] >= 0
-
 class Replacement(AbstractEdit):
-    def __init__(self, target, ingredient=None):
-        self.__class__.is_modi(target)
-        if ingredient:
-            self.__class__.is_modi(ingredient)
+    def __init__(self, target, ingredient):
         self.target = target
         self.ingredient = ingredient
 
@@ -99,8 +89,6 @@ class Replacement(AbstractEdit):
 
 class Insertion(AbstractEdit):
     def __init__(self, target, ingredient, direction='before'):
-        super().__init__()
-        self.__class__.is_modi(target, ingredient)
         assert direction in ['before', 'after']
         self.target = target
         self.ingredient = ingredient
@@ -117,8 +105,6 @@ class Insertion(AbstractEdit):
 
 class Deletion(AbstractEdit):
     def __init__(self, target):
-        super().__init__()
-        self.__class__.is_modi(target)
         self.target = target
 
     def apply(self, program, new_contents, modification_points):
@@ -130,8 +116,6 @@ class Deletion(AbstractEdit):
 
 class Moving(AbstractEdit):
     def __init__(self, target, ingredient, direction='before'):
-        super().__init__()
-        self.__class__.is_modi(target, ingredient)
         assert direction in ['before', 'after']
         self.target = target
         self.ingredient = ingredient

@@ -46,15 +46,16 @@ class LineProgram(AbstractLineProgram):
                 idx += 1
         return code
 
-    @property
-    def modification_points(self):
-        if self._modification_points:
-            return self._modification_points
-
-        self._modification_points = dict()
-        for target_file in self.target_files:
-            self._modification_points[target_file] = list(range(len(self.contents[target_file])))
-        return self._modification_points
+    def load_contents(self):
+        self.contents = {}
+        self.modification_points = dict()
+        self.modification_weights = dict()
+        for target in self.target_files:
+            with open(os.path.join(self.path, target), 'r') as target_file:
+                self.contents[target] = list(
+                    map(str.rstrip, target_file.readlines()))
+            self.modification_points[target] = list(range(len(self.contents[target])))
+            self.modification_weights[target] = [1.0] * len(self.modification_points[target])
 
     def print_modification_points(self, target_file, indices=None):
         def print_modification_point(contents, modification_points, i):
@@ -65,14 +66,6 @@ class LineProgram(AbstractLineProgram):
             indices = range(len(self.modification_points[target_file]))
         for i in indices:
             print_modification_point(self.contents[target_file], self.modification_points[target_file], i)
-    
-    def parse(self, path, target_files):
-        contents = {}
-        for target in target_files:
-            with open(os.path.join(path, target), 'r') as target_file:
-                contents[target] = list(
-                    map(str.rstrip, target_file.readlines()))
-        return contents
 
     @classmethod
     def to_source(self, contents_of_file):

@@ -44,23 +44,24 @@ class TreeProgram(AbstractTreeProgram):
     def __str__(self):
         return self.target_files
 
-    @property
-    def modification_points(self):
-        if self._modification_points:
-            return self._modification_points
-
-        self._modification_points = dict()
-        for target_file in self.target_files:
-            if check_file_extension(target_file, 'py'):
-                self._modification_points[target_file] = astor_helper.get_modification_points(
-                    self.contents[target_file])
-        return self._modification_points
+    def load_contents(self):
+        self.contents = {}
+        self.modification_points = dict()
+        self.modification_weights = dict()
+        for target in self.target_files:
+            if check_file_extension(target, 'py'):
+                root = astor.parse_file(os.path.join(self.path, target))
+                self.contents[target] = root
+                self.modification_points[target] = astor_helper.get_modification_points(
+                    self.contents[target])
+                self.modification_weights[target] = [1.0] * len(self.modification_points[target])
+            else:
+                raise Exception('Program', '{} file is not supported'.format(get_file_extension(target)))
 
     def print_modification_points(self, target_file, indices=None):
         title_format = "=" * 25 + " {} {} " + "=" * 25
         if not indices:
             indices = range(len(self.modification_points[target_file]))
-
         if check_file_extension(target_file, 'py'):
             def print_modification_point(contents, modification_points, i):
                 print(title_format.format('node', i))
@@ -73,17 +74,6 @@ class TreeProgram(AbstractTreeProgram):
     @classmethod
     def to_source(cls, contents_of_file):
         return astor.to_source(contents_of_file)
-
-    @classmethod
-    def parse(cls, path, target_files):
-        contents = {}
-        for target in target_files:
-            if check_file_extension(target, 'py'):
-                root = astor.parse_file(os.path.join(path, target))
-                contents[target] = root
-            else:
-                raise Exception('Program', '{} file is not supported'.format(get_file_extension(target)))
-        return contents
 
     def do_replace(self, op, new_contents, modification_points):
         assert have_the_same_file_extension(op.target[0], op.ingredient[0])

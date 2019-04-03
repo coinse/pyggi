@@ -22,12 +22,10 @@ triangle = MyProgram("sample/Triangle_bug_python")
 # triangle.print_modification_points('triangle.py')
 
 # See sample/Triangle_bug_python/get_spectrum.py
-weights = [0] * len(triangle.modification_points['triangle.py'])
-weights[14] = 1
-weights[15] = 1
-weights[16] = 1
+for i in range(len(triangle.modification_points['triangle.py'])):
+    if i not in [14, 15, 16]:
+        triangle.set_weight(('triangle.py', i), 0)
 
-triangle.set_modification_weights('triangle.py', weights)
 valid_edit_operators = [LineDeletion, LineMoving, LineReplacement]
 tabu = []
 

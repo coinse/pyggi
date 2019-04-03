@@ -3,6 +3,9 @@
 
 paper/
 
+ast_test.py
+line_test.py
+
 # Setuptools distribution folder.
 /dist/
 

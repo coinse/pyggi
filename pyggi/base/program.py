@@ -138,7 +138,7 @@ class AbstractProgram(ABC):
         """
         for target_file in new_contents:
             with open(os.path.join(self.tmp_path, target_file), 'w') as tmp_file:
-                tmp_file.write(self.__class__.dump(new_contents[target_file]))
+                tmp_file.write(self.__class__.dump(new_contents, target_file))
 
     @classmethod
     @abstractmethod
@@ -177,9 +177,7 @@ class AbstractProgram(ABC):
             - value: The contents of the file
         """
         new_contents = self.get_modified_contents(patch)
-        for target_file in new_contents:
-            with open(os.path.join(self.tmp_path, target_file), 'w') as tmp_file:
-                tmp_file.write(self.__class__.dump(new_contents, target_file))
+        self.write_to_tmp_dir(new_contents)
         return new_contents
 
     def run(self, timeout=15):
@@ -219,7 +217,7 @@ class AbstractProgram(ABC):
             raise InvalidPatchError
 
     def evaluate_patch(self, patch, timeout=15):
-        # apply + run_test
+        # apply + run
         self.apply(patch)
         result = self.run(timeout)
 

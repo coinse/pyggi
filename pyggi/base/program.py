@@ -85,25 +85,28 @@ class AbstractProgram(ABC):
     def load_contents(self):
         pass
 
-    def set_weight(self, modification_point, weight):
+    def set_weight(self, file_name, index, weight):
         """
-        :param str target_file: The path to file
-        :param weights: The modification weight([0,1]) of each modification points
+        :param file_name: the file containing the modification point
+        :param index: the index of the modification point
+        :param weight: The modification weight([0,1]) of the modification point
+        :type file_name: str
+        :type index: int
         :type weight: float
         :return: None
         :rtype: None
         """
         assert 0 <= weight <= 1
-        file, index = modification_point
-        self.modification_weights[file][index] = weight
+        self.modification_weights[file_name][index] = weight
 
     @abstractmethod
-    def get_source(self, target_file, indices=None):
+    def get_source(self, file_name, index):
         """
-        :param target_file: The path to target file
-        :param indices: the indices of modification points
-        :type target_file: str
-        :return: the sources of each modification point
+        :param file_name: the file containing the modification point
+        :param index: the index of the modification point
+        :type file_name: str
+        :type index: int
+        :return: the sources of the modification point
         :rtype: str
         """
         pass

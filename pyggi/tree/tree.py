@@ -61,11 +61,9 @@ class TreeProgram(AbstractTreeProgram):
             self.modification_points[file_name] = ast_engine.get_modification_points(self.contents[file_name])
             self.modification_weights[file_name] = [1.0] * len(self.modification_points[file_name])
 
-    def get_source(self, file_name, indices=None):
+    def get_source(self, file_name, index):
         ast_engine = self.__class__.get_ast_engine(file_name)
-        if not indices:
-            indices = range(len(self.modification_points[file_name]))
-        return { i: ast_engine.get_source(self, file_name, i) for i in indices }
+        return ast_engine.get_source(self, file_name, index)
 
     @classmethod
     def dump(cls, contents, file_name):

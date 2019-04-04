@@ -48,10 +48,8 @@ class LineProgram(AbstractLineProgram):
             self.modification_points[file_name] = list(range(len(self.contents[file_name])))
             self.modification_weights[file_name] = [1.0] * len(self.modification_points[file_name])
 
-    def get_source(self, target_file, indices=None):
-        if not indices:
-            indices = range(len(self.modification_points[target_file]))
-        return { i: self.contents[modification_points[i]] for i in indices }
+    def get_source(self, file_name, index):
+        return self.contents[file_name][index]
 
     @classmethod
     def dump(cls, contents, file_name):

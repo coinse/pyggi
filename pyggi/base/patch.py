@@ -53,7 +53,7 @@ class Patch:
         :rtype: str
         """
         diffs = ''
-        new_contents = self.program.apply(self)
+        new_contents = self.program.get_modified_contents(self)
         for file_name in self.program.target_files:
             orig = self.program.dump(self.program.contents, file_name)
             modi = self.program.dump(new_contents, file_name)

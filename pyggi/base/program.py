@@ -180,18 +180,12 @@ class AbstractProgram(ABC):
         self.write_to_tmp_dir(new_contents)
         return new_contents
 
-    def run(self, timeout=15):
-        """
-        Run the test script of the temporary variant
-
-        :param float timeout: The time limit of test run (unit: seconds)
-        :return: The fitness value of the patch
-        """
+    def exec_cmd(self, cmd, timeout=15):
         Result = collections.namedtuple("Result", 'status_code elapsed_time stdout stderr')
         cwd = os.getcwd()
         os.chdir(self.tmp_path)
         sprocess = subprocess.Popen(
-            shlex.split(self.test_command),
+            shlex.split(cmd),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
         try:
@@ -209,6 +203,15 @@ class AbstractProgram(ABC):
                             stderr=None)
         os.chdir(cwd)
         return result
+
+    def run(self, timeout=15):
+        """
+        Run the test script of the temporary variant
+
+        :param float timeout: The time limit of test run (unit: seconds)
+        :return: The fitness value of the patch
+        """
+        return self.exec_cmd(self.test_command, timeout)
 
     def compute_fitness(self, elapsed_time, stdout, stderr):
         try:

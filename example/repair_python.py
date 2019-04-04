@@ -21,7 +21,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     class MyProgram(LineProgram):
-        def result_parser(self, stdout, stderr):
+        def compute_fitness(self, elapsed_time, stdout, stderr):
             import re
             m = re.findall("runtime: ([0-9.]+)", stdout)
             if len(m) > 0:
@@ -53,8 +53,8 @@ if __name__ == "__main__":
         def is_better_than_the_best(self, fitness, best_fitness):
             return fitness < best_fitness
 
-        def stopping_criterion(self, iter, patch):
-            if patch.fitness == 0:
+        def stopping_criterion(self, iter, fitness):
+            if fitness == 0:
                 return True
             return False
 

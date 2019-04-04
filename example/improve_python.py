@@ -21,7 +21,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     class MyProgram(LineProgram):
-        def result_parser(self, stdout, stderr):
+        def compute_fitness(self, elapsed_time, stdout, stderr):
             import re
             m = re.findall("runtime: ([0-9.]+)", stdout)
             if len(m) > 0:
@@ -44,8 +44,8 @@ if __name__ == "__main__":
                 patch.add(edit_operator.create(program))
             return patch
 
-        def stopping_criterion(self, iter, patch):
-            return patch.fitness < 0.05
+        def stopping_criterion(self, iter, fitness):
+            return fitness < 0.05
 
     program = MyProgram(args.project_path)
     local_search = MyLocalSearch(program)

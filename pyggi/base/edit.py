@@ -1,9 +1,18 @@
 import ast
+import inspect
 from abc import ABC, abstractmethod
 
 class AbstractEdit(ABC):
     @abstractmethod
     def __init__(self):
+        """
+        frame = inspect.currentframe()
+        args, _, _, values = inspect.getargvalues(frame)
+        for name in args:
+            if name != 'self':
+                setattr(o, name, values[name])
+        print(self.__dict__)
+        """
         pass
 
     def __eq__(self, other):

@@ -46,7 +46,7 @@ class LocalSearch(Algorithm):
         """
         return fitness <= best_fitness
 
-    def stopping_criterion(self, iter, patch):
+    def stopping_criterion(self, iter, fitness):
         """
         :param int iter: The current iteration number in the epoch
         :param patch: The patch visited in the current iteration
@@ -94,8 +94,9 @@ class LocalSearch(Algorithm):
         warmup = list()
         empty_patch = Patch(self.program)
         for i in range(warmup_reps):
-            empty_patch.run_test(timeout=timeout)
-            warmup.append(empty_patch.fitness)
+            status_code, fitness = self.program.evaluate_patch(empty_patch, timeout=timeout)
+            if fitness:
+                warmup.append(fitness)
         original_fitness = float(sum(warmup)) / len(warmup)
 
         self.program.logger.info(
@@ -117,9 +118,8 @@ class LocalSearch(Algorithm):
             start = time.time()
             for cur_iter in range(1, max_iter + 1):
                 patch = self.get_neighbour(best_patch.clone())
-                patch.run_test(timeout=timeout)
+                status_code, fitness = self.program.evaluate_patch(patch, timeout=timeout)
                 result[cur_epoch]['FitnessEval'] += 1
-                fitness = patch.fitness
                 if not fitness:
                     result[cur_epoch]['InvalidPatch'] += 1
                     self.program.logger.info("{}\t{}\t{}\t{}".format(cur_epoch, cur_iter, fitness, patch))
@@ -129,7 +129,7 @@ class LocalSearch(Algorithm):
                     continue
                 self.program.logger.info("{}\t{}\t*{}\t{}".format(cur_epoch, cur_iter, fitness, patch))
                 best_fitness, best_patch = fitness, patch
-                if self.stopping_criterion(cur_iter, patch):
+                if self.stopping_criterion(cur_iter, fitness):
                     result[cur_epoch]['Success'] = True
                     break
             result[cur_epoch]['Time'] = time.time() - start

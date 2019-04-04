@@ -40,14 +40,11 @@ if __name__ == "__main__":
                     break
             return temp_patch
 
-        def get_fitness(self, patch):
-            return int(patch.test_result.custom['failed'])
-
         def is_better_than_the_best(self, fitness, best_fitness):
             return fitness < best_fitness
 
-        def stopping_criterion(self, iter, patch):
-            if patch.fitness == 0:
+        def stopping_criterion(self, iter, fitness):
+            if fitness == 0:
                 return True
             return False
 

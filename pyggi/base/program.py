@@ -9,11 +9,21 @@ import json
 import time
 import pathlib
 import random
+import enum
+import collections
+import subprocess
+import shlex
+from copy import deepcopy
 from abc import ABC, abstractmethod
 from distutils.dir_util import copy_tree
 from . import InvalidPatchError
 from .. import PYGGI_DIR
 from ..utils import Logger
+
+class StatusCode(enum.Enum):
+    NORMAL = 0
+    TIME_OUT = 1
+    PARSE_ERROR = 2
 
 class AbstractProgram(ABC):
     """
@@ -143,8 +153,78 @@ class AbstractProgram(ABC):
         """
         pass
 
-    def result_parser(self, stdout: str, stderr: str):
+    def apply(self, patch):
+        """
+        This method applies the patch to the target program.
+        It does not directly modify the source code of the original program,
+        but modifies the copied program within the temporary directory.
+
+        :return: The contents of the patch-applied program, See *Hint*.
+        :rtype: dict(str, list(str))
+
+        .. hint::
+            - key: The target file name(path) related to the program root path
+            - value: The contents of the file
+        """
+        target_files = self.contents.keys()
+        modification_points = deepcopy(self.modification_points)
+        new_contents = deepcopy(self.contents)
+        for target_file in target_files:
+            edits = list(filter(lambda a: a.target[0] == target_file, patch.edit_list))
+            for edit in edits:
+                edit.apply(self, new_contents, modification_points)
+        for target_file in new_contents:
+            with open(os.path.join(self.tmp_path, target_file), 'w') as tmp_file:
+                tmp_file.write(self.__class__.dump(new_contents, target_file))
+        return new_contents
+
+    def run(self, timeout=15):
+        """
+        Run the test script of the temporary variant
+
+        :param float timeout: The time limit of test run (unit: seconds)
+        :return: The fitness value of the patch
+        """
+        Result = collections.namedtuple("Result", 'status_code elapsed_time stdout stderr')
+        cwd = os.getcwd()
+        os.chdir(self.tmp_path)
+        sprocess = subprocess.Popen(
+            shlex.split(self.test_command),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+        try:
+            start = time.time()
+            stdout, stderr = sprocess.communicate(timeout=timeout)
+            end = time.time()
+            result = Result(status_code=StatusCode.NORMAL,
+                            elapsed_time=(end - start),
+                            stdout=stdout.decode("ascii"),
+                            stderr=stderr.decode("ascii"))
+        except subprocess.TimeoutExpired:
+            result = Result(status_code=StatusCode.TIME_OUT,
+                            elapsed_time=None,
+                            stdout=None,
+                            stderr=None)
+        os.chdir(cwd)
+        return result
+
+    def compute_fitness(self, elapsed_time, stdout, stderr):
         try:
             return float(stdout.strip())
         except:
             raise InvalidPatchError
+
+    def evaluate_patch(self, patch, timeout=15):
+        # apply + run_test
+        self.apply(patch)
+        result = self.run(timeout)
+
+        if result.status_code == StatusCode.TIME_OUT:
+            return StatusCode.TIME_OUT, None
+
+        try:
+            fitness = self.compute_fitness(result.elapsed_time, result.stdout, result.stderr)
+        except InvalidPatchError:
+            return StatusCode.PARSE_ERROR, None
+
+        return StatusCode.NORMAL, fitness

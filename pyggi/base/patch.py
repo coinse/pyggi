@@ -20,10 +20,6 @@ class Patch:
     """
     def __init__(self, program):
         self.program = program
-        self.fitness = None
-        self.elapsed_time = None
-        self.timeout = False
-        self.valid = True
         self.edit_list = []
 
     def __str__(self):
@@ -44,8 +40,6 @@ class Patch:
         """
         clone_patch = Patch(self.program)
         clone_patch.edit_list = deepcopy(self.edit_list)
-        clone_patch.fitness = None
-        clone_patch.elapsed_time = None
         return clone_patch
 
     @property
@@ -58,7 +52,7 @@ class Patch:
         :rtype: str
         """
         import difflib
-        self.apply()
+        self.program.apply(self)
         diffs = ''
         for i in range(len(self.program.target_files)):
             original_target_file = os.path.join(self.program.path,
@@ -74,40 +68,6 @@ class Patch:
                         tofile=modified_target_file):
                     diffs += diff
         return diffs
-
-    def run_test(self, timeout=15):
-        """
-        Run the test script provided by the user
-        which is placed within the project directory.
-
-        :param float timeout: The time limit of test run (unit: seconds)
-        :return: The fitness value of the patch
-        """
-        import time
-        import subprocess
-        import shlex
-        self.apply()
-        cwd = os.getcwd()
-
-        os.chdir(self.program.tmp_path)
-        sprocess = subprocess.Popen(
-            shlex.split(self.program.test_command),
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE)
-        try:
-            start = time.time()
-            stdout, stderr = sprocess.communicate(timeout=timeout)
-            self.elapsed_time = time.time() - start
-            self.fitness = self.program.result_parser(stdout.decode("ascii"), stderr.decode("ascii"))
-        except subprocess.TimeoutExpired:
-            self.elapsed_time = timeout * 1000 # seconds to milliseconds
-            self.timeout = True
-        except InvalidPatchError:
-            self.valid = False
-
-        os.chdir(cwd)
-
-        return self.fitness
 
     def add(self, edit):
         """
@@ -128,28 +88,3 @@ class Patch:
         :param int index: The index of edit to delete
         """
         del self.edit_list[index]
-    
-    def apply(self):
-        """
-        This method applies the patch to the target program.
-        It does not directly modify the source code of the original program,
-        but modifies the copied program within the temporary directory.
-
-        :return: The contents of the patch-applied program, See *Hint*.
-        :rtype: dict(str, list(str))
-
-        .. hint::
-            - key: The target file name(path) related to the program root path
-            - value: The contents of the file
-        """
-        target_files = self.program.contents.keys()
-        modification_points = deepcopy(self.program.modification_points)
-        new_contents = deepcopy(self.program.contents)
-        for target_file in target_files:
-            edits = list(filter(lambda a: a.target[0] == target_file, self.edit_list))
-            for edit in edits:
-                edit.apply(self.program, new_contents, modification_points)
-        for target_file in new_contents:
-            with open(os.path.join(self.program.tmp_path, target_file), 'w') as tmp_file:
-                tmp_file.write(self.program.__class__.dump(new_contents, target_file))
-        return new_contents

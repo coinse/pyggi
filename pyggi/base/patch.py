@@ -2,6 +2,7 @@
 This module contains Patch class.
 """
 import os
+import difflib
 from copy import deepcopy
 from .edit import AbstractEdit
 
@@ -51,22 +52,16 @@ class Patch:
         :return: The file comparison result
         :rtype: str
         """
-        import difflib
-        self.program.apply(self)
         diffs = ''
-        for i in range(len(self.program.target_files)):
-            original_target_file = os.path.join(self.program.path,
-                                                self.program.target_files[i])
-            modified_target_file = os.path.join(self.program.tmp_path,
-                                                self.program.target_files[i])
-            with open(original_target_file) as orig, open(
-                modified_target_file) as modi:
-                for diff in difflib.context_diff(
-                        orig.readlines(),
-                        modi.readlines(),
-                        fromfile=original_target_file,
-                        tofile=modified_target_file):
-                    diffs += diff
+        new_contents = self.program.apply(self)
+        for file_name in self.program.target_files:
+            orig = self.program.dump(self.program.contents, file_name)
+            modi = self.program.dump(new_contents, file_name)
+            orig_list = list(map(lambda s: s+'\n', orig.splitlines()))
+            modi_list = list(map(lambda s: s+'\n', modi.splitlines()))
+            for diff in difflib.context_diff(orig_list, modi_list, fromfile="before: " + file_name,
+                                                                   tofile="after: " + file_name):
+                diffs += diff
         return diffs
 
     def add(self, edit):

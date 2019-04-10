@@ -6,7 +6,7 @@ Automated program repair ::
 import sys
 import random
 import argparse
-from pyggi.base import Patch, InvalidPatchError
+from pyggi.base import Patch, ParseError
 from pyggi.line import LineProgram
 from pyggi.line import LineReplacement, LineInsertion, LineDeletion
 from pyggi.algorithms import LocalSearch
@@ -31,7 +31,7 @@ if __name__ == "__main__":
                 failed = int(failed[0]) if not pass_all else 0
                 return failed
             else:
-                raise InvalidPatchError
+                raise ParseError
 
     class MyTabuSearch(LocalSearch):
         def setup(self):
@@ -54,9 +54,7 @@ if __name__ == "__main__":
             return fitness < best_fitness
 
         def stopping_criterion(self, iter, fitness):
-            if fitness == 0:
-                return True
-            return False
+            return fitness == 0
 
     program = MyProgram(args.project_path)
     tabu_search = MyTabuSearch(program)

@@ -13,10 +13,10 @@ import enum
 import collections
 import subprocess
 import shlex
-from copy import deepcopy
+import copy
+import difflib
 from abc import ABC, abstractmethod
 from distutils.dir_util import copy_tree
-from . import InvalidPatchError
 from .. import PYGGI_DIR
 from ..utils import Logger
 
@@ -24,6 +24,9 @@ class StatusCode(enum.Enum):
     NORMAL = 0
     TIME_OUT = 1
     PARSE_ERROR = 2
+
+class ParseError(Exception):
+    pass
 
 class AbstractProgram(ABC):
     """
@@ -39,20 +42,16 @@ class AbstractProgram(ABC):
     CONFIG_FILE_NAME = '.pyggi.config'
     TMP_DIR = os.path.join(PYGGI_DIR, 'tmp_variants')
     SAVE_DIR = os.path.join(PYGGI_DIR, 'saved_variants')
+    Result = collections.namedtuple("Result", 'status_code elapsed_time stdout stderr')
 
     def __init__(self, path, config=None):
         self.timestamp = str(int(time.time()))
         self.path = os.path.abspath(path.strip())
         self.name = os.path.basename(self.path)
         self.logger = Logger(self.name + '_' + self.timestamp)
-        if not config:
-            with open(os.path.join(self.path, self.__class__.CONFIG_FILE_NAME)) as config_file:
-                config = json.load(config_file)
-        self.test_command = config['test_command']
-        self.target_files = config['target_files']
+        self.load_config(path, config)
         self.load_contents()
         assert self.modification_points
-        assert self.modification_weights
         assert self.contents
         self.create_tmp_variant()
         self.logger.info("Path to the temporal program variants: {}".format(self.tmp_path))
@@ -67,6 +66,28 @@ class AbstractProgram(ABC):
         :rtype: str
         """
         return os.path.join(self.__class__.TMP_DIR, self.name, self.timestamp)
+
+    def load_config(self, path, config):
+        assert config is None or isinstance(config, str) or isinstance(config, dict)
+
+        from_file = False
+
+        if config:
+            if isinstance(config, str):
+                config_file_name = config
+                from_file = True
+        else:
+            config_file_name = self.__class__.CONFIG_FILE_NAME
+            from_file = True
+
+        if from_file:
+            with open(os.path.join(self.path, config_file_name)) as config_file:
+                config = json.load(config_file)
+
+        self.test_command = config['test_command']
+        self.target_files = config['target_files']
+
+        return config
 
     def create_tmp_variant(self):
         """
@@ -97,6 +118,8 @@ class AbstractProgram(ABC):
         :rtype: None
         """
         assert 0 <= weight <= 1
+        if file_name not in self.modification_weights:
+            self.modification_weights[file_name] = [1.0] * len(self.modification_points[file_name])
         self.modification_weights[file_name][index] = weight
 
     @abstractmethod
@@ -158,8 +181,8 @@ class AbstractProgram(ABC):
 
     def get_modified_contents(self, patch):
         target_files = self.contents.keys()
-        modification_points = deepcopy(self.modification_points)
-        new_contents = deepcopy(self.contents)
+        modification_points = copy.deepcopy(self.modification_points)
+        new_contents = copy.deepcopy(self.contents)
         for target_file in target_files:
             edits = list(filter(lambda a: a.target[0] == target_file, patch.edit_list))
             for edit in edits:
@@ -184,7 +207,6 @@ class AbstractProgram(ABC):
         return new_contents
 
     def exec_cmd(self, cmd, timeout=15):
-        Result = collections.namedtuple("Result", 'status_code elapsed_time stdout stderr')
         cwd = os.getcwd()
         os.chdir(self.tmp_path)
         sprocess = subprocess.Popen(
@@ -195,12 +217,12 @@ class AbstractProgram(ABC):
             start = time.time()
             stdout, stderr = sprocess.communicate(timeout=timeout)
             end = time.time()
-            result = Result(status_code=StatusCode.NORMAL,
+            result = self.__class__.Result(status_code=StatusCode.NORMAL,
                             elapsed_time=(end - start),
                             stdout=stdout.decode("ascii"),
                             stderr=stderr.decode("ascii"))
         except subprocess.TimeoutExpired:
-            result = Result(status_code=StatusCode.TIME_OUT,
+            result = self.__class__.Result(status_code=StatusCode.TIME_OUT,
                             elapsed_time=None,
                             stdout=None,
                             stderr=None)
@@ -220,7 +242,7 @@ class AbstractProgram(ABC):
         try:
             return float(stdout.strip())
         except:
-            raise InvalidPatchError
+            raise ParseError
 
     def evaluate_patch(self, patch, timeout=15):
         # apply + run
@@ -232,7 +254,27 @@ class AbstractProgram(ABC):
 
         try:
             fitness = self.compute_fitness(result.elapsed_time, result.stdout, result.stderr)
-        except InvalidPatchError:
+        except ParseError:
             return StatusCode.PARSE_ERROR, None
 
         return StatusCode.NORMAL, fitness
+
+    def diff(self, patch) -> str:
+        """
+        Compare the source codes of original program and the patch-applied program
+        using *difflib* module(https://docs.python.org/3.6/library/difflib.html).
+
+        :return: The file comparison result
+        :rtype: str
+        """
+        diffs = ''
+        new_contents = self.get_modified_contents(patch)
+        for file_name in self.target_files:
+            orig = self.dump(self.contents, file_name)
+            modi = self.dump(new_contents, file_name)
+            orig_list = list(map(lambda s: s+'\n', orig.splitlines()))
+            modi_list = list(map(lambda s: s+'\n', modi.splitlines()))
+            for diff in difflib.context_diff(orig_list, modi_list, fromfile="before: " + file_name,
+                                                                   tofile="after: " + file_name):
+                diffs += diff
+        return diffs

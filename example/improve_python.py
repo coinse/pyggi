@@ -6,7 +6,7 @@ Improving non-functional properties ::
 import sys
 import random
 import argparse
-from pyggi.base import Patch, InvalidPatchError
+from pyggi.base import Patch, ParseError
 from pyggi.line import LineProgram
 from pyggi.line import LineReplacement, LineInsertion, LineDeletion
 from pyggi.algorithms import LocalSearch
@@ -31,9 +31,9 @@ if __name__ == "__main__":
                 if pass_all:
                     return round(float(runtime), 3)
                 else:
-                    raise InvalidPatchError
+                    raise ParseError
             else:
-                raise InvalidPatchError
+                raise ParseError
 
     class MyLocalSearch(LocalSearch):
         def get_neighbour(self, patch):

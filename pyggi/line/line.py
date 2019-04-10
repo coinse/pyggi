@@ -1,42 +1,9 @@
 import os
 import random
 from abc import abstractmethod
-from ..base import AbstractProgram, Replacement, Insertion, Deletion, Moving
+from ..base import AbstractProgram, AbstractEdit
 
-class AbstractLineProgram(AbstractProgram):
-    @abstractmethod
-    def do_replace(self, target, ingredient):
-        pass
-
-    @abstractmethod
-    def do_insert(self, target, ingredient, direction='before'):
-        pass
-
-    @abstractmethod
-    def do_delete(self, target):
-        pass
-
-class LineReplacement(Replacement):
-    @property
-    def domain(self):
-        return AbstractLineProgram
-
-class LineInsertion(Insertion):
-    @property
-    def domain(self):
-        return AbstractLineProgram
-
-class LineDeletion(Deletion):
-    @property
-    def domain(self):
-        return AbstractLineProgram
-
-class LineMoving(Moving):
-    @property
-    def domain(self):
-        return AbstractLineProgram
-
-class LineProgram(AbstractLineProgram):
+class LineProgram(AbstractProgram):
     def load_contents(self):
         self.contents = {}
         self.modification_points = dict()
@@ -46,7 +13,6 @@ class LineProgram(AbstractLineProgram):
                 self.contents[file_name] = list(
                     map(str.rstrip, target_file.readlines()))
             self.modification_points[file_name] = list(range(len(self.contents[file_name])))
-            self.modification_weights[file_name] = [1.0] * len(self.modification_points[file_name])
 
     def get_source(self, file_name, index):
         return self.contents[file_name][index]
@@ -87,3 +53,65 @@ class LineProgram(AbstractLineProgram):
         l_f, l_n = op.target # line file and line number
         new_contents[l_f][modification_points[l_f][l_n]] = ''
         return True
+
+class LineEdit(AbstractEdit):
+    @property
+    def domain(self):
+        return LineProgram
+
+class LineReplacement(LineEdit):
+    def __init__(self, target, ingredient):
+        self.target = target
+        self.ingredient = ingredient
+
+    def apply(self, program, new_contents, modification_points):
+        return program.do_replace(self, new_contents, modification_points)
+
+    @classmethod
+    def create(cls, program, target_file=None, ingr_file=None, method='random'):
+        return cls(program.random_target(target_file, method),
+                   program.random_target(ingr_file, 'random'))
+
+class LineInsertion(LineEdit):
+    def __init__(self, target, ingredient, direction='before'):
+        assert direction in ['before', 'after']
+        self.target = target
+        self.ingredient = ingredient
+        self.direction = direction
+
+    def apply(self, program, new_contents, modification_points):
+        return program.do_insert(self, new_contents, modification_points)
+
+    @classmethod
+    def create(cls, program, target_file=None, ingr_file=None, direction='before', method='random'):
+        return cls(program.random_target(target_file, 'random'),
+                   program.random_target(ingr_file, 'random'),
+                   direction)
+
+class LineDeletion(LineEdit):
+    def __init__(self, target):
+        self.target = target
+
+    def apply(self, program, new_contents, modification_points):
+        return program.do_delete(self, new_contents, modification_points)
+
+    @classmethod
+    def create(cls, program, target_file=None, method='random'):
+        return cls(program.random_target(target_file, method))
+
+class LineMoving(LineEdit):
+    def __init__(self, target, ingredient, direction='before'):
+        assert direction in ['before', 'after']
+        self.target = target
+        self.ingredient = ingredient
+        self.direction = direction
+
+    def apply(self, program, new_contents, modification_points):
+        program.do_insert(self, new_contents, modification_points)
+        program.do_delete(self, new_contents, modification_points)
+
+    @classmethod
+    def create(cls, program, target_file=None, ingr_file=None, direction='before', method='random'):
+        return cls(program.random_target(target_file, method),
+                   program.random_target(ingr_file, 'random'),
+                   direction)

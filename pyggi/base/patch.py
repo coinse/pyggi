@@ -2,12 +2,8 @@
 This module contains Patch class.
 """
 import os
-import difflib
 from copy import deepcopy
-from .edit import AbstractEdit
-
-class InvalidPatchError(Exception):
-    pass
+from . import AbstractEdit
 
 class Patch:
     """
@@ -44,25 +40,8 @@ class Patch:
         return clone_patch
 
     @property
-    def diff(self) -> str:
-        """
-        Compare the source codes of original program and the patch-applied program
-        using *difflib* module(https://docs.python.org/3.6/library/difflib.html).
-
-        :return: The file comparison result
-        :rtype: str
-        """
-        diffs = ''
-        new_contents = self.program.get_modified_contents(self)
-        for file_name in self.program.target_files:
-            orig = self.program.dump(self.program.contents, file_name)
-            modi = self.program.dump(new_contents, file_name)
-            orig_list = list(map(lambda s: s+'\n', orig.splitlines()))
-            modi_list = list(map(lambda s: s+'\n', modi.splitlines()))
-            for diff in difflib.context_diff(orig_list, modi_list, fromfile="before: " + file_name,
-                                                                   tofile="after: " + file_name):
-                diffs += diff
-        return diffs
+    def diff(self):
+        return self.program.diff(self)
 
     def add(self, edit):
         """

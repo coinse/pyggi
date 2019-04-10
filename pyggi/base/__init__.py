@@ -1,4 +1,4 @@
-from .patch import Patch, InvalidPatchError
-from .program import AbstractProgram, StatusCode
+from .edit import AbstractEdit
+from .patch import Patch
+from .program import AbstractProgram, StatusCode, ParseError
 from .algorithm import Algorithm
-from .edit import AbstractEdit, Replacement, Deletion, Insertion, Moving

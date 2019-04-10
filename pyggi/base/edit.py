@@ -16,7 +16,7 @@ class AbstractEdit(ABC):
         pass
 
     def __eq__(self, other):
-        if self.__class__.__name__ != other.__class__.__name__:
+        if self.__class__ != other.__class__:
             return False
         for prop in self.__dict__:
             if self.__dict__[prop] != other.__dict__[prop]:
@@ -56,60 +56,3 @@ class AbstractEdit(ABC):
         :return: The operator instance with randomly-selected properties.
         """
         pass
-
-class Replacement(AbstractEdit):
-    def __init__(self, target, ingredient):
-        self.target = target
-        self.ingredient = ingredient
-
-    def apply(self, program, new_contents, modification_points):
-        return program.do_replace(self, new_contents, modification_points)
-
-    @classmethod
-    def create(cls, program, target_file=None, ingr_file=None, method='random'):
-        return cls(program.random_target(target_file, method),
-                   program.random_target(ingr_file, 'random'))
-
-class Insertion(AbstractEdit):
-    def __init__(self, target, ingredient, direction='before'):
-        assert direction in ['before', 'after']
-        self.target = target
-        self.ingredient = ingredient
-        self.direction = direction
-
-    def apply(self, program, new_contents, modification_points):
-        return program.do_insert(self, new_contents, modification_points)
-
-    @classmethod
-    def create(cls, program, target_file=None, ingr_file=None, direction='before', method='random'):
-        return cls(program.random_target(target_file, 'random'),
-                   program.random_target(ingr_file, 'random'),
-                   direction)
-
-class Deletion(AbstractEdit):
-    def __init__(self, target):
-        self.target = target
-
-    def apply(self, program, new_contents, modification_points):
-        return program.do_delete(self, new_contents, modification_points)
-
-    @classmethod
-    def create(cls, program, target_file=None, method='random'):
-        return cls(program.random_target(target_file, method))
-
-class Moving(AbstractEdit):
-    def __init__(self, target, ingredient, direction='before'):
-        assert direction in ['before', 'after']
-        self.target = target
-        self.ingredient = ingredient
-        self.direction = direction
-
-    def apply(self, program, new_contents, modification_points):
-        program.do_insert(self, new_contents, modification_points)
-        program.do_delete(self, new_contents, modification_points)
-
-    @classmethod
-    def create(cls, program, target_file=None, ingr_file=None, direction='before', method='random'):
-        return cls(program.random_target(target_file, method),
-                   program.random_target(ingr_file, 'random'),
-                   direction)

@@ -1,6 +1,6 @@
 import time
 from abc import ABCMeta, abstractmethod
-from ..base import Patch, Algorithm, InvalidPatchError
+from ..base import Patch, Algorithm, ParseError
 
 class LocalSearch(Algorithm):
     """

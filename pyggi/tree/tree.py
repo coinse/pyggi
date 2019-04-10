@@ -4,43 +4,10 @@ import astor
 import random
 from abc import abstractmethod
 from .ast_engine import Astor#, SrcML
-from ..base import AbstractProgram, Replacement, Insertion, Deletion, Moving
+from ..base import AbstractProgram, AbstractEdit
 from ..utils import get_file_extension
 
-class AbstractTreeProgram(AbstractProgram):
-    @abstractmethod
-    def do_replace(self, op, new_contents, modification_points):
-        pass
-
-    @abstractmethod
-    def do_insert(self, op, new_contents, modification_points, direction='before'):
-        pass
-
-    @abstractmethod
-    def do_delete(self, op, new_contents, modification_points):
-        pass
-
-class StmtReplacement(Replacement):
-    @property
-    def domain(self):
-        return AbstractTreeProgram
-
-class StmtInsertion(Insertion):
-    @property
-    def domain(self):
-        return AbstractTreeProgram
-
-class StmtDeletion(Deletion):
-    @property
-    def domain(self):
-        return AbstractTreeProgram
-
-class StmtMoving(Moving):
-    @property
-    def domain(self):
-        return AbstractTreeProgram
-
-class TreeProgram(AbstractTreeProgram):
+class TreeProgram(AbstractProgram):
     @classmethod
     def get_ast_engine(cls, file_name):
         # get_contents, get_modification_points, get_source, dump, do_replace, do_insert, do_delete
@@ -59,7 +26,6 @@ class TreeProgram(AbstractTreeProgram):
             ast_engine = self.__class__.get_ast_engine(file_name)
             self.contents[file_name] = ast_engine.get_contents(os.path.join(self.path, file_name))
             self.modification_points[file_name] = ast_engine.get_modification_points(self.contents[file_name])
-            self.modification_weights[file_name] = [1.0] * len(self.modification_points[file_name])
 
     def get_source(self, file_name, index):
         ast_engine = self.__class__.get_ast_engine(file_name)
@@ -83,3 +49,66 @@ class TreeProgram(AbstractTreeProgram):
     def do_delete(self, op, new_contents, modification_points):
         ast_engine = self.__class__.get_ast_engine(op.target[0])
         return ast_engine.do_delete(self, op, new_contents, modification_points)
+
+
+class TreeEdit(AbstractEdit):
+    @property
+    def domain(self):
+        return TreeProgram
+
+class StmtReplacement(TreeEdit):
+    def __init__(self, target, ingredient):
+        self.target = target
+        self.ingredient = ingredient
+
+    def apply(self, program, new_contents, modification_points):
+        return program.do_replace(self, new_contents, modification_points)
+
+    @classmethod
+    def create(cls, program, target_file=None, ingr_file=None, method='random'):
+        return cls(program.random_target(target_file, method),
+                   program.random_target(ingr_file, 'random'))
+
+class StmtInsertion(TreeEdit):
+    def __init__(self, target, ingredient, direction='before'):
+        assert direction in ['before', 'after']
+        self.target = target
+        self.ingredient = ingredient
+        self.direction = direction
+
+    def apply(self, program, new_contents, modification_points):
+        return program.do_insert(self, new_contents, modification_points)
+
+    @classmethod
+    def create(cls, program, target_file=None, ingr_file=None, direction='before', method='random'):
+        return cls(program.random_target(target_file, 'random'),
+                   program.random_target(ingr_file, 'random'),
+                   direction)
+
+class StmtDeletion(TreeEdit):
+    def __init__(self, target):
+        self.target = target
+
+    def apply(self, program, new_contents, modification_points):
+        return program.do_delete(self, new_contents, modification_points)
+
+    @classmethod
+    def create(cls, program, target_file=None, method='random'):
+        return cls(program.random_target(target_file, method))
+
+class StmtMoving(TreeEdit):
+    def __init__(self, target, ingredient, direction='before'):
+        assert direction in ['before', 'after']
+        self.target = target
+        self.ingredient = ingredient
+        self.direction = direction
+
+    def apply(self, program, new_contents, modification_points):
+        program.do_insert(self, new_contents, modification_points)
+        program.do_delete(self, new_contents, modification_points)
+
+    @classmethod
+    def create(cls, program, target_file=None, ingr_file=None, direction='before', method='random'):
+        return cls(program.random_target(target_file, method),
+                   program.random_target(ingr_file, 'random'),
+                   direction)

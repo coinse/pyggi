@@ -28,16 +28,31 @@ class StatusCode(enum.Enum):
 class ParseError(Exception):
     pass
 
+class AbstractEngine(ABC):
+    @abstractmethod
+    def get_contents(self, file_path):
+        pass
+
+    @abstractmethod
+    def get_modification_points(self, contents_of_file):
+        pass
+
+    @abstractmethod
+    def get_source(self, program, file_name, index):
+        pass
+
+    @abstractmethod
+    def dump(self, contents_of_file):
+        pass
+
 class AbstractProgram(ABC):
     """
-
     Program encapsulates the original source code.
     Currently, PYGGI stores the source code as a list of code lines,
     as lines are the only supported unit of modifications.
     For modifications at other granularity levels,
     this class needs to process and store the source code accordingly
     (for example, by parsing and storing the AST).
-
     """
     CONFIG_FILE_NAME = '.pyggi.config'
     TMP_DIR = os.path.join(PYGGI_DIR, 'tmp_variants')
@@ -49,23 +64,27 @@ class AbstractProgram(ABC):
         self.path = os.path.abspath(path.strip())
         self.name = os.path.basename(self.path)
         self.logger = Logger(self.name + '_' + self.timestamp)
+
+        # Configuration
         self.load_config(path, config)
+        assert self.test_command
+        assert self.target_files
+
+        # Associate each file to its engine
+        self.load_engines()
+
+        # Load actual contents using the engines
         self.load_contents()
         assert self.modification_points
         assert self.contents
+
+        # Create the temporary directory
         self.create_tmp_variant()
+
         self.logger.info("Path to the temporal program variants: {}".format(self.tmp_path))
 
     def __str__(self):
         return "{}({}):{}".format(self.__class__.__name__, self.path, ",".join(self.target_files))
-
-    @property
-    def tmp_path(self):
-        """
-        :return: The path of the temporary dirctory
-        :rtype: str
-        """
-        return os.path.join(self.__class__.TMP_DIR, self.name, self.timestamp)
 
     def load_config(self, path, config):
         assert config is None or isinstance(config, str) or isinstance(config, dict)
@@ -77,7 +96,7 @@ class AbstractProgram(ABC):
                 config_file_name = config
                 from_file = True
         else:
-            config_file_name = self.__class__.CONFIG_FILE_NAME
+            config_file_name = AbstractProgram.CONFIG_FILE_NAME
             from_file = True
 
         if from_file:
@@ -89,22 +108,29 @@ class AbstractProgram(ABC):
 
         return config
 
-    def create_tmp_variant(self):
-        """
-        Clean the temporary project directory if it exists.
-
-        :param str tmp_path: The path of directory to clean.
-        :return: None
-        """
-        pathlib.Path(self.tmp_path).mkdir(parents=True, exist_ok=True)
-        copy_tree(self.path, self.tmp_path)
-
-    def remove_tmp_variant(self):
-        shutil.rmtree(self.tmp_path)
-
+    @classmethod
     @abstractmethod
-    def load_contents(self):
+    def get_engine(cls, file_name):
         pass
+
+    def load_engines(self):
+        # Associate each file to its engine
+        self.engines = dict()
+        engine_instances = dict()
+        for file_name in self.target_files:
+            engine_class = self.__class__.get_engine(file_name)
+            if not engine_class in engine_instances:
+                engine_instances[file_name] = engine_class()
+            self.engines[file_name] = engine_instances[file_name]
+
+    def load_contents(self):
+        self.contents = {}
+        self.modification_points = dict()
+        self.modification_weights = dict()
+        for file_name in self.target_files:
+            engine = self.engines[file_name]
+            self.contents[file_name] = engine.get_contents(os.path.join(self.path, file_name))
+            self.modification_points[file_name] = engine.get_modification_points(self.contents[file_name])
 
     def set_weight(self, file_name, index, weight):
         """
@@ -122,7 +148,6 @@ class AbstractProgram(ABC):
             self.modification_weights[file_name] = [1.0] * len(self.modification_points[file_name])
         self.modification_weights[file_name][index] = weight
 
-    @abstractmethod
     def get_source(self, file_name, index):
         """
         :param file_name: the file containing the modification point
@@ -132,7 +157,7 @@ class AbstractProgram(ABC):
         :return: the sources of the modification point
         :rtype: str
         """
-        pass
+        return self.engines[file_name].get_source(self, file_name, index)
 
     def random_target(self, target_file=None, method="random"):
         """
@@ -153,6 +178,27 @@ class AbstractProgram(ABC):
             list_of_prob = list(map(lambda w: float(w)/cumulated_weights, self.modification_weights[target_file]))
             return (target_file, random.choices(list(range(len(candidates))), weights=list_of_prob, k=1)[0])
 
+    @property
+    def tmp_path(self):
+        """
+        :return: The path of the temporary dirctory
+        :rtype: str
+        """
+        return os.path.join(self.__class__.TMP_DIR, self.name, self.timestamp)
+
+    def create_tmp_variant(self):
+        """
+        Clean the temporary project directory if it exists.
+
+        :param str tmp_path: The path of directory to clean.
+        :return: None
+        """
+        pathlib.Path(self.tmp_path).mkdir(parents=True, exist_ok=True)
+        copy_tree(self.path, self.tmp_path)
+
+    def remove_tmp_variant(self):
+        shutil.rmtree(self.tmp_path)
+
     def write_to_tmp_dir(self, new_contents):
         """
         Write new contents to the temporary directory of program
@@ -167,7 +213,6 @@ class AbstractProgram(ABC):
                 tmp_file.write(self.__class__.dump(new_contents, target_file))
 
     @classmethod
-    @abstractmethod
     def dump(cls, contents, file_name):
         """
         Convert contents of file to the source code
@@ -177,7 +222,8 @@ class AbstractProgram(ABC):
         :return: The source code
         :rtype: str
         """
-        pass
+        engine = cls.get_engine(file_name)
+        return engine().dump(contents[file_name])
 
     def get_modified_contents(self, patch):
         target_files = self.contents.keys()

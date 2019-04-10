@@ -2,58 +2,30 @@ import os
 import random
 from abc import abstractmethod
 from ..base import AbstractProgram, AbstractEdit
+from .engine import LineEngine
 
 class LineProgram(AbstractProgram):
-    def load_contents(self):
-        self.contents = {}
-        self.modification_points = dict()
-        self.modification_weights = dict()
-        for file_name in self.target_files:
-            with open(os.path.join(self.path, file_name), 'r') as target_file:
-                self.contents[file_name] = list(
-                    map(str.rstrip, target_file.readlines()))
-            self.modification_points[file_name] = list(range(len(self.contents[file_name])))
-
-    def get_source(self, file_name, index):
-        return self.contents[file_name][index]
-
     @classmethod
-    def dump(cls, contents, file_name):
-        return '\n'.join(contents[file_name]) + '\n'
+    def get_engine(cls, file_name):
+        return LineEngine
 
     def do_replace(self, op, new_contents, modification_points):
-        l_f, l_n = op.target # line file and line number
-        if op.ingredient:
-            i_f, i_n = op.ingredient
-            new_contents[l_f][modification_points[l_f][l_n]] = self.contents[i_f][i_n]
-        else:
-            new_contents[l_f][modification_points[l_f][l_n]] = ''
-        return True
+        assert self.engines[op.target[0]] == self.engines[op.ingredient[0]]
+        engine = self.engines[op.target[0]]
+        return engine.do_replace(self, op, new_contents, modification_points)
 
     def do_insert(self, op, new_contents, modification_points):
-        l_f, l_n = op.target
-        i_f, i_n = op.ingredient
-        if op.direction == 'before':
-            new_contents[l_f].insert(
-                modification_points[l_f][l_n],
-                self.contents[i_f][i_n]
-            )
-            for i in range(l_n, len(modification_points[l_f])):
-                modification_points[l_f][i] += 1
-        elif op.direction == 'after':
-            new_contents[l_f].insert(
-                modification_points[l_f][l_n] + 1,
-                self.contents[i_f][i_n]
-            )
-            for i in range(l_n + 1, len(modification_points[l_f])):
-                modification_points[l_f][i] += 1
-        return True
+        assert self.engines[op.target[0]] == self.engines[op.ingredient[0]]
+        engine = self.engines[op.target[0]]
+        return engine.do_insert(self, op, new_contents, modification_points)
 
     def do_delete(self, op, new_contents, modification_points):
-        l_f, l_n = op.target # line file and line number
-        new_contents[l_f][modification_points[l_f][l_n]] = ''
-        return True
+        engine = self.engines[op.target[0]]
+        return engine.do_delete(self, op, new_contents, modification_points)
 
+"""
+Possible Edit Operators
+"""
 class LineEdit(AbstractEdit):
     @property
     def domain(self):
@@ -84,7 +56,7 @@ class LineInsertion(LineEdit):
 
     @classmethod
     def create(cls, program, target_file=None, ingr_file=None, direction='before', method='random'):
-        return cls(program.random_target(target_file, 'random'),
+        return cls(program.random_target(target_file, method),
                    program.random_target(ingr_file, 'random'),
                    direction)
 

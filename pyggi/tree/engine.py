@@ -1,38 +1,9 @@
 import ast
 import astor
-from abc import ABC, abstractmethod
-from copy import deepcopy
+import copy
+from ..base import AbstractEngine
 
-class ASTEngine(ABC):
-    @abstractmethod
-    def get_contents(self, file_path):
-        pass
-
-    @abstractmethod
-    def get_modification_points(self, contents_of_file):
-        pass
-
-    @abstractmethod
-    def get_source(self, program, file_name, index):
-        pass
-
-    @abstractmethod
-    def dump(self, contents_of_file):
-        pass
-
-    @abstractmethod
-    def do_replace(self, program, op, new_contents, modification_points):
-        pass
-
-    @abstractmethod
-    def do_insert(self, program, op, new_contents, modification_points):
-        pass
-
-    @abstractmethod
-    def do_delete(self, program, op, new_contents, modification_points):
-        pass
-
-class Astor(ASTEngine):
+class AstorEngine(AbstractEngine):
     def get_contents(self, file_path):
         return astor.parse_file(file_path)
     
@@ -124,7 +95,7 @@ class Astor(ASTEngine):
         dst_block, dst_index = self.pos_2_block_n_index(*dst)
         if src:
             src_block, src_index = self.pos_2_block_n_index(*src)
-            dst_block[dst_index] = deepcopy(src_block[src_index])
+            dst_block[dst_index] = copy.deepcopy(src_block[src_index])
         else:
             dst_block[dst_index] = ast.Pass()
         return True
@@ -181,7 +152,7 @@ class Astor(ASTEngine):
         dst_block, dst_index = self.pos_2_block_n_index(*dst)
         if src:
             src_block, src_index = self.pos_2_block_n_index(*src)
-            dst_block[dst_index] = deepcopy(src_block[src_index])
+            dst_block[dst_index] = copy.deepcopy(src_block[src_index])
         else:
             dst_block[dst_index] = ast.Pass()
         return True
@@ -201,7 +172,7 @@ class Astor(ASTEngine):
             return False
         a_block, a_index = self.pos_2_block_n_index(*a)
         b_block, b_index = self.pos_2_block_n_index(*b)
-        a_block[a_index], b_block[b_index] = deepcopy(b_block[b_index]), deepcopy(
+        a_block[a_index], b_block[b_index] = copy.deepcopy(b_block[b_index]), copy.deepcopy(
             a_block[a_index])
         return True
 
@@ -220,7 +191,7 @@ class Astor(ASTEngine):
             return False
         dst_block, dst_index = self.pos_2_block_n_index(*dst)
         src_block, src_index = self.pos_2_block_n_index(*src)
-        dst_block.insert(dst_index, deepcopy(src_block[src_index]))
+        dst_block.insert(dst_index, copy.deepcopy(src_block[src_index]))
         return True
 
     def insert_after(self, dst, src):
@@ -238,11 +209,11 @@ class Astor(ASTEngine):
             return False
         dst_block, dst_index = self.pos_2_block_n_index(*dst)
         src_block, src_index = self.pos_2_block_n_index(*src)
-        dst_block.insert(dst_index + 1, deepcopy(src_block[src_index]))
+        dst_block.insert(dst_index + 1, copy.deepcopy(src_block[src_index]))
         return True
 
 """
-class SrcML(ASTEngine):
+class SrcMLEngine(ASTEngine):
     def get_contents(self, file_path):
         pass
 

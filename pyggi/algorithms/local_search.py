@@ -1,21 +1,14 @@
-"""
-
-This module contains meta-heuristic search algorithms.
-
-"""
 import time
 from abc import ABCMeta, abstractmethod
-from .patch import Patch
-from .test_result import TestResult
+from ..base import Patch, Algorithm, ParseError, StatusCode
 
-class LocalSearch(metaclass=ABCMeta):
+class LocalSearch(Algorithm):
     """
     Local Search (Abstact Class)
 
     All children classes need to override
 
     * :py:meth:`get_neighbour`
-    * :py:meth:`get_fitness`
 
     .. hint::
         Example of LocalSearch class. ::
@@ -37,35 +30,12 @@ class LocalSearch(metaclass=ABCMeta):
                         patch.add(edit_operator.random(program))
                     return patch
 
-                def get_fitness(self, patch):
-                    return float(patch.test_result.custom['runtime'])
-
-                def is_valid_patch(self, patch):
-                    return patch.test_result.compiled and patch.test_result.custom['pass_all'] == 'true'
-
                 def stopping_criterion(self, iter, patch):
-                    return float(patch.test_result.custom['runtime']) < 100
+                    return patch.elapsed_time < 100
 
             local_search = MyLocalSearch(program)
             results = local_search.run(warmup_reps=5, epoch=3, max_iter=100, timeout=15)
     """
-    def __init__(self, program):
-        """
-        :param program: The Program instance to optimize.
-        :type program: :py:class:`.Program`
-        """
-        self.program = program
-        self.best_fitness = None
-
-    def is_valid_patch(self, patch):
-        """
-        :param patch: The Patch instance whose validity should be checked.
-        :type patch: :py:class:`.Patch`
-        :return: The validity of the patch
-        :rtype: bool
-        """
-        return patch.test_result.compiled
-
     def is_better_than_the_best(self, fitness, best_fitness):
         """
         :param fitness: The fitness value of the current patch
@@ -76,7 +46,7 @@ class LocalSearch(metaclass=ABCMeta):
         """
         return fitness <= best_fitness
 
-    def stopping_criterion(self, iter, patch):
+    def stopping_criterion(self, iter, fitness):
         """
         :param int iter: The current iteration number in the epoch
         :param patch: The patch visited in the current iteration
@@ -102,22 +72,7 @@ class LocalSearch(metaclass=ABCMeta):
         """
         pass
 
-    @abstractmethod
-    def get_fitness(self, patch):
-        """
-        Define the fitness value of the patch
-
-        If you want to use original one(elapsed_time),
-        simply call ``super()``.
-
-        :param patch: The patch instacne
-        :type patch: :py:class:`.Patch`
-        :return: The fitness value
-        """
-        return patch.test_result.elapsed_time
-
-    def run(self, warmup_reps=1, epoch=5, max_iter=100, timeout=15,
-            result_parser=TestResult.pyggi_result_parser):
+    def run(self, warmup_reps=1, epoch=5, max_iter=100, timeout=15):
         """
         It starts from a randomly generated candidate solution
         and iteratively moves to its neighbouring solution with
@@ -132,18 +87,16 @@ class LocalSearch(metaclass=ABCMeta):
         :param int epoch: The total epoch
         :param int max_iter: The maximum iterations per epoch
         :param float timeout: The time limit of test run (unit: seconds)
-        :param result_parser: The parser of test output
-          (default: :py:meth:`.TestResult.pyggi_result_parser`)
-        :type result_parser: None or callable((str, str), :py:class:`.TestResult`)
-        :return: The result of searching(Time, Success, FitnessEval, CompileFailed, BestPatch)
+        :return: The result of searching(Time, Success, FitnessEval, InvalidPatch, BestPatch)
         :rtype: dict(int, dict(str, ))
         """
         self.program.logger.info(self.program.logger.log_file_path)
         warmup = list()
         empty_patch = Patch(self.program)
         for i in range(warmup_reps):
-            empty_patch.run_test(timeout=timeout, result_parser=result_parser)
-            warmup.append(self.get_fitness(empty_patch))
+            status_code, fitness = self.program.evaluate_patch(empty_patch, timeout=timeout)
+            if status_code is StatusCode.NORMAL:
+                warmup.append(fitness)
         original_fitness = float(sum(warmup)) / len(warmup)
 
         self.program.logger.info(
@@ -160,25 +113,23 @@ class LocalSearch(metaclass=ABCMeta):
             result[cur_epoch]['BestPatch'] = None
             result[cur_epoch]['Success'] = False
             result[cur_epoch]['FitnessEval'] = 0
-            result[cur_epoch]['CompileFailed'] = 0
+            result[cur_epoch]['InvalidPatch'] = 0
 
             start = time.time()
             for cur_iter in range(1, max_iter + 1):
                 patch = self.get_neighbour(best_patch.clone())
-                patch.run_test(timeout=timeout, result_parser=result_parser)
+                status_code, fitness = self.program.evaluate_patch(patch, timeout=timeout)
                 result[cur_epoch]['FitnessEval'] += 1
-                if not patch.test_result.compiled:
-                    result[cur_epoch]['CompileFailed'] += 1
-                if not (patch.test_result.compiled and self.is_valid_patch(patch)):
-                    self.program.logger.info("{}\t{}\tnull\t{}".format(cur_epoch, cur_iter, patch))
+                if status_code is not StatusCode.NORMAL:
+                    result[cur_epoch]['InvalidPatch'] += 1
+                    self.program.logger.info("{}\t{}\t{}\t{}".format(cur_epoch, cur_iter, fitness, patch))
                     continue
-                fitness = self.get_fitness(patch)
                 if not self.is_better_than_the_best(fitness, best_fitness):
                     self.program.logger.info("{}\t{}\t{}\t{}".format(cur_epoch, cur_iter, fitness, patch))
                     continue
                 self.program.logger.info("{}\t{}\t*{}\t{}".format(cur_epoch, cur_iter, fitness, patch))
                 best_fitness, best_patch = fitness, patch
-                if self.stopping_criterion(cur_iter, patch):
+                if self.stopping_criterion(cur_iter, fitness):
                     result[cur_epoch]['Success'] = True
                     break
             result[cur_epoch]['Time'] = time.time() - start

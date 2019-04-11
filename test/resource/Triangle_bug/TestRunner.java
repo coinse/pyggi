@@ -16,10 +16,11 @@ public class TestRunner {
       //System.out.println(result.getRunCount());
       //System.out.println(result.getRunTime());
       //System.out.println(result.wasSuccessful());
-      System.out.println("[PYGGI_RESULT] {" +
-        "runtime: " + result.getRunTime() + "," +
-        "failed: " + result.getFailureCount() + "," +
-        "pass_all: " + result.wasSuccessful() + "}"
-      );
+      //System.out.println("[PYGGI_RESULT] {" +
+      //  "runtime: " + result.getRunTime() + "," +
+      //  "failed: " + result.getFailureCount() + "," +
+      //  "pass_all: " + result.wasSuccessful() + "}"
+      //);
+      System.out.println(result.getFailureCount());
    }
 }

@@ -6,13 +6,13 @@ Improving non-functional properties ::
 import sys
 import random
 import argparse
-from pyggi import Program, Patch, GranularityLevel
+from pyggi.base import Patch, ParseError
+from pyggi.line import LineProgram
+from pyggi.line import LineReplacement, LineInsertion, LineDeletion
 from pyggi.algorithms import LocalSearch
-from pyggi.atomic_operator import LineReplacement, LineInsertion
-from pyggi.custom_operator import LineDeletion
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='PYGGI Improvment Example')
+    parser = argparse.ArgumentParser(description='PYGGI Improvement Example')
     parser.add_argument('project_path', type=str, default='../sample/Triangle_fast')
     parser.add_argument('--epoch', type=int, default=30,
         help='total epoch(default: 30)')
@@ -20,7 +20,17 @@ if __name__ == "__main__":
         help='total iterations per epoch(default: 100)')
     args = parser.parse_args()
     
-    program = Program(args.project_path, GranularityLevel.LINE)
+    class MyProgram(LineProgram):
+        def compute_fitness(self, elapsed_time, stdout, stderr):
+            try:
+                runtime, pass_all = stdout.strip().split(',')
+                runtime = float(runtime)
+                if not pass_all == 'true':
+                    raise ParseError
+                else:
+                    return runtime
+            except:
+                raise ParseError
    
     class MyLocalSearch(LocalSearch):
         def get_neighbour(self, patch):
@@ -31,15 +41,10 @@ if __name__ == "__main__":
                 patch.add(edit_operator.create(program))
             return patch
 
-        def get_fitness(self, patch):
-            return float(patch.test_result.custom['runtime'])
+        def stopping_criterion(self, iter, fitness):
+            return fitness < 100
 
-        def is_valid_patch(self, patch):
-            return patch.test_result.compiled and patch.test_result.custom['pass_all'] == 'true'
-
-        def stopping_criterion(self, iter, patch):
-            return float(patch.test_result.custom['runtime']) < 100
-
+    program = MyProgram(args.project_path)
     local_search = MyLocalSearch(program)
     result = local_search.run(warmup_reps=5, epoch=args.epoch, max_iter=args.iter, timeout=15)
 

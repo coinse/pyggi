@@ -6,10 +6,10 @@ Automated program repair ::
 import sys
 import random
 import argparse
-from pyggi import Program, Patch, GranularityLevel
+from pyggi.base import Patch
+from pyggi.line import LineProgram
+from pyggi.line import LineReplacement, LineInsertion, LineDeletion
 from pyggi.algorithms import LocalSearch
-from pyggi.atomic_operator import LineReplacement, LineInsertion
-from pyggi.custom_operator import LineDeletion
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='PYGGI Bug Repair Example')
@@ -20,9 +20,13 @@ if __name__ == "__main__":
         help='total iterations per epoch(default: 10000)')
     args = parser.parse_args()
     
-    program = Program(args.project_path, GranularityLevel.LINE)
+    program = LineProgram(args.project_path)
+
     #program.set_modifcation_points = []
     class MyTabuSearch(LocalSearch):
+        def setup(self):
+            self.tabu = []
+
         def get_neighbour(self, patch):
             while True:
                 temp_patch = patch.clone()
@@ -36,20 +40,15 @@ if __name__ == "__main__":
                     break
             return temp_patch
 
-        def get_fitness(self, patch):
-            return int(patch.test_result.custom['failed'])
-
         def is_better_than_the_best(self, fitness, best_fitness):
             return fitness < best_fitness
 
-        def stopping_criterion(self, iter, patch):
-            if not int(patch.test_result.custom['failed']) == 0:
-                return False
-            self.tabu = []
-            return True
+        def stopping_criterion(self, iter, fitness):
+            if fitness == 0:
+                return True
+            return False
 
     tabu_search = MyTabuSearch(program)
-    tabu_search.tabu = []
     result = tabu_search.run(warmup_reps=1, epoch=args.epoch, max_iter=args.iter)
     for epoch in result:
         print ("Epoch #{}".format(epoch))

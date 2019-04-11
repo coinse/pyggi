@@ -67,8 +67,6 @@ class AbstractProgram(ABC):
 
         # Configuration
         self.load_config(path, config)
-        assert self.test_command
-        assert self.target_files
 
         # Associate each file to its engine
         self.load_engines()
@@ -84,13 +82,12 @@ class AbstractProgram(ABC):
         self.logger.info("Path to the temporal program variants: {}".format(self.tmp_path))
 
     def __str__(self):
-        return "{}({}):{}".format(self.__class__.__name__, self.path, ",".join(self.target_files))
+        return "{}({}):{}".format(self.__class__.__name__,
+                                  self.path, ",".join(self.target_files))
 
     def load_config(self, path, config):
         assert config is None or isinstance(config, str) or isinstance(config, dict)
-
         from_file = False
-
         if config:
             if isinstance(config, str):
                 config_file_name = config
@@ -98,14 +95,11 @@ class AbstractProgram(ABC):
         else:
             config_file_name = AbstractProgram.CONFIG_FILE_NAME
             from_file = True
-
         if from_file:
             with open(os.path.join(self.path, config_file_name)) as config_file:
                 config = json.load(config_file)
-
         self.test_command = config['test_command']
         self.target_files = config['target_files']
-
         return config
 
     @classmethod
@@ -294,15 +288,12 @@ class AbstractProgram(ABC):
         # apply + run
         self.apply(patch)
         result = self.run(timeout)
-
         if result.status_code == StatusCode.TIME_OUT:
             return StatusCode.TIME_OUT, None
-
         try:
             fitness = self.compute_fitness(result.elapsed_time, result.stdout, result.stderr)
         except ParseError:
             return StatusCode.PARSE_ERROR, None
-
         return StatusCode.NORMAL, fitness
 
     def diff(self, patch) -> str:
@@ -320,7 +311,8 @@ class AbstractProgram(ABC):
             modi = self.dump(new_contents, file_name)
             orig_list = list(map(lambda s: s+'\n', orig.splitlines()))
             modi_list = list(map(lambda s: s+'\n', modi.splitlines()))
-            for diff in difflib.context_diff(orig_list, modi_list, fromfile="before: " + file_name,
-                                                                   tofile="after: " + file_name):
+            for diff in difflib.context_diff(orig_list, modi_list,
+                                             fromfile="before: " + file_name,
+                                             tofile="after: " + file_name):
                 diffs += diff
         return diffs

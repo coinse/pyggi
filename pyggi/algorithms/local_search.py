@@ -1,6 +1,6 @@
 import time
 from abc import ABCMeta, abstractmethod
-from ..base import Patch, Algorithm, ParseError
+from ..base import Patch, Algorithm, ParseError, StatusCode
 
 class LocalSearch(Algorithm):
     """
@@ -95,7 +95,7 @@ class LocalSearch(Algorithm):
         empty_patch = Patch(self.program)
         for i in range(warmup_reps):
             status_code, fitness = self.program.evaluate_patch(empty_patch, timeout=timeout)
-            if fitness:
+            if status_code is StatusCode.NORMAL:
                 warmup.append(fitness)
         original_fitness = float(sum(warmup)) / len(warmup)
 
@@ -120,7 +120,7 @@ class LocalSearch(Algorithm):
                 patch = self.get_neighbour(best_patch.clone())
                 status_code, fitness = self.program.evaluate_patch(patch, timeout=timeout)
                 result[cur_epoch]['FitnessEval'] += 1
-                if not fitness:
+                if status_code is not StatusCode.NORMAL:
                     result[cur_epoch]['InvalidPatch'] += 1
                     self.program.logger.info("{}\t{}\t{}\t{}".format(cur_epoch, cur_iter, fitness, patch))
                     continue

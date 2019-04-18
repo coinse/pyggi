@@ -1,6 +1,20 @@
+from abc import abstractmethod
 from ..base import AbstractEngine
 
-class LineEngine(AbstractEngine):
+class AbstractLineEngine(AbstractEngine):
+    @abstractmethod
+    def do_replace(self, program, op, new_contents, modification_points):
+        pass
+
+    @abstractmethod
+    def do_insert(self, program, op, new_contents, modification_points):
+        pass
+
+    @abstractmethod
+    def do_delete(self, program, op, new_contents, modification_points):
+        pass
+
+class LineEngine(AbstractLineEngine):
     def get_contents(self, file_path):
         with open(file_path, 'r') as target_file:
             return list(map(str.rstrip, target_file.readlines()))

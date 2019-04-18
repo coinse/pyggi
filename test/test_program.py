@@ -5,7 +5,7 @@ from pyggi.line import LineProgram as Program
 
 @pytest.fixture(scope='session')
 def setup():
-    program = Program('./resource/Triangle_bug')
+    program = Program('../sample/Triangle_bug')
     assert len(program.target_files) == 1
     assert program.target_files[0] == 'Triangle.java'
 

@@ -1,9 +1,23 @@
 import ast
 import astor
 import copy
+from abc import abstractmethod
 from ..base import AbstractEngine
 
-class AstorEngine(AbstractEngine):
+class AbstractTreeEngine(AbstractEngine):
+    @abstractmethod
+    def do_replace(self, program, op, new_contents, modification_points):
+        pass
+
+    @abstractmethod
+    def do_insert(self, program, op, new_contents, modification_points):
+        pass
+
+    @abstractmethod
+    def do_delete(self, program, op, new_contents, modification_points):
+        pass
+
+class AstorEngine(AbstractTreeEngine):
     def get_contents(self, file_path):
         return astor.parse_file(file_path)
     
@@ -213,7 +227,7 @@ class AstorEngine(AbstractEngine):
         return True
 
 """
-class SrcMLEngine(ASTEngine):
+class SrcMLEngine(AbstractTreeEngine):
     def get_contents(self, file_path):
         pass
 

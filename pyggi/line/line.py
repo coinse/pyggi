@@ -24,11 +24,15 @@ class LineReplacement(LineEdit):
 
     def apply(self, program, new_contents, modification_points):
         engine = program.engines[self.target[0]]
-        assert engine == program.engines[self.ingredient[0]]
         return engine.do_replace(program, self, new_contents, modification_points)
 
     @classmethod
     def create(cls, program, target_file=None, ingr_file=None, method='random'):
+        if target_file is None:
+            target_file = program.random_file()
+        if ingr_file is None:
+            ingr_file = program.random_file(engine=program.engines[target_file])
+        assert program.engines[target_file] == program.engines[ingr_file]
         return cls(program.random_target(target_file, method),
                    program.random_target(ingr_file, 'random'))
 
@@ -41,11 +45,15 @@ class LineInsertion(LineEdit):
 
     def apply(self, program, new_contents, modification_points):
         engine = program.engines[self.target[0]]
-        assert engine == program.engines[self.ingredient[0]]
         return engine.do_insert(program, self, new_contents, modification_points)
 
     @classmethod
     def create(cls, program, target_file=None, ingr_file=None, direction='before', method='random'):
+        if target_file is None:
+            target_file = program.random_file()
+        if ingr_file is None:
+            ingr_file = program.random_file(engine=program.engines[target_file])
+        assert program.engines[target_file] == program.engines[ingr_file]
         return cls(program.random_target(target_file, method),
                    program.random_target(ingr_file, 'random'),
                    direction)
@@ -60,6 +68,8 @@ class LineDeletion(LineEdit):
 
     @classmethod
     def create(cls, program, target_file=None, method='random'):
+        if target_file is None:
+            target_file = program.random_file()
         return cls(program.random_target(target_file, method))
 
 class LineMoving(LineEdit):
@@ -71,12 +81,16 @@ class LineMoving(LineEdit):
 
     def apply(self, program, new_contents, modification_points):
         engine = program.engines[self.target[0]]
-        assert engine == program.engines[self.ingredient[0]]
         engine.do_insert(program, self, new_contents, modification_points)
         return engine.do_delete(program, self, new_contents, modification_points)
 
     @classmethod
     def create(cls, program, target_file=None, ingr_file=None, direction='before', method='random'):
+        if target_file is None:
+            target_file = program.random_file()
+        if ingr_file is None:
+            ingr_file = program.random_file(engine=program.engines[target_file])
+        assert program.engines[target_file] == program.engines[ingr_file]
         return cls(program.random_target(target_file, method),
                    program.random_target(ingr_file, 'random'),
                    direction)

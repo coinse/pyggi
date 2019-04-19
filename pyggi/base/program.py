@@ -153,6 +153,12 @@ class AbstractProgram(ABC):
         """
         return self.engines[file_name].get_source(self, file_name, index)
 
+    def random_file(self, engine=None):
+        files = self.target_files
+        if engine:
+            files = list(filter(lambda f: self.engines[f] == engine, files))
+        return random.choice(files)
+
     def random_target(self, target_file=None, method="random"):
         """
         :param str target_file: The modification point is chosen within target_file

@@ -5,23 +5,28 @@ from abc import abstractmethod
 from ..base import AbstractEngine
 
 class AbstractTreeEngine(AbstractEngine):
+    @classmethod
     @abstractmethod
-    def do_replace(self, program, op, new_contents, modification_points):
+    def do_replace(cls, program, op, new_contents, modification_points):
         pass
 
+    @classmethod
     @abstractmethod
-    def do_insert(self, program, op, new_contents, modification_points):
+    def do_insert(cls, program, op, new_contents, modification_points):
         pass
 
+    @classmethod
     @abstractmethod
-    def do_delete(self, program, op, new_contents, modification_points):
+    def do_delete(cls, program, op, new_contents, modification_points):
         pass
 
 class AstorEngine(AbstractTreeEngine):
-    def get_contents(self, file_path):
+    @classmethod
+    def get_contents(cls, file_path):
         return astor.parse_file(file_path)
     
-    def get_modification_points(self, root):
+    @classmethod
+    def get_modification_points(cls, root):
         modification_points = list()
         def visit_node(parent_pos, node):
             for attr in ['body', 'orelse', 'finalbody']:
@@ -33,28 +38,32 @@ class AstorEngine(AbstractTreeEngine):
         visit_node([], root)
         return modification_points
 
-    def get_source(self, program, file_name, index):
-        blk, idx = self.pos_2_block_n_index(program.contents[file_name],
+    @classmethod
+    def get_source(cls, program, file_name, index):
+        blk, idx = cls.pos_2_block_n_index(program.contents[file_name],
                                        program.modification_points[file_name][index])
         return astor.to_source(blk[idx])
 
-    def dump(self, contents_of_file):
+    @classmethod
+    def dump(cls, contents_of_file):
         return astor.to_source(contents_of_file)
 
-    def do_replace(self, program, op, new_contents, modification_points):
+    @classmethod
+    def do_replace(cls, program, op, new_contents, modification_points):
         dst_root = new_contents[op.target[0]]
         dst_pos = modification_points[op.target[0]][op.target[1]]
         ingr_root = program.contents[op.ingredient[0]]
         ingr_pos = program.modification_points[op.ingredient[0]][op.ingredient[1]]
-        return self.replace((dst_root, dst_pos), (ingr_root, ingr_pos))
+        return cls.replace((dst_root, dst_pos), (ingr_root, ingr_pos))
 
-    def do_insert(self, program, op, new_contents, modification_points):
+    @classmethod
+    def do_insert(cls, program, op, new_contents, modification_points):
         dst_root = new_contents[op.target[0]]
         dst_pos = modification_points[op.target[0]][op.target[1]]
         ingr_root = program.contents[op.ingredient[0]]
         ingr_pos = program.modification_points[op.ingredient[0]][op.ingredient[1]]
         if op.direction == 'before':
-            success = self.insert_before((dst_root, dst_pos), (ingr_root, ingr_pos))
+            success = cls.insert_before((dst_root, dst_pos), (ingr_root, ingr_pos))
             if success:
                 depth = len(dst_pos)
                 parent = dst_pos[:depth-1]
@@ -64,7 +73,7 @@ class AstorEngine(AbstractTreeEngine):
                         a, i = pos[depth-1]
                         pos[depth-1] = (a, i + 1)
         elif op.direction == 'after':
-            success = self.insert_after((dst_root, dst_pos), (ingr_root, ingr_pos))
+            success = cls.insert_after((dst_root, dst_pos), (ingr_root, ingr_pos))
             if success:
                 depth = len(dst_pos)
                 parent = dst_pos[:depth-1]
@@ -75,12 +84,14 @@ class AstorEngine(AbstractTreeEngine):
                         pos[depth-1] = (a, i + 1)
         return success
 
-    def do_delete(self, program, op, new_contents, modification_points):
+    @classmethod
+    def do_delete(cls, program, op, new_contents, modification_points):
         dst_root = new_contents[op.target[0]]
         dst_pos = modification_points[op.target[0]][op.target[1]]
-        return self.replace((dst_root, dst_pos), None)
+        return cls.replace((dst_root, dst_pos), None)
 
-    def is_pos_type(self, pos):
+    @classmethod
+    def is_pos_type(cls, pos):
         """
         :param pos: The position of the node
         :type pos: ?
@@ -92,7 +103,8 @@ class AstorEngine(AbstractTreeEngine):
         return all(isinstance(t, tuple) and isinstance(t[0], str)
             and isinstance(t[1], int) and t[1] >= 0 for t in pos)
 
-    def replace(self, dst, src):
+    @classmethod
+    def replace(cls, dst, src):
         """
         Replace *dst* with *src*
         :param dst: The root and the position of the destination node
@@ -102,19 +114,20 @@ class AstorEngine(AbstractTreeEngine):
         :return: Success or not
         :rtype: bool
         """
-        if not self.is_valid_pos(*dst):
+        if not cls.is_valid_pos(*dst):
             return False
-        if src and not self.is_valid_pos(*src):
+        if src and not cls.is_valid_pos(*src):
             return False
-        dst_block, dst_index = self.pos_2_block_n_index(*dst)
+        dst_block, dst_index = cls.pos_2_block_n_index(*dst)
         if src:
-            src_block, src_index = self.pos_2_block_n_index(*src)
+            src_block, src_index = cls.pos_2_block_n_index(*src)
             dst_block[dst_index] = copy.deepcopy(src_block[src_index])
         else:
             dst_block[dst_index] = ast.Pass()
         return True
 
-    def is_valid_pos(self, root, pos):
+    @classmethod
+    def is_valid_pos(cls, root, pos):
         """
         :param root: The root node of AST
         :type root: :py:class:`ast.AST`
@@ -134,7 +147,8 @@ class AstorEngine(AbstractTreeEngine):
             node = node.__dict__[block][index]
         return True
 
-    def pos_2_block_n_index(self, root, pos):
+    @classmethod
+    def pos_2_block_n_index(cls, root, pos):
         """
         :param root: The root node of AST
         :type root: :py:class:`ast.AST`
@@ -149,7 +163,8 @@ class AstorEngine(AbstractTreeEngine):
             node = node.__dict__[block][index]
         return (node.__dict__[pos[-1][0]], pos[-1][1])
 
-    def replace(self, dst, src):
+    @classmethod
+    def replace(cls, dst, src):
         """
         Replace *dst* with *src*
         :param dst: The root and the position of the destination node
@@ -159,19 +174,20 @@ class AstorEngine(AbstractTreeEngine):
         :return: Success or not
         :rtype: bool
         """
-        if not self.is_valid_pos(*dst):
+        if not cls.is_valid_pos(*dst):
             return False
-        if src and not self.is_valid_pos(*src):
+        if src and not cls.is_valid_pos(*src):
             return False
-        dst_block, dst_index = self.pos_2_block_n_index(*dst)
+        dst_block, dst_index = cls.pos_2_block_n_index(*dst)
         if src:
-            src_block, src_index = self.pos_2_block_n_index(*src)
+            src_block, src_index = cls.pos_2_block_n_index(*src)
             dst_block[dst_index] = copy.deepcopy(src_block[src_index])
         else:
             dst_block[dst_index] = ast.Pass()
         return True
 
-    def swap(self, a, b):
+    @classmethod
+    def swap(cls, a, b):
         """
         Swap *a* and *b*
 
@@ -182,15 +198,16 @@ class AstorEngine(AbstractTreeEngine):
         :return: Success or not
         :rtype: bool
         """
-        if not self.is_valid_pos(*a) or not self.is_valid_pos(*b):
+        if not cls.is_valid_pos(*a) or not cls.is_valid_pos(*b):
             return False
-        a_block, a_index = self.pos_2_block_n_index(*a)
-        b_block, b_index = self.pos_2_block_n_index(*b)
+        a_block, a_index = cls.pos_2_block_n_index(*a)
+        b_block, b_index = cls.pos_2_block_n_index(*b)
         a_block[a_index], b_block[b_index] = copy.deepcopy(b_block[b_index]), copy.deepcopy(
             a_block[a_index])
         return True
 
-    def insert_before(self, dst, src):
+    @classmethod
+    def insert_before(cls, dst, src):
         """
         Insert *src* before *dst*
 
@@ -201,14 +218,15 @@ class AstorEngine(AbstractTreeEngine):
         :return: Success or not
         :rtype: bool
         """
-        if not self.is_valid_pos(*dst) or not self.is_valid_pos(*src):
+        if not cls.is_valid_pos(*dst) or not cls.is_valid_pos(*src):
             return False
-        dst_block, dst_index = self.pos_2_block_n_index(*dst)
-        src_block, src_index = self.pos_2_block_n_index(*src)
+        dst_block, dst_index = cls.pos_2_block_n_index(*dst)
+        src_block, src_index = cls.pos_2_block_n_index(*src)
         dst_block.insert(dst_index, copy.deepcopy(src_block[src_index]))
         return True
 
-    def insert_after(self, dst, src):
+    @classmethod
+    def insert_after(cls, dst, src):
         """
         Insert *src* after *dst*
 
@@ -219,33 +237,40 @@ class AstorEngine(AbstractTreeEngine):
         :return: Success or not
         :rtype: bool
         """
-        if not self.is_valid_pos(*dst) or not self.is_valid_pos(*src):
+        if not cls.is_valid_pos(*dst) or not cls.is_valid_pos(*src):
             return False
-        dst_block, dst_index = self.pos_2_block_n_index(*dst)
-        src_block, src_index = self.pos_2_block_n_index(*src)
+        dst_block, dst_index = cls.pos_2_block_n_index(*dst)
+        src_block, src_index = cls.pos_2_block_n_index(*src)
         dst_block.insert(dst_index + 1, copy.deepcopy(src_block[src_index]))
         return True
 
 """
 class SrcMLEngine(AbstractTreeEngine):
-    def get_contents(self, file_path):
+    @classmethod
+    def get_contents(cls, file_path):
         pass
 
-    def get_modification_points(self, contents_of_file):
+    @classmethod
+    def get_modification_points(cls, contents_of_file):
         pass
 
-    def get_source(self, program, file_name, index):
+    @classmethod
+    def get_source(cls, program, file_name, index):
         pass
 
-    def dump(self, contents_of_file):
+    @classmethod
+    def dump(cls, contents_of_file):
         pass
 
-    def do_replace(self, program, op, new_contents, modification_points):
+    @classmethod
+    def do_replace(cls, program, op, new_contents, modification_points):
         pass
 
-    def do_insert(self, program, op, new_contents, modification_points):
+    @classmethod
+    def do_insert(cls, program, op, new_contents, modification_points):
         pass
 
-    def do_delete(self, program, op, new_contents, modification_points):
+    @classmethod
+    def do_delete(cls, program, op, new_contents, modification_points):
         pass
 """

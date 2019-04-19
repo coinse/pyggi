@@ -29,18 +29,22 @@ class ParseError(Exception):
     pass
 
 class AbstractEngine(ABC):
+    @classmethod
     @abstractmethod
     def get_contents(self, file_path):
         pass
 
+    @classmethod
     @abstractmethod
     def get_modification_points(self, contents_of_file):
         pass
 
+    @classmethod
     @abstractmethod
     def get_source(self, program, file_name, index):
         pass
 
+    @classmethod
     @abstractmethod
     def dump(self, contents_of_file):
         pass
@@ -110,12 +114,8 @@ class AbstractProgram(ABC):
     def load_engines(self):
         # Associate each file to its engine
         self.engines = dict()
-        engine_instances = dict()
         for file_name in self.target_files:
-            engine_class = self.__class__.get_engine(file_name)
-            if not engine_class in engine_instances:
-                engine_instances[file_name] = engine_class()
-            self.engines[file_name] = engine_instances[file_name]
+            self.engines[file_name] = self.__class__.get_engine(file_name)
 
     def load_contents(self):
         self.contents = {}

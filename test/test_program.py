@@ -1,6 +1,8 @@
 import pytest
 import os
+from pyggi.base import Patch, StatusCode
 from pyggi.line import LineProgram as Program
+from pyggi.line import LineDeletion
 
 @pytest.fixture(scope='session')
 def setup():
@@ -72,3 +74,23 @@ class TestProgram(object):
         file_contents = open(os.path.join(program.tmp_path, 'Triangle.java'), 'r').read()
         for i in range(len(program.modification_points['Triangle.java'])):
             program.get_source('Triangle.java', i) in file_contents
+
+    def test_apply(self, setup):
+        program = setup
+        patch = Patch(program)
+        patch.add(LineDeletion(('Triangle.java', 1)))
+        program.apply(patch)
+        file_contents = open(os.path.join(program.tmp_path, 'Triangle.java'), 'r').read()
+        assert file_contents == program.dump(program.get_modified_contents(patch), 'Triangle.java')
+
+    def test_exec_cmd(self, setup):
+        program = setup
+        result = program.exec_cmd("echo hello")
+        assert result.stdout.strip() == "hello"
+
+    def test_evaluate_patch(self, setup):
+        program = setup
+        patch = Patch(program)
+        status_code, fitness = program.evaluate_patch(patch)
+        assert status_code == StatusCode.NORMAL
+        assert fitness is not None

@@ -44,6 +44,8 @@ class LocalSearch(Algorithm):
           False otherwise.
         :rtype: bool
         """
+        if best_fitness is None:
+            return True
         return fitness <= best_fitness
 
     def stopping_criterion(self, iter, fitness):
@@ -97,7 +99,10 @@ class LocalSearch(Algorithm):
             status_code, fitness = self.program.evaluate_patch(empty_patch, timeout=timeout)
             if status_code is StatusCode.NORMAL:
                 warmup.append(fitness)
-        original_fitness = float(sum(warmup)) / len(warmup)
+        try:
+            original_fitness = float(sum(warmup)) / len(warmup)
+        except:
+            original_fitness = None
 
         self.program.logger.info(
             "The fitness value of original program: {}".format(original_fitness))

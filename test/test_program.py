@@ -1,5 +1,6 @@
 import pytest
 import os
+import random
 from pyggi.base import Patch, StatusCode, ParseError
 from pyggi.line import LineProgram, LineInsertion, LineEngine
 from pyggi.tree import TreeProgram, StmtInsertion, AstorEngine
@@ -78,6 +79,14 @@ class TestLineProgram(object):
         program = setup_line
         assert program.get_engine('triangle.py') == LineEngine
 
+    def test_random_target(self, setup_line):
+        program = setup_line
+        with pytest.raises(AssertionError) as e_info:
+            program.random_target(target_file="triangle2.py")
+        file, point = program.random_target()
+        assert file in program.target_files
+        assert point in range(len(program.modification_points[file]))
+
     def test_tmp_path(self, setup_line):
         program = setup_line
         assert program.tmp_path.startswith(os.path.join(program.TMP_DIR, program.name))
@@ -97,6 +106,16 @@ class TestLineProgram(object):
         program.set_weight('triangle.py', 1, 0.1)
         assert 'triangle.py' in program.modification_weights
         assert program.modification_weights['triangle.py'][1] == 0.1
+
+    def test_random_target_weighted(self, setup_line):
+        program = setup_line
+        file = program.random_file()
+        index = random.randrange(len(program.modification_points[file]))
+        for i in range(len(program.modification_points[file])):
+            program.set_weight(file, i, 0)
+        program.set_weight(file, index, 1)
+        file, point = program.random_target(file, "weighted")
+        assert point == index
 
     def test_get_source(self, setup_line):
         program = setup_line
@@ -187,6 +206,13 @@ class TestTreeProgram(object):
         program.apply(patch)
         file_contents = open(os.path.join(program.tmp_path, 'triangle.py'), 'r').read()
         assert file_contents == program.dump(program.get_modified_contents(patch), 'triangle.py')
+
+    def test_diff(self, setup_tree):
+        program = setup_tree
+        patch = Patch(program)
+        assert not program.diff(patch).strip()
+        patch.add(StmtInsertion(('triangle.py', 1), ('triangle.py', 10), direction='after'))
+        assert program.diff(patch).strip()
 
     def test_exec_cmd(self, setup_tree):
         program = setup_tree

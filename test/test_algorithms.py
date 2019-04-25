@@ -1,7 +1,7 @@
 import pytest
 import random
 from pyggi.base import Algorithm, ParseError, Patch
-from pyggi.tree import TreeProgram, StmtReplacement
+from pyggi.tree import TreeProgram, StmtReplacement, StmtInsertion, StmtDeletion
 from pyggi.algorithms import LocalSearch
 
 @pytest.fixture(scope='session')
@@ -56,7 +56,8 @@ class TestLocalSearch(object):
                 if len(temp_patch) > 0 and random.random() < 0.1:
                     temp_patch.remove(random.randrange(0, len(temp_patch)))
                 else:
-                    temp_patch.add(StmtReplacement.create(program, method="weighted"))
+                    operators = [StmtReplacement, StmtInsertion, StmtDeletion]
+                    temp_patch.add(random.choice(operators).create(program, method="weighted"))
                 return temp_patch
 
             def is_better_than_the_best(self, fitness, best_fitness):

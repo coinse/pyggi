@@ -2,7 +2,7 @@ import pytest
 import os
 from pyggi.base import Patch, StatusCode, ParseError
 from pyggi.line import LineProgram, LineDeletion
-from pyggi.tree import TreeProgram, StmtDeletion
+from pyggi.tree import TreeProgram, StmtInsertion
 
 class MyLineProgram(LineProgram):
     def compute_fitness(self, elapsed_time, stdout, stderr):
@@ -175,7 +175,7 @@ class TestTreeProgram(object):
     def test_apply(self, setup_tree):
         program = setup_tree
         patch = Patch(program)
-        patch.add(StmtDeletion(('triangle.py', 1)))
+        patch.add(StmtInsertion(('triangle.py', 1), ('triangle.py', 10), direction='after'))
         program.apply(patch)
         file_contents = open(os.path.join(program.tmp_path, 'triangle.py'), 'r').read()
         assert file_contents == program.dump(program.get_modified_contents(patch), 'triangle.py')

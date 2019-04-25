@@ -104,29 +104,6 @@ class AstorEngine(AbstractTreeEngine):
             and isinstance(t[1], int) and t[1] >= 0 for t in pos)
 
     @classmethod
-    def replace(cls, dst, src):
-        """
-        Replace *dst* with *src*
-        :param dst: The root and the position of the destination node
-        :type dst: tuple(:py:class:`ast.AST`, list(tuple(str, int)))
-        :param src: None or The root and the position of the source node. If none, *dst* is replaced with a pass statement.
-        :type src: None or tuple(:py:class:`ast.AST`, list(tuple(str, int))
-        :return: Success or not
-        :rtype: bool
-        """
-        if not cls.is_valid_pos(*dst):
-            return False
-        if src and not cls.is_valid_pos(*src):
-            return False
-        dst_block, dst_index = cls.pos_2_block_n_index(*dst)
-        if src:
-            src_block, src_index = cls.pos_2_block_n_index(*src)
-            dst_block[dst_index] = copy.deepcopy(src_block[src_index])
-        else:
-            dst_block[dst_index] = ast.Pass()
-        return True
-
-    @classmethod
     def is_valid_pos(cls, root, pos):
         """
         :param root: The root node of AST

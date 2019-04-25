@@ -1,8 +1,8 @@
 import pytest
 import os
 from pyggi.base import Patch, StatusCode, ParseError
-from pyggi.line import LineProgram, LineDeletion
-from pyggi.tree import TreeProgram, StmtInsertion
+from pyggi.line import LineProgram, LineInsertion, LineEngine
+from pyggi.tree import TreeProgram, StmtInsertion, AstorEngine
 
 class MyLineProgram(LineProgram):
     def compute_fitness(self, elapsed_time, stdout, stderr):
@@ -74,9 +74,12 @@ class TestLineProgram(object):
         assert program.test_command == test_command
         assert program.target_files == target_files
 
+    def test_get_engine(self, setup_line):
+        program = setup_line
+        assert program.get_engine('triangle.py') == LineEngine
+
     def test_tmp_path(self, setup_line):
         program = setup_line
-
         assert program.tmp_path.startswith(os.path.join(program.TMP_DIR, program.name))
 
     def test_create_tmp_variant(self, setup_line):
@@ -104,7 +107,7 @@ class TestLineProgram(object):
     def test_apply(self, setup_line):
         program = setup_line
         patch = Patch(program)
-        patch.add(LineDeletion(('triangle.py', 1)))
+        patch.add(LineInsertion(('triangle.py', 1), ('triangle.py', 10), direction='after'))
         program.apply(patch)
         file_contents = open(os.path.join(program.tmp_path, 'triangle.py'), 'r').read()
         assert file_contents == program.dump(program.get_modified_contents(patch), 'triangle.py')
@@ -139,11 +142,16 @@ class TestTreeProgram(object):
             "target_files": target_files,
             "test_command": test_command
         }
-
         program = MyTreeProgram('../sample/Triangle_bug_python', config=config)
         check_program_validity(program)
         assert program.test_command == test_command
         assert program.target_files == target_files
+
+    def test_get_engine(self, setup_tree):
+        program = setup_tree
+        with pytest.raises(Exception) as e_info:
+            program.get_engine('triangle.html')
+        assert program.get_engine('triangle.py') == AstorEngine
 
     def test_tmp_path(self, setup_tree):
         program = setup_tree

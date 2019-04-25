@@ -57,9 +57,11 @@ class TestEdit(object):
         ingredient = (ingr_file, 2)
         line_replacement = LineReplacement(target, ingredient)
         line_replacement2 = LineReplacement(target, ingredient)
+        line_replacement3 = LineReplacement(target, target)
         line_insertion = LineInsertion(target, ingredient)
         assert line_replacement is not line_replacement2
         assert line_replacement == line_replacement2
+        assert line_replacement != line_replacement3
         assert line_insertion != line_replacement
 
     def test_domain(self, setup_line_replacement, setup_stmt_replacement):

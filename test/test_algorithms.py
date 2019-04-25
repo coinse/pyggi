@@ -1,7 +1,7 @@
 import pytest
 import random
 from pyggi.base import Algorithm, ParseError, Patch
-from pyggi.tree import TreeProgram, StmtReplacement, StmtInsertion, StmtDeletion
+from pyggi.tree import TreeProgram, StmtReplacement, StmtInsertion, StmtDeletion, StmtMoving
 from pyggi.algorithms import LocalSearch
 
 @pytest.fixture(scope='session')
@@ -56,7 +56,7 @@ class TestLocalSearch(object):
                 if len(temp_patch) > 0 and random.random() < 0.1:
                     temp_patch.remove(random.randrange(0, len(temp_patch)))
                 else:
-                    operators = [StmtReplacement, StmtInsertion, StmtDeletion]
+                    operators = [StmtReplacement, StmtInsertion, StmtDeletion, StmtMoving]
                     temp_patch.add(random.choice(operators).create(program, method="weighted"))
                 return temp_patch
 

@@ -7,6 +7,7 @@ from pyggi.tree import TreeProgram, StmtInsertion, AstorEngine
 
 class MyLineProgram(LineProgram):
     def compute_fitness(self, elapsed_time, stdout, stderr):
+        print(elapsed_time, stdout, stderr)
         import re
         m = re.findall("runtime: ([0-9.]+)", stdout)
         if len(m) > 0:
@@ -20,6 +21,7 @@ class MyLineProgram(LineProgram):
 
 class MyTreeProgram(TreeProgram):
     def compute_fitness(self, elapsed_time, stdout, stderr):
+        print(elapsed_time, stdout, stderr)
         import re
         m = re.findall("runtime: ([0-9.]+)", stdout)
         if len(m) > 0:

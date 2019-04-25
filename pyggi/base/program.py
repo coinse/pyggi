@@ -18,7 +18,7 @@ import difflib
 from abc import ABC, abstractmethod
 from distutils.dir_util import copy_tree
 from .. import PYGGI_DIR
-from ..utils import Logger
+from ..utils import Logger, weighted_choice
 
 class StatusCode(enum.Enum):
     NORMAL = 0
@@ -174,9 +174,13 @@ class AbstractProgram(ABC):
         if method == 'random' or target_file not in self.modification_weights:
             return (target_file, random.randrange(len(candidates)))
         elif method == 'weighted':
-            cumulated_weights = sum(self.modification_weights[target_file])
-            list_of_prob = list(map(lambda w: float(w)/cumulated_weights, self.modification_weights[target_file]))
-            return (target_file, random.choices(list(range(len(candidates))), weights=list_of_prob, k=1)[0])
+            weighted_choice = lambda s : random.choice(sum(([v] * wt for v,wt in s),[]))
+            point = weighted_choice(list(zip(list(range(len(candidates))),
+                self.modification_weights[target_file])))
+            return (target_file, point)
+            #cumulated_weights = sum(self.modification_weights[target_file])
+            #list_of_prob = list(map(lambda w: float(w)/cumulated_weights, self.modification_weights[target_file]))
+            #return (target_file, random.choices(list(range(len(candidates))), weights=list_of_prob, k=1)[0])
 
     @property
     def tmp_path(self):

@@ -74,4 +74,4 @@ class TestLocalSearch(object):
         assert len(result) == 1
         assert result[0]['FitnessEval'] <= max_iter
         if result[0]['FitnessEval'] < max_iter:
-            assert result[1]['BestFitness'] < current_fitness
+            assert result[0]['BestFitness'] < current_fitness

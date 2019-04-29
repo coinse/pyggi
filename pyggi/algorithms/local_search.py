@@ -13,13 +13,6 @@ class LocalSearch(Algorithm):
     .. hint::
         Example of LocalSearch class. ::
 
-            from pyggi import Program, Patch, GranularityLevel
-            from pyggi.algorithms import LocalSearch
-            from pyggi.atomic_operator import LineReplacement, LineInsertion
-            from pyggi.custom_operator import LineDeletion
-
-            program = Program("<PROGRAM_ROOT_PATH>", GranularityLevel.LINE)
-
             class MyLocalSearch(LocalSearch):
                 def get_neighbour(self, patch):
                     import random
@@ -27,7 +20,7 @@ class LocalSearch(Algorithm):
                         patch.remove(random.randrange(0, len(patch)))
                     else:
                         edit_operator = random.choice([LineDeletion, LineInsertion, LineReplacement])
-                        patch.add(edit_operator.random(program))
+                        patch.add(edit_operator.create(program, method="random"))
                     return patch
 
                 def stopping_criterion(self, iter, patch):

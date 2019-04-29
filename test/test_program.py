@@ -144,7 +144,11 @@ class TestLineProgram(object):
         status_code, fitness = program.evaluate_patch(patch)
         assert status_code == StatusCode.NORMAL
         assert fitness is not None
-
+    
+    def test_remove_tmp_variant(self, setup_line):
+        program = setup_line
+        program.remove_tmp_variant()
+        assert not os.path.exists(program.tmp_path)
 
 class TestTreeProgram(object):
 
@@ -227,3 +231,8 @@ class TestTreeProgram(object):
         status_code, fitness = program.evaluate_patch(patch)
         assert status_code == StatusCode.NORMAL
         assert fitness is not None
+
+    def test_remove_tmp_variant(self, setup_tree):
+        program = setup_tree
+        program.remove_tmp_variant()
+        assert not os.path.exists(program.tmp_path)

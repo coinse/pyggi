@@ -71,6 +71,7 @@ class TestLocalSearch(object):
         _, current_fitness = program.evaluate_patch(Patch(program))
         ls = MyLocalSearch(program)
         result = ls.run(warmup_reps=1, epoch=1, max_iter=max_iter, timeout=10)
-        assert result[1]['FitnessEval'] <= max_iter
-        if result[1]['FitnessEval'] < max_iter:
+        assert len(result) == 1
+        assert result[0]['FitnessEval'] <= max_iter
+        if result[0]['FitnessEval'] < max_iter:
             assert result[1]['BestFitness'] < current_fitness

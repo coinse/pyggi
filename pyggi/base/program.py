@@ -21,9 +21,9 @@ from .. import PYGGI_DIR
 from ..utils import Logger, weighted_choice
 
 class StatusCode(enum.Enum):
-    NORMAL = 0
-    TIME_OUT = 1
-    PARSE_ERROR = 2
+    NORMAL = 'NORMAL'
+    TIME_OUT = 'TIME_OUT'
+    PARSE_ERROR = 'PARSE_ERR'
 
 class ParseError(Exception):
     pass

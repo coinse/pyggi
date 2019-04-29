@@ -67,7 +67,7 @@ class LocalSearch(Algorithm):
         """
         pass
 
-    def run(self, warmup_reps=1, epoch=5, max_iter=100, timeout=15):
+    def run(self, warmup_reps=1, epoch=5, max_iter=100, timeout=15, verbose=True):
         """
         It starts from a randomly generated candidate solution
         and iteratively moves to its neighbouring solution with
@@ -85,53 +85,66 @@ class LocalSearch(Algorithm):
         :return: The result of searching(Time, Success, FitnessEval, InvalidPatch, BestPatch)
         :rtype: dict(int, dict(str, ))
         """
-        self.program.logger.info(self.program.logger.log_file_path)
+        if verbose:
+            self.program.logger.info(self.program.logger.log_file_path)
+
         warmup = list()
         empty_patch = Patch(self.program)
         for i in range(warmup_reps):
             status_code, fitness = self.program.evaluate_patch(empty_patch, timeout=timeout)
             if status_code is StatusCode.NORMAL:
                 warmup.append(fitness)
-        try:
-            original_fitness = float(sum(warmup)) / len(warmup)
-        except:
-            original_fitness = None
+        original_fitness = float(sum(warmup)) / len(warmup) if warmup else None
 
-        self.program.logger.info(
-            "The fitness value of original program: {}".format(original_fitness))
+        if verbose:
+            self.program.logger.info(
+                "The fitness value of original program: {}".format(original_fitness))
 
-        result = {ep: dict() for ep in range(1, epoch + 1)}
+        result = []
 
-        self.program.logger.info("Epoch\tIter\tFitness\tPatch")
+        if verbose:
+            self.program.logger.info("Epoch\tIter\tStatus\tFitness\tPatch")
+
         for cur_epoch in range(1, epoch + 1):
+            cur_result = {}
             best_patch = empty_patch
             best_fitness = original_fitness
 
             # Result Initilization
-            result[cur_epoch]['BestPatch'] = None
-            result[cur_epoch]['Success'] = False
-            result[cur_epoch]['FitnessEval'] = 0
-            result[cur_epoch]['InvalidPatch'] = 0
+            cur_result['BestPatch'] = None
+            cur_result['Success'] = False
+            cur_result['FitnessEval'] = 0
+            cur_result['InvalidPatch'] = 0
 
             start = time.time()
             for cur_iter in range(1, max_iter + 1):
                 patch = self.get_neighbour(best_patch.clone())
                 status_code, fitness = self.program.evaluate_patch(patch, timeout=timeout)
-                result[cur_epoch]['FitnessEval'] += 1
+                cur_result['FitnessEval'] += 1
+
                 if status_code is not StatusCode.NORMAL:
-                    result[cur_epoch]['InvalidPatch'] += 1
-                    self.program.logger.info("{}\t{}\t{}\t{}".format(cur_epoch, cur_iter, fitness, patch))
-                    continue
-                if not self.is_better_than_the_best(fitness, best_fitness):
-                    self.program.logger.info("{}\t{}\t{}\t{}".format(cur_epoch, cur_iter, fitness, patch))
-                    continue
-                self.program.logger.info("{}\t{}\t*{}\t{}".format(cur_epoch, cur_iter, fitness, patch))
-                best_fitness, best_patch = fitness, patch
-                if self.stopping_criterion(cur_iter, fitness):
-                    result[cur_epoch]['Success'] = True
+                    cur_result['InvalidPatch'] += 1
+                    update_best = False
+                else:
+                    update_best = self.is_better_than_the_best(fitness, best_fitness)
+
+                if update_best:
+                    best_fitness, best_patch = fitness, patch
+
+                if verbose:
+                    self.program.logger.info("{}\t{}\t{}\t{}{}\t{}".format(
+                        cur_epoch, cur_iter, status_code, '*' if update_best else '',
+                        fitness, patch))
+
+                if fitness is not None and self.stopping_criterion(cur_iter, fitness):
+                    cur_result['Success'] = True
                     break
-            result[cur_epoch]['Time'] = time.time() - start
+
+            cur_result['Time'] = time.time() - start
+
             if best_patch:
-                result[cur_epoch]['BestPatch'] = best_patch
-                result[cur_epoch]['BestFitness'] = best_fitness
+                cur_result['BestPatch'] = best_patch
+                cur_result['BestFitness'] = best_fitness
+
+            result.append(cur_result)
         return result

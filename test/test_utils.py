@@ -1,4 +1,5 @@
 import pytest
+import shutil
 from pyggi.utils import get_file_extension
 
 class TestUtils(object):
@@ -11,3 +12,9 @@ class TestUtils(object):
         assert get_file_extension(python_file) == '.py'
         assert get_file_extension(java_file) == '.java'
         assert get_file_extension(c_file) == '.c'
+
+@pytest.fixture(scope="session", autouse=True)
+def cleanup(request):
+    def remove_test_dir():
+        shutil.rmtree('.pyggi')
+    request.addfinalizer(remove_test_dir)

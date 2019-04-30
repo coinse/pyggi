@@ -31,22 +31,27 @@ class ParseError(Exception):
 class AbstractEngine(ABC):
     @classmethod
     @abstractmethod
-    def get_contents(self, file_path):
+    def get_contents(cls, file_path):
         pass
 
     @classmethod
     @abstractmethod
-    def get_modification_points(self, contents_of_file):
+    def get_modification_points(cls, contents_of_file):
         pass
 
     @classmethod
     @abstractmethod
-    def get_source(self, program, file_name, index):
+    def get_source(cls, program, file_name, index):
         pass
 
     @classmethod
+    def write_to_tmp_dir(cls, contents_of_file, tmp_path):
+        with open(tmp_path, 'w') as tmp_file:
+            tmp_file.write(cls.dump(contents_of_file))
+
+    @classmethod
     @abstractmethod
-    def dump(self, contents_of_file):
+    def dump(cls, contents_of_file):
         pass
 
 class AbstractProgram(ABC):
@@ -213,21 +218,9 @@ class AbstractProgram(ABC):
         :rtype: None
         """
         for target_file in new_contents:
-            with open(os.path.join(self.tmp_path, target_file), 'w') as tmp_file:
-                tmp_file.write(self.__class__.dump(new_contents, target_file))
-
-    @classmethod
-    def dump(cls, contents, file_name):
-        """
-        Convert contents of file to the source code
-
-        :param contents_of_file: The contents of the file which is the parsed form of source code
-        :type contents_of_file: ?
-        :return: The source code
-        :rtype: str
-        """
-        engine = cls.get_engine(file_name)
-        return engine().dump(contents[file_name])
+            engine = self.engines[target_file]
+            tmp_path = os.path.join(self.tmp_path, target_file)
+            engine.write_to_tmp_dir(new_contents[target_file], tmp_path)
 
     def get_modified_contents(self, patch):
         target_files = self.contents.keys()

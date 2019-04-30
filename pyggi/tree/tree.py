@@ -3,7 +3,7 @@ import ast
 import astor
 import random
 from abc import abstractmethod
-from . import AstorEngine#, XmlEngine
+from . import AstorEngine, XmlEngine
 from ..base import AbstractProgram, AbstractEdit
 from ..utils import get_file_extension
 
@@ -13,8 +13,8 @@ class TreeProgram(AbstractProgram):
         extension = get_file_extension(file_name)
         if extension in ['.py']:
             return AstorEngine
-        # elif extension in ['.java', '.cpp']:
-        #     return SrcMLEngine
+        elif extension in ['.xml']:
+            return XmlEngine
         else:
             raise Exception('{} file is not supported'.format(extension))
 

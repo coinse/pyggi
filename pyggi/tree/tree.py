@@ -3,7 +3,7 @@ import ast
 import astor
 import random
 from abc import abstractmethod
-from .engine import AstorEngine#, SrcMLEngine
+from . import AstorEngine#, XmlEngine
 from ..base import AbstractProgram, AbstractEdit
 from ..utils import get_file_extension
 

@@ -18,20 +18,6 @@ class TreeProgram(AbstractProgram):
         else:
             raise Exception('{} file is not supported'.format(extension))
 
-    def do_replace(self, op, new_contents, modification_points):
-        assert self.engines[op.target[0]] == self.engines[op.ingredient[0]]
-        engine = self.engines[op.target[0]]
-        return engine.do_replace(self, op, new_contents, modification_points)
-
-    def do_insert(self, op, new_contents, modification_points):
-        assert self.engines[op.target[0]] == self.engines[op.ingredient[0]]
-        engine = self.engines[op.target[0]]
-        return engine.do_insert(self, op, new_contents, modification_points)
-
-    def do_delete(self, op, new_contents, modification_points):
-        engine = self.engines[op.target[0]]
-        return engine.do_delete(self, op, new_contents, modification_points)
-
 """
 Possible Edit Operators
 """
@@ -47,10 +33,16 @@ class StmtReplacement(TreeEdit):
         self.ingredient = ingredient
 
     def apply(self, program, new_contents, modification_points):
-        return program.do_replace(self, new_contents, modification_points)
+        engine = program.engines[self.target[0]]
+        return engine.do_replace(program, self, new_contents, modification_points)
 
     @classmethod
     def create(cls, program, target_file=None, ingr_file=None, method='random'):
+        if target_file is None:
+            target_file = program.random_file()
+        if ingr_file is None:
+            ingr_file = program.random_file(engine=program.engines[target_file])
+        assert program.engines[target_file] == program.engines[ingr_file]
         return cls(program.random_target(target_file, method),
                    program.random_target(ingr_file, 'random'))
 
@@ -62,10 +54,16 @@ class StmtInsertion(TreeEdit):
         self.direction = direction
 
     def apply(self, program, new_contents, modification_points):
-        return program.do_insert(self, new_contents, modification_points)
+        engine = program.engines[self.target[0]]
+        return engine.do_insert(program, self, new_contents, modification_points)
 
     @classmethod
     def create(cls, program, target_file=None, ingr_file=None, direction='before', method='random'):
+        if target_file is None:
+            target_file = program.random_file()
+        if ingr_file is None:
+            ingr_file = program.random_file(engine=program.engines[target_file])
+        assert program.engines[target_file] == program.engines[ingr_file]
         return cls(program.random_target(target_file, method),
                    program.random_target(ingr_file, 'random'),
                    direction)
@@ -75,10 +73,13 @@ class StmtDeletion(TreeEdit):
         self.target = target
 
     def apply(self, program, new_contents, modification_points):
-        return program.do_delete(self, new_contents, modification_points)
+        engine = program.engines[self.target[0]]
+        return engine.do_delete(program, self, new_contents, modification_points)
 
     @classmethod
     def create(cls, program, target_file=None, method='random'):
+        if target_file is None:
+            target_file = program.random_file()
         return cls(program.random_target(target_file, method))
 
 class StmtMoving(TreeEdit):
@@ -89,11 +90,17 @@ class StmtMoving(TreeEdit):
         self.direction = direction
 
     def apply(self, program, new_contents, modification_points):
-        program.do_insert(self, new_contents, modification_points)
-        program.do_delete(self, new_contents, modification_points)
+        engine = program.engines[self.target[0]]
+        engine.do_insert(program, self, new_contents, modification_points)
+        return engine.do_delete(program, self, new_contents, modification_points)
 
     @classmethod
     def create(cls, program, target_file=None, ingr_file=None, direction='before', method='random'):
+        if target_file is None:
+            target_file = program.random_file()
+        if ingr_file is None:
+            ingr_file = program.random_file(engine=program.engines[target_file])
+        assert program.engines[target_file] == program.engines[ingr_file]
         return cls(program.random_target(target_file, method),
                    program.random_target(ingr_file, 'random'),
                    direction)

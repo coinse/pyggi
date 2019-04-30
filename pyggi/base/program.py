@@ -18,29 +18,33 @@ import difflib
 from abc import ABC, abstractmethod
 from distutils.dir_util import copy_tree
 from .. import PYGGI_DIR
-from ..utils import Logger
+from ..utils import Logger, weighted_choice
 
 class StatusCode(enum.Enum):
-    NORMAL = 0
-    TIME_OUT = 1
-    PARSE_ERROR = 2
+    NORMAL = 'NORMAL'
+    TIME_OUT = 'TIME_OUT'
+    PARSE_ERROR = 'PARSE_ERR'
 
 class ParseError(Exception):
     pass
 
 class AbstractEngine(ABC):
+    @classmethod
     @abstractmethod
     def get_contents(self, file_path):
         pass
 
+    @classmethod
     @abstractmethod
     def get_modification_points(self, contents_of_file):
         pass
 
+    @classmethod
     @abstractmethod
     def get_source(self, program, file_name, index):
         pass
 
+    @classmethod
     @abstractmethod
     def dump(self, contents_of_file):
         pass
@@ -110,12 +114,8 @@ class AbstractProgram(ABC):
     def load_engines(self):
         # Associate each file to its engine
         self.engines = dict()
-        engine_instances = dict()
         for file_name in self.target_files:
-            engine_class = self.__class__.get_engine(file_name)
-            if not engine_class in engine_instances:
-                engine_instances[file_name] = engine_class()
-            self.engines[file_name] = engine_instances[file_name]
+            self.engines[file_name] = self.__class__.get_engine(file_name)
 
     def load_contents(self):
         self.contents = {}
@@ -153,6 +153,12 @@ class AbstractProgram(ABC):
         """
         return self.engines[file_name].get_source(self, file_name, index)
 
+    def random_file(self, engine=None):
+        files = self.target_files
+        if engine:
+            files = list(filter(lambda f: self.engines[f] == engine, files))
+        return random.choice(files)
+
     def random_target(self, target_file=None, method="random"):
         """
         :param str target_file: The modification point is chosen within target_file
@@ -168,9 +174,13 @@ class AbstractProgram(ABC):
         if method == 'random' or target_file not in self.modification_weights:
             return (target_file, random.randrange(len(candidates)))
         elif method == 'weighted':
-            cumulated_weights = sum(self.modification_weights[target_file])
-            list_of_prob = list(map(lambda w: float(w)/cumulated_weights, self.modification_weights[target_file]))
-            return (target_file, random.choices(list(range(len(candidates))), weights=list_of_prob, k=1)[0])
+            weighted_choice = lambda s : random.choice(sum(([v] * wt for v,wt in s),[]))
+            point = weighted_choice(list(zip(list(range(len(candidates))),
+                self.modification_weights[target_file])))
+            return (target_file, point)
+            #cumulated_weights = sum(self.modification_weights[target_file])
+            #list_of_prob = list(map(lambda w: float(w)/cumulated_weights, self.modification_weights[target_file]))
+            #return (target_file, random.choices(list(range(len(candidates))), weights=list_of_prob, k=1)[0])
 
     @property
     def tmp_path(self):

@@ -50,7 +50,6 @@ if __name__ == "__main__":
 
     tabu_search = MyTabuSearch(program)
     result = tabu_search.run(warmup_reps=1, epoch=args.epoch, max_iter=args.iter)
-    for epoch in result:
-        print ("Epoch #{}".format(epoch))
-        for key in result[epoch]:
-            print ("- {}: {}".format(key, result[epoch][key]))
+    print("======================RESULT======================")
+    print(result)
+    program.remove_tmp_variant()

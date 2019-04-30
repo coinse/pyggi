@@ -58,12 +58,14 @@ class StmtInsertion(TreeEdit):
         return engine.do_insert(program, self, new_contents, modification_points)
 
     @classmethod
-    def create(cls, program, target_file=None, ingr_file=None, direction='before', method='random'):
+    def create(cls, program, target_file=None, ingr_file=None, direction=None, method='random'):
         if target_file is None:
             target_file = program.random_file()
         if ingr_file is None:
             ingr_file = program.random_file(engine=program.engines[target_file])
         assert program.engines[target_file] == program.engines[ingr_file]
+        if direction is None:
+            direction = random.choice(['before', 'after'])
         return cls(program.random_target(target_file, method),
                    program.random_target(ingr_file, 'random'),
                    direction)
@@ -95,12 +97,14 @@ class StmtMoving(TreeEdit):
         return engine.do_delete(program, self, new_contents, modification_points)
 
     @classmethod
-    def create(cls, program, target_file=None, ingr_file=None, direction='before', method='random'):
+    def create(cls, program, target_file=None, ingr_file=None, direction=None, method='random'):
         if target_file is None:
             target_file = program.random_file()
         if ingr_file is None:
             ingr_file = program.random_file(engine=program.engines[target_file])
         assert program.engines[target_file] == program.engines[ingr_file]
+        if direction is None:
+            direction = random.choice(['before', 'after'])
         return cls(program.random_target(target_file, method),
                    program.random_target(ingr_file, 'random'),
                    direction)

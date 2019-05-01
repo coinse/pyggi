@@ -222,6 +222,16 @@ class AbstractProgram(ABC):
             tmp_path = os.path.join(self.tmp_path, target_file)
             engine.write_to_tmp_dir(new_contents[target_file], tmp_path)
 
+    def dump(self, contents, file_name):
+        """
+        Convert contents of file to the source code
+        :param contents_of_file: The contents of the file which is the parsed form of source code
+        :type contents_of_file: ?
+        :return: The source code
+        :rtype: str
+        """
+        return self.engines[file_name].dump(contents[file_name])
+
     def get_modified_contents(self, patch):
         target_files = self.contents.keys()
         modification_points = copy.deepcopy(self.modification_points)

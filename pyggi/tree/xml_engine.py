@@ -42,7 +42,8 @@ class XmlEngine(AbstractTreeEngine):
 
     @staticmethod
     def string_to_tree(s):
-        xml = re.sub(r'\s+xmlns="[^"]+"', '', s, count=1)
+        xml = re.sub(r'(?:\s+xmlns[^=]*="[^"]+")+', '', s, count=1)
+        xml = re.sub(r'<(/?)[^>]+:([^:>]+)>', r'<\1\2>', xml)
         try:
             return ElementTree.fromstring(xml)
         except ElementTree.ParseError as e:

@@ -272,6 +272,7 @@ class AbstractProgram(ABC):
                             stdout=stdout.decode("ascii"),
                             stderr=stderr.decode("ascii"))
         except subprocess.TimeoutExpired:
+            sprocess.kill()
             result = self.__class__.Result(status_code=StatusCode.TIME_OUT,
                             elapsed_time=None,
                             stdout=None,

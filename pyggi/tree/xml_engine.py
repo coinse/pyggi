@@ -100,19 +100,21 @@ class XmlEngine(AbstractTreeEngine):
         if old_tag != ingredient.tag:
             head, tag, pos, _ = cls.split_xpath(modification_points[op.target[0]][op.target[1]])
             itag = 1
-            for i, pos in enumerate(modification_points[op.target[0]]):
-                h, t, p, s = cls.split_xpath(pos, head)
+            for i, xpath in enumerate(modification_points[op.target[0]]):
+                h, t, p, s = cls.split_xpath(xpath, head)
                 if i < op.target[1]:
                     if h != head:
                         continue
                     elif t == ingredient.tag:
                         itag += 1
-                elif i == op.target[0]:
-                    modification_points[i] = '{}/{}[{}]'.format(h, t, itag)
+                elif i == op.target[1]:
+                    modification_points[op.target[0]][i] = '{}/{}[{}]'.format(h, ingredient.tag, itag)
                 elif h != head:
                     break
                 elif t == tag:
-                    if s:
+                    if p == pos:
+                        new_pos = 'deleted'
+                    elif s:
                         new_pos = '{}/{}[{}]/{}'.format(h, t, p-1, s)
                     else:
                         new_pos = '{}/{}[{}]'.format(h, t, p-1)
@@ -148,14 +150,15 @@ class XmlEngine(AbstractTreeEngine):
 
         # update modification points
         head, tag, pos, _ = cls.split_xpath(modification_points[op.target[0]][op.target[1]])
-        buff = 1 if op.direction == 'after' else 0
-        for i, pos in enumerate(modification_points[op.target[0]]):
-            if i < op.target[1] + buff:
+        for i, xpath in enumerate(modification_points[op.target[0]]):
+            if i < op.target[1]:
                 continue
-            h, t, p, s = cls.split_xpath(pos, head)
-            if h != head:
+            h, t, p, s = cls.split_xpath(xpath, head)
+            if h != head and xpath != 'deleted':
                 break
-            if t == ingredient.tag:
+            if t == tag and p == pos and op.direction == 'after':
+                continue
+            if t in [ingredient.tag, tag]:
                 if s:
                     new_pos = '{}/{}[{}]/{}'.format(h, t, p+1, s)
                 else:

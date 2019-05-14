@@ -1,30 +1,13 @@
 import ast
 import astor
 import copy
-from abc import abstractmethod
-from ..base import AbstractEngine
-
-class AbstractTreeEngine(AbstractEngine):
-    @classmethod
-    @abstractmethod
-    def do_replace(cls, program, op, new_contents, modification_points):
-        pass
-
-    @classmethod
-    @abstractmethod
-    def do_insert(cls, program, op, new_contents, modification_points):
-        pass
-
-    @classmethod
-    @abstractmethod
-    def do_delete(cls, program, op, new_contents, modification_points):
-        pass
+from . import AbstractTreeEngine
 
 class AstorEngine(AbstractTreeEngine):
     @classmethod
     def get_contents(cls, file_path):
         return astor.parse_file(file_path)
-    
+
     @classmethod
     def get_modification_points(cls, root):
         modification_points = list()
@@ -220,34 +203,3 @@ class AstorEngine(AbstractTreeEngine):
         src_block, src_index = cls.pos_2_block_n_index(*src)
         dst_block.insert(dst_index + 1, copy.deepcopy(src_block[src_index]))
         return True
-
-"""
-class SrcMLEngine(AbstractTreeEngine):
-    @classmethod
-    def get_contents(cls, file_path):
-        pass
-
-    @classmethod
-    def get_modification_points(cls, contents_of_file):
-        pass
-
-    @classmethod
-    def get_source(cls, program, file_name, index):
-        pass
-
-    @classmethod
-    def dump(cls, contents_of_file):
-        pass
-
-    @classmethod
-    def do_replace(cls, program, op, new_contents, modification_points):
-        pass
-
-    @classmethod
-    def do_insert(cls, program, op, new_contents, modification_points):
-        pass
-
-    @classmethod
-    def do_delete(cls, program, op, new_contents, modification_points):
-        pass
-"""

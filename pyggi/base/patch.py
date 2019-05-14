@@ -52,7 +52,6 @@ class Patch:
         :return: None
         """
         assert isinstance(edit, AbstractEdit)
-        assert isinstance(self.program, edit.domain)
         self.edit_list.append(edit)
 
     def remove(self, index: int):

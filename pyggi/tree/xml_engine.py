@@ -1,5 +1,6 @@
 import copy
 import re
+import os
 from . import AbstractTreeEngine
 from xml.etree import ElementTree
 
@@ -37,8 +38,9 @@ class XmlEngine(AbstractTreeEngine):
 
     @classmethod
     def write_to_tmp_dir(cls, contents_of_file, tmp_path):
-        assert tmp_path[-4:] == '.xml'
-        with open(tmp_path[:-4], 'w') as tmp_file:
+        root, ext = os.path.splitext(tmp_path)
+        assert ext == '.xml'
+        with open(root, 'w') as tmp_file:
             tmp_file.write(cls.dump(contents_of_file))
 
     @classmethod
@@ -227,7 +229,7 @@ class XmlEngine(AbstractTreeEngine):
     @classmethod
     def rotate_newlines(cls, element):
         if element.tail:
-            match = re.match("(\n\s*)", element.tail)
+            match = re.match(r'(^\n\s*)', element.tail)
             if match:
                 element.tail = element.tail[len(match.group(1)):]
                 if len(element) > 0:

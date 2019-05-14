@@ -4,18 +4,15 @@ from . import AbstractTreeEngine
 from xml.etree import ElementTree
 
 class XmlEngine(AbstractTreeEngine):
-    TARGET_TAGS = None
-    RENAME_TAGS = {}
-    # ex) RENAME_TAGS = { 'stmt': ['if', 'while'] }
+    @classmethod
+    def postproc_tree(cls, tree):
+        pass
 
     @classmethod
     def get_contents(cls, file_path):
         with open(file_path) as target_file:
             tree = cls.string_to_tree(target_file.read())
-        if cls.TARGET_TAGS is not None:
-            cls.remove_tags(tree, keep=cls.TARGET_TAGS)
-        for tag in cls.RENAME_TAGS:
-            cls.rewrite_tags(tree, cls.RENAME_TAGS[tag], tag)
+        cls.postproc_tree(tree)
         cls.rotate_newlines(tree)
         return tree
 
@@ -190,12 +187,12 @@ class XmlEngine(AbstractTreeEngine):
         return True
 
     @classmethod
-    def remove_tags(cls, element, keep):
+    def select_tags(cls, element, keep):
         last = None
         marked = []
         buff = 0
         for i, child in enumerate(element):
-            cls.remove_tags(child, keep=keep)
+            cls.select_tags(child, keep=keep)
             if child.tag not in keep:
                 marked.append(child)
                 if child.text:

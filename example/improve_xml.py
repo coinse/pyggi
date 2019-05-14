@@ -8,7 +8,7 @@ import random
 import argparse
 import re
 from pyggi.base import Patch, ParseError
-from pyggi.tree import TreeProgram, XmlEngine
+from pyggi.tree import TreeProgram
 from pyggi.tree import StmtReplacement, StmtInsertion, StmtDeletion, StmtMoving
 from pyggi.algorithms import LocalSearch
 

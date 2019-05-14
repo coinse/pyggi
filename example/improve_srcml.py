@@ -15,10 +15,11 @@ from improve_xml import MyProgram as XmlProgram
 from improve_xml import MyLocalSearch
 
 class MyXmlEngine(XmlEngine):
-    TARGET_TAGS = ['if', 'decl_stmt', 'expr_stmt', 'return', 'try']
-    RENAME_TAGS = {
-        'stmt': TARGET_TAGS
-    }
+    @classmethod
+    def postproc_tree(cls, tree):
+        stmt_tags = ['if', 'decl_stmt', 'expr_stmt', 'return', 'try']
+        cls.select_tags(tree, keep=stmt_tags)
+        cls.rewrite_tags(tree, stmt_tags, 'stmt')
 
 class MyProgram(XmlProgram):
     @classmethod

@@ -4,10 +4,22 @@ from . import AbstractTreeEngine
 from xml.etree import ElementTree
 
 class XmlEngine(AbstractTreeEngine):
+    TARGET_TAGS = None
+    RENAME_TAGS = {}
+    # ex) RENAME_TAGS = { 'stmt': ['if', 'while'] }
+
     @classmethod
     def get_contents(cls, file_path):
         with open(file_path) as target_file:
-            return cls.string_to_tree(target_file.read())
+            tree = cls.string_to_tree(target_file.read())
+        if cls.TARGET_TAGS is not None:
+            cls.remove_tags(tree, keep=cls.TARGET_TAGS)
+        for tag in cls.RENAME_TAGS:
+            cls.rewrite_tags(tree, cls.RENAME_TAGS[tag], tag)
+        cls.rotate_newlines(tree)
+        print(cls.tree_to_string(tree))
+        print('------------------------------------')
+        return tree
 
     @classmethod
     def get_modification_points(cls, contents_of_file):
@@ -38,7 +50,6 @@ class XmlEngine(AbstractTreeEngine):
     @classmethod
     def dump(cls, contents_of_file):
         return cls.strip_xml_from_tree(contents_of_file)
-
 
     @staticmethod
     def string_to_tree(s):
@@ -73,7 +84,6 @@ class XmlEngine(AbstractTreeEngine):
                 return (prefix, match.group(1), int(match.group(2)), match.group(3))
             else:
                 return (None, None, None, None)
-
 
     @classmethod
     def do_replace(cls, program, op, new_contents, modification_points):
@@ -180,3 +190,57 @@ class XmlEngine(AbstractTreeEngine):
         target.tag = old_tag
         target.tail = old_tail
         return True
+
+    @classmethod
+    def remove_tags(cls, element, keep):
+        last = None
+        marked = []
+        buff = 0
+        for i, child in enumerate(element):
+            cls.remove_tags(child, keep=keep)
+            if child.tag not in keep:
+                marked.append(child)
+                if child.text:
+                    if last is not None:
+                        last.tail = last.tail or ''
+                        last.tail += child.text
+                    else:
+                        element.text = element.text or ''
+                        element.text += child.text
+                if len(child) > 0:
+                    for sub_child in reversed(child):
+                        element.insert(i+1, sub_child)
+                    last = child[-1]
+                if child.tail:
+                    if last is not None:
+                        last.tail = last.tail or ''
+                        last.tail += child.tail
+                    else:
+                        element.text = element.text or ''
+                        element.text += child.tail
+            else:
+                last = child
+        for child in marked:
+            element.remove(child)
+
+    @classmethod
+    def rewrite_tags(cls, element, tags, new_tag):
+        if element.tag in tags:
+            element.tag = new_tag
+        for child in element:
+            cls.rewrite_tags(child, tags, new_tag)
+
+    @classmethod
+    def rotate_newlines(cls, element):
+        if element.tail:
+            match = re.match("(\n\s*)", element.tail)
+            if match:
+                element.tail = element.tail[len(match.group(1)):]
+                if len(element) > 0:
+                    element[-1].tail = element[-1].tail or ''
+                    element[-1].tail += match.group(1)
+                else:
+                    element.text = element.text or ''
+                    element.text += match.group(1)
+        for child in element:
+            cls.rotate_newlines(child)

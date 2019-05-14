@@ -13,7 +13,7 @@ from pyggi.algorithms import LocalSearch
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='PYGGI Improvement Example')
-    parser.add_argument('project_path', type=str, default='../sample/Triangle_fast')
+    parser.add_argument('--project_path', type=str, default='../sample/Triangle_fast')
     parser.add_argument('--epoch', type=int, default=30,
         help='total epoch(default: 30)')
     parser.add_argument('--iter', type=int, default=100,

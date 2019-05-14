@@ -7,16 +7,12 @@ import sys
 import random
 import argparse
 import re
-from pyggi.base import Patch, ParseError, AbstractProgram
-from pyggi.tree import XmlEngine
+from pyggi.base import Patch, ParseError
+from pyggi.tree import TreeProgram, XmlEngine
 from pyggi.tree import StmtReplacement, StmtInsertion, StmtDeletion, StmtMoving
 from pyggi.algorithms import LocalSearch
 
-class MyProgram(AbstractProgram):
-    @classmethod
-    def get_engine(cls, file_name):
-        return XmlEngine
-
+class MyProgram(TreeProgram):
     def compute_fitness(self, elapsed_time, stdout, stderr):
         try:
             runtime, pass_all = stdout.strip().split(',')
@@ -41,7 +37,7 @@ class MyLocalSearch(LocalSearch):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='PYGGI Improvement Example')
-    parser.add_argument('project_path', type=str, default='../sample/Triangle_fast_xml')
+    parser.add_argument('--project_path', type=str, default='../sample/Triangle_fast_xml')
     parser.add_argument('--epoch', type=int, default=30,
         help='total epoch(default: 30)')
     parser.add_argument('--iter', type=int, default=100,

@@ -17,8 +17,6 @@ class XmlEngine(AbstractTreeEngine):
         for tag in cls.RENAME_TAGS:
             cls.rewrite_tags(tree, cls.RENAME_TAGS[tag], tag)
         cls.rotate_newlines(tree)
-        print(cls.tree_to_string(tree))
-        print('------------------------------------')
         return tree
 
     @classmethod

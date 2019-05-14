@@ -11,17 +11,18 @@ from pyggi.base import Patch, ParseError, AbstractProgram
 from pyggi.tree import XmlEngine
 from pyggi.tree import StmtReplacement, StmtInsertion, StmtDeletion, StmtMoving
 from pyggi.algorithms import LocalSearch
-from improve_xml import MyProgram as XmlProgram
+from improve_xml import MyProgram as Program
 from improve_xml import MyLocalSearch
 
 class MyXmlEngine(XmlEngine):
     @classmethod
-    def postproc_tree(cls, tree):
+    def process_tree(cls, tree):
         stmt_tags = ['if', 'decl_stmt', 'expr_stmt', 'return', 'try']
         cls.select_tags(tree, keep=stmt_tags)
         cls.rewrite_tags(tree, stmt_tags, 'stmt')
+        cls.rotate_newlines(tree)
 
-class MyProgram(XmlProgram):
+class MyProgram(Program):
     @classmethod
     def get_engine(cls, file_name):
         return MyXmlEngine

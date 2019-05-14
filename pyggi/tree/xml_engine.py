@@ -5,15 +5,14 @@ from xml.etree import ElementTree
 
 class XmlEngine(AbstractTreeEngine):
     @classmethod
-    def postproc_tree(cls, tree):
+    def process_tree(cls, tree):
         pass
 
     @classmethod
     def get_contents(cls, file_path):
         with open(file_path) as target_file:
             tree = cls.string_to_tree(target_file.read())
-        cls.postproc_tree(tree)
-        cls.rotate_newlines(tree)
+        cls.process_tree(tree)
         return tree
 
     @classmethod

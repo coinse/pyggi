@@ -80,7 +80,7 @@ class TestEdit(object):
             assert line_replacement.ingredient == ingredient
 
         def test_create(self):
-            program = LineProgram('../sample/Triangle_bug')
+            program = LineProgram('../sample/Triangle_bug_java')
             random_line_replacement = LineReplacement.create(
                 program,
                 target_file='Triangle.java',
@@ -92,7 +92,7 @@ class TestEdit(object):
 
         def test_apply(self, setup_line_replacement):
             line_replacement, target, ingredient = setup_line_replacement
-            program = LineProgram('../sample/Triangle_bug')
+            program = LineProgram('../sample/Triangle_bug_java')
             modification_points = copy.deepcopy(program.modification_points)
             new_contents = copy.deepcopy(program.contents)
             line_replacement.apply(program, new_contents, modification_points)
@@ -109,7 +109,7 @@ class TestEdit(object):
             assert line_insertion.ingredient == ingredient
 
         def test_create(self):
-            program = LineProgram('../sample/Triangle_bug')
+            program = LineProgram('../sample/Triangle_bug_java')
             random_line_insertion = LineInsertion.create(
                 program, target_file='Triangle.java', ingr_file='Triangle.java')
 
@@ -118,7 +118,7 @@ class TestEdit(object):
         
         def test_apply(self, setup_line_insertion):
             line_insertion, target, ingredient = setup_line_insertion
-            program = LineProgram('../sample/Triangle_bug')
+            program = LineProgram('../sample/Triangle_bug_java')
             modification_points = copy.deepcopy(program.modification_points)
             new_contents = copy.deepcopy(program.contents)
             line_insertion.apply(program, new_contents, modification_points)
@@ -134,7 +134,7 @@ class TestEdit(object):
             assert line_insertion.target == target
 
         def test_create(self):
-            program = LineProgram('../sample/Triangle_bug')
+            program = LineProgram('../sample/Triangle_bug_java')
             random_line_deletion = LineDeletion.create(
                 program, target_file='Triangle.java')
 
@@ -143,7 +143,7 @@ class TestEdit(object):
         
         def test_apply(self, setup_line_deletion):
             line_deletion, target = setup_line_deletion
-            program = LineProgram('../sample/Triangle_bug')
+            program = LineProgram('../sample/Triangle_bug_java')
             modification_points = copy.deepcopy(program.modification_points)
             new_contents = copy.deepcopy(program.contents)
             line_deletion.apply(program, new_contents, modification_points)

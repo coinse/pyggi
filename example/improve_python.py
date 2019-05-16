@@ -1,7 +1,5 @@
 """
 Improving non-functional properties ::
-
-    python improve_python.py ../sample/Triangle_fast_python
 """
 import sys
 import random

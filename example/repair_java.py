@@ -1,7 +1,5 @@
 """
 Automated program repair ::
-
-    python repair.py ../sample/Triangle_bug
 """
 import sys
 import random
@@ -58,7 +56,7 @@ class MyTabuSearch(LocalSearch):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='PYGGI Bug Repair Example')
-    parser.add_argument('--project_path', type=str, default='../sample/Triangle_bug')
+    parser.add_argument('--project_path', type=str, default='../sample/Triangle_bug_java')
     parser.add_argument('--mode', type=str, default='line')
     parser.add_argument('--epoch', type=int, default=30,
         help='total epoch(default: 30)')

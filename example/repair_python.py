@@ -1,7 +1,5 @@
 """
 Automated program repair ::
-
-    python repair.py ../sample/Triangle_bug
 """
 import sys
 import random

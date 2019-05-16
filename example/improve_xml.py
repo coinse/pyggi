@@ -1,7 +1,5 @@
 """
 Improving non-functional properties ::
-
-    python improve_xml.py ../sample/Triangle_fast_xml
 """
 import sys
 import random

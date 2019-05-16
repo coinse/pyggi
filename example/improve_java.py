@@ -1,7 +1,5 @@
 """
 Improving non-functional properties ::
-
-    python improve.py ../sample/Triangle_fast
 """
 import sys
 import random
@@ -60,7 +58,7 @@ class MyLocalSearch(LocalSearch):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='PYGGI Improvement Example')
-    parser.add_argument('--project_path', type=str, default='../sample/Triangle_fast')
+    parser.add_argument('--project_path', type=str, default='../sample/Triangle_fast_java')
     parser.add_argument('--mode', type=str, default='line')
     parser.add_argument('--epoch', type=int, default=30,
         help='total epoch(default: 30)')

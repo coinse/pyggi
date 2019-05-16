@@ -74,6 +74,10 @@ class AbstractProgram(ABC):
         self.name = os.path.basename(self.path)
         self.logger = Logger(self.name + '_' + self.timestamp)
 
+        # Create the temporary directory
+        self.create_tmp_variant()
+        self.setup()
+
         # Configuration
         self.load_config(path, config)
 
@@ -85,14 +89,14 @@ class AbstractProgram(ABC):
         assert self.modification_points
         assert self.contents
 
-        # Create the temporary directory
-        self.create_tmp_variant()
-
         self.logger.info("Path to the temporal program variants: {}".format(self.tmp_path))
 
     def __str__(self):
         return "{}({}):{}".format(self.__class__.__name__,
                                   self.path, ",".join(self.target_files))
+
+    def setup(self):
+        pass
 
     def load_config(self, path, config):
         assert config is None or isinstance(config, str) or isinstance(config, dict)

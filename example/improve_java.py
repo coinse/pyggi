@@ -1,38 +1,50 @@
 """
 Improving non-functional properties ::
 
-    python improve_python.py ../sample/Triangle_fast_python
+    python improve.py ../sample/Triangle_fast
 """
 import sys
 import random
 import argparse
+import os
 from pyggi.base import Patch, ParseError, AbstractProgram
 from pyggi.line import LineProgram
 from pyggi.line import LineReplacement, LineInsertion, LineDeletion
-from pyggi.tree import TreeProgram
+from pyggi.tree import TreeProgram, XmlEngine
 from pyggi.tree import StmtReplacement, StmtInsertion, StmtDeletion
 from pyggi.algorithms import LocalSearch
 
 class MyProgram(AbstractProgram):
     def compute_fitness(self, elapsed_time, stdout, stderr):
-        import re
-        m = re.findall("runtime: ([0-9.]+)", stdout)
-        if len(m) > 0:
-            runtime = m[0]
-            failed = re.findall("([0-9]+) failed", stdout)
-            pass_all = len(failed) == 0
-            if pass_all:
-                return round(float(runtime), 3)
-            else:
+        try:
+            runtime, pass_all = stdout.strip().split(',')
+            runtime = float(runtime)
+            if not pass_all == 'true':
                 raise ParseError
-        else:
+            else:
+                return runtime
+        except:
             raise ParseError
 
 class MyLineProgram(LineProgram, MyProgram):
     pass
 
+class MyXmlEngine(XmlEngine):
+    @classmethod
+    def process_tree(cls, tree):
+        stmt_tags = ['if', 'decl_stmt', 'expr_stmt', 'return', 'try']
+        cls.select_tags(tree, keep=stmt_tags)
+        cls.rewrite_tags(tree, stmt_tags, 'stmt')
+        cls.rotate_newlines(tree)
+
 class MyTreeProgram(TreeProgram, MyProgram):
-    pass
+    def setup(self):
+        if not os.path.exists(os.path.join(self.tmp_path, "Triangle.java.xml")):
+            self.exec_cmd("srcml Triangle.java -o Triangle.java.xml")
+
+    @classmethod
+    def get_engine(cls, file_name):
+        return MyXmlEngine
 
 class MyLocalSearch(LocalSearch):
     def get_neighbour(self, patch):
@@ -44,11 +56,11 @@ class MyLocalSearch(LocalSearch):
         return patch
 
     def stopping_criterion(self, iter, fitness):
-        return fitness < 0.05
+        return fitness < 100
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='PYGGI Improvement Example')
-    parser.add_argument('--project_path', type=str, default='../sample/Triangle_fast_python')
+    parser.add_argument('--project_path', type=str, default='../sample/Triangle_fast')
     parser.add_argument('--mode', type=str, default='line')
     parser.add_argument('--epoch', type=int, default=30,
         help='total epoch(default: 30)')
@@ -58,10 +70,18 @@ if __name__ == "__main__":
     assert args.mode in ['line', 'tree']
 
     if args.mode == 'line':
-        program = MyLineProgram(args.project_path)
+        config = {
+            "target_files": ["Triangle.java"],
+            "test_command": "./run.sh"
+        }
+        program = MyLineProgram(args.project_path, config=config)
         operators = [LineReplacement, LineInsertion, LineDeletion]
     elif args.mode == 'tree':
-        program = MyTreeProgram(args.project_path)
+        config = {
+            "target_files": ["Triangle.java.xml"],
+            "test_command": "./run.sh"
+        }
+        program = MyTreeProgram(args.project_path, config=config)
         operators = [StmtReplacement, StmtInsertion, StmtDeletion]
 
     local_search = MyLocalSearch(program)

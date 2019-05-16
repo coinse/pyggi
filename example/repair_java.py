@@ -6,31 +6,30 @@ Automated program repair ::
 import sys
 import random
 import argparse
-from pyggi.base import Patch, ParseError, AbstractProgram
+import os
+from pyggi.base import Patch
 from pyggi.line import LineProgram
 from pyggi.line import LineReplacement, LineInsertion, LineDeletion
-from pyggi.tree import TreeProgram
+from pyggi.tree import TreeProgram, XmlEngine
 from pyggi.tree import StmtReplacement, StmtInsertion, StmtDeletion
 from pyggi.algorithms import LocalSearch
 
-class MyProgram(AbstractProgram):
-    def compute_fitness(self, elapsed_time, stdout, stderr):
-        import re
-        m = re.findall("runtime: ([0-9.]+)", stdout)
-        if len(m) > 0:
-            runtime = m[0]
-            failed = re.findall("([0-9]+) failed", stdout)
-            pass_all = len(failed) == 0
-            failed = int(failed[0]) if not pass_all else 0
-            return failed
-        else:
-            raise ParseError
+class MyXmlEngine(XmlEngine):
+    @classmethod
+    def process_tree(cls, tree):
+        stmt_tags = ['if', 'decl_stmt', 'expr_stmt', 'return', 'try']
+        cls.select_tags(tree, keep=stmt_tags)
+        cls.rewrite_tags(tree, stmt_tags, 'stmt')
+        cls.rotate_newlines(tree)
 
-class MyLineProgram(LineProgram, MyProgram):
-    pass
+class MyTreeProgram(TreeProgram):
+    def setup(self):
+        if not os.path.exists(os.path.join(self.tmp_path, "Triangle.java.xml")):
+            self.exec_cmd("srcml Triangle.java -o Triangle.java.xml")
 
-class MyTreeProgram(TreeProgram, MyProgram):
-    pass
+    @classmethod
+    def get_engine(cls, file_name):
+        return MyXmlEngine
 
 class MyTabuSearch(LocalSearch):
     def setup(self):
@@ -53,28 +52,38 @@ class MyTabuSearch(LocalSearch):
         return fitness < best_fitness
 
     def stopping_criterion(self, iter, fitness):
-        return fitness == 0
+        if fitness == 0:
+            return True
+        return False
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='PYGGI Bug Repair Example')
-    parser.add_argument('--project_path', type=str, default='../sample/Triangle_bug_python')
+    parser.add_argument('--project_path', type=str, default='../sample/Triangle_bug')
     parser.add_argument('--mode', type=str, default='line')
     parser.add_argument('--epoch', type=int, default=30,
         help='total epoch(default: 30)')
-    parser.add_argument('--iter', type=int, default=100,
-        help='total iterations per epoch(default: 100)')
+    parser.add_argument('--iter', type=int, default=10000,
+        help='total iterations per epoch(default: 10000)')
     args = parser.parse_args()
     assert args.mode in ['line', 'tree']
 
     if args.mode == 'line':
-        program = MyLineProgram(args.project_path)
+        config = {
+            "target_files": ["Triangle.java"],
+            "test_command": "./run.sh"
+        }
+        program = LineProgram(args.project_path, config=config)
         operators = [LineReplacement, LineInsertion, LineDeletion]
     elif args.mode == 'tree':
-        program = MyTreeProgram(args.project_path)
+        config = {
+            "target_files": ["Triangle.java.xml"],
+            "test_command": "./run.sh"
+        }
+        program = MyTreeProgram(args.project_path, config=config)
         operators = [StmtReplacement, StmtInsertion, StmtDeletion]
 
     tabu_search = MyTabuSearch(program)
-    result = tabu_search.run(warmup_reps=1, epoch=args.epoch, max_iter=args.iter, timeout=10)
+    result = tabu_search.run(warmup_reps=1, epoch=args.epoch, max_iter=args.iter)
     print("======================RESULT======================")
     print(result)
     program.remove_tmp_variant()

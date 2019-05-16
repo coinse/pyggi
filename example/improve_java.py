@@ -50,7 +50,7 @@ class MyLocalSearch(LocalSearch):
             patch.remove(random.randrange(0, len(patch)))
         else:
             edit_operator = random.choice(operators)
-            patch.add(edit_operator.create(program))
+            patch.add(edit_operator.create(self.program))
         return patch
 
     def stopping_criterion(self, iter, fitness):
@@ -85,5 +85,8 @@ if __name__ == "__main__":
     local_search = MyLocalSearch(program)
     result = local_search.run(warmup_reps=5, epoch=args.epoch, max_iter=args.iter, timeout=15)
     print("======================RESULT======================")
-    print(result)
+    for epoch in range(len(result)):
+        print("Epoch {}".format(epoch))
+        print(result[epoch])
+        print(result[epoch]['diff'])
     program.remove_tmp_variant()

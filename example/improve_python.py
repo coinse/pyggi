@@ -37,7 +37,7 @@ class MyLocalSearch(LocalSearch):
         if len(patch) > 0 and random.random() < 0.5:
             patch.remove(random.randrange(0, len(patch)))
         else:
-            edit_operator = random.choice(operators)
+            edit_operator = random.choice(self.operators)
             patch.add(edit_operator.create(self.program))
         return patch
 
@@ -57,12 +57,12 @@ if __name__ == "__main__":
 
     if args.mode == 'line':
         program = MyLineProgram(args.project_path)
-        operators = [LineReplacement, LineInsertion, LineDeletion]
+        local_search = MyLocalSearch(program)
+        local_search.operators = [LineReplacement, LineInsertion, LineDeletion]
     elif args.mode == 'tree':
         program = MyTreeProgram(args.project_path)
-        operators = [StmtReplacement, StmtInsertion, StmtDeletion]
+        local_search.operators = [StmtReplacement, StmtInsertion, StmtDeletion]
 
-    local_search = MyLocalSearch(program)
     result = local_search.run(warmup_reps=5, epoch=args.epoch, max_iter=args.iter, timeout=15)
     print("======================RESULT======================")
     for epoch in range(len(result)):

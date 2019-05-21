@@ -40,7 +40,7 @@ class MyTabuSearch(LocalSearch):
             if len(temp_patch) > 0 and random.random() < 0.5:
                 temp_patch.remove(random.randrange(0, len(temp_patch)))
             else:
-                edit_operator = random.choice(operators)
+                edit_operator = random.choice(self.operators)
                 temp_patch.add(edit_operator.create(self.program, method="weighted"))
             if not any(item == temp_patch for item in self.tabu):
                 self.tabu.append(temp_patch)
@@ -66,12 +66,13 @@ if __name__ == "__main__":
 
     if args.mode == 'line':
         program = MyLineProgram(args.project_path)
-        operators = [LineReplacement, LineInsertion, LineDeletion]
+        tabu_search = MyTabuSearch(program)
+        tabu_search.operators = [LineReplacement, LineInsertion, LineDeletion]
     elif args.mode == 'tree':
         program = MyTreeProgram(args.project_path)
-        operators = [StmtReplacement, StmtInsertion, StmtDeletion]
+        tabu_search = MyTabuSearch(program)
+        tabu_search.operators = [StmtReplacement, StmtInsertion, StmtDeletion]
 
-    tabu_search = MyTabuSearch(program)
     result = tabu_search.run(warmup_reps=1, epoch=args.epoch, max_iter=args.iter, timeout=10)
     print("======================RESULT======================")
     print(result)

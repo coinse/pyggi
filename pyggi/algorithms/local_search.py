@@ -145,6 +145,7 @@ class LocalSearch(Algorithm):
             if best_patch:
                 cur_result['BestPatch'] = best_patch
                 cur_result['BestFitness'] = best_fitness
+                cur_result['diff'] = self.program.diff(best_patch)
 
             result.append(cur_result)
         return result

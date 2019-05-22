@@ -5,7 +5,7 @@ from pyggi.line import LineDeletion, LineMoving, LineInsertion
 
 @pytest.fixture(scope='session')
 def setup():
-    program = LineProgram('../sample/Triangle_bug')
+    program = LineProgram('../sample/Triangle_bug_java')
     assert len(program.target_files) == 1
     assert program.target_files[0] == 'Triangle.java'
 
@@ -33,7 +33,7 @@ class TestPatch(object):
 
     def test_eq(self, setup):
         patch, program = setup
-        program2 = LineProgram('../sample/Triangle_bug')
+        program2 = LineProgram('../sample/Triangle_bug_java')
         patch2 = Patch(program2)
 
         assert patch == patch2

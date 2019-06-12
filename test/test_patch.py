@@ -1,5 +1,5 @@
 import pytest
-from pyggi.base import Patch, StatusCode
+from pyggi.base import Patch
 from pyggi.line import LineProgram
 from pyggi.line import LineDeletion, LineMoving, LineInsertion
 
@@ -68,13 +68,13 @@ class TestPatch(object):
 
     def test_run_test(self, setup):
         patch, program = setup
-        status_code, fitness = program.evaluate_patch(patch)
+        run = program.evaluate_patch(patch)
 
         assert len(patch) > 0
-        if status_code == StatusCode.NORMAL:
-            assert fitness is not None
+        if run.status == 'SUCCESS':
+            assert run.fitness is not None
         else:
-            assert fitness is None
+            assert run.fitness is None
 
     def test_remove(self, setup):
         patch, program = setup

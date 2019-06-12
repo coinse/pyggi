@@ -1,12 +1,12 @@
 import pytest
 import os
 import random
-from pyggi.base import Patch, StatusCode, ParseError
+from pyggi.base import Patch
 from pyggi.line import LineProgram, LineInsertion, LineEngine
 from pyggi.tree import TreeProgram, StmtInsertion, AstorEngine
 
 class MyLineProgram(LineProgram):
-    def compute_fitness(self, elapsed_time, stdout, stderr):
+    def compute_fitness(self, result, return_code, stdout, stderr, elapsed_time):
         print(elapsed_time, stdout, stderr)
         import re
         m = re.findall("runtime: ([0-9.]+)", stdout)
@@ -15,12 +15,12 @@ class MyLineProgram(LineProgram):
             failed = re.findall("([0-9]+) failed", stdout)
             pass_all = len(failed) == 0
             failed = int(failed[0]) if not pass_all else 0
-            return failed
+            result.fitness = failed
         else:
-            raise ParseError
+            result.status = 'PARSE_ERROR'
 
 class MyTreeProgram(TreeProgram):
-    def compute_fitness(self, elapsed_time, stdout, stderr):
+    def compute_fitness(self, result, return_code, stdout, stderr, elapsed_time):
         print(elapsed_time, stdout, stderr)
         import re
         m = re.findall("runtime: ([0-9.]+)", stdout)
@@ -29,9 +29,9 @@ class MyTreeProgram(TreeProgram):
             failed = re.findall("([0-9]+) failed", stdout)
             pass_all = len(failed) == 0
             failed = int(failed[0]) if not pass_all else 0
-            return failed
+            result.fitness = failed
         else:
-            raise ParseError
+            result.status = 'PARSE_ERROR'
 
 @pytest.fixture(scope='session')
 def setup_line():
@@ -135,16 +135,16 @@ class TestLineProgram(object):
 
     def test_exec_cmd(self, setup_line):
         program = setup_line
-        result = program.exec_cmd("echo hello")
-        assert result.stdout.strip() == "hello"
+        _, stdout, _, _ = program.exec_cmd("echo hello")
+        assert stdout.strip() == "hello"
 
     def test_evaluate_patch(self, setup_line):
         program = setup_line
         patch = Patch(program)
-        status_code, fitness = program.evaluate_patch(patch)
-        assert status_code == StatusCode.NORMAL
-        assert fitness is not None
-    
+        run = program.evaluate_patch(patch)
+        assert run.status == 'SUCCESS'
+        assert run.fitness is not None
+
     def test_remove_tmp_variant(self, setup_line):
         program = setup_line
         program.remove_tmp_variant()
@@ -222,15 +222,15 @@ class TestTreeProgram(object):
 
     def test_exec_cmd(self, setup_tree):
         program = setup_tree
-        result = program.exec_cmd("echo hello")
-        assert result.stdout.strip() == "hello"
+        _, stdout, _, _ = program.exec_cmd("echo hello")
+        assert stdout.strip() == "hello"
 
     def test_evaluate_patch(self, setup_tree):
         program = setup_tree
         patch = Patch(program)
-        status_code, fitness = program.evaluate_patch(patch)
-        assert status_code == StatusCode.NORMAL
-        assert fitness is not None
+        run = program.evaluate_patch(patch)
+        assert run.status == 'SUCCESS'
+        assert run.fitness is not None
 
     def test_remove_tmp_variant(self, setup_tree):
         program = setup_tree

@@ -1,13 +1,13 @@
 import pytest
 import random
-from pyggi.base import Algorithm, ParseError, Patch
+from pyggi.base import Algorithm, Patch
 from pyggi.tree import TreeProgram, StmtReplacement, StmtInsertion, StmtDeletion, StmtMoving
 from pyggi.algorithms import LocalSearch
 
 @pytest.fixture(scope='session')
 def setup_program():
     class MyProgram(TreeProgram):
-        def compute_fitness(self, elapsed_time, stdout, stderr):
+        def compute_fitness(self, result, return_code, stdout, stderr, elapsed_time):
             import re
             m = re.findall("runtime: ([0-9.]+)", stdout)
             if len(m) > 0:
@@ -15,9 +15,9 @@ def setup_program():
                 failed = re.findall("([0-9]+) failed", stdout)
                 pass_all = len(failed) == 0
                 failed = int(failed[0]) if not pass_all else 0
-                return failed
+                result.fitness = failed
             else:
-                raise ParseError
+                result.status = 'PARSE_ERROR'
     program = MyProgram('../sample/Triangle_bug_python')
     return program
 
@@ -68,10 +68,10 @@ class TestLocalSearch(object):
 
         max_iter = 10
         program = setup_program
-        _, current_fitness = program.evaluate_patch(Patch(program))
+        run = program.evaluate_patch(Patch(program))
         ls = MyLocalSearch(program)
         result = ls.run(warmup_reps=1, epoch=1, max_iter=max_iter, timeout=10)
         assert len(result) == 1
         assert result[0]['FitnessEval'] <= max_iter
         if result[0]['FitnessEval'] < max_iter:
-            assert result[0]['BestFitness'] < current_fitness
+            assert result[0]['BestFitness'] < run.fitness

@@ -269,22 +269,15 @@ class AbstractProgram(ABC):
         return new_contents
 
     def exec_cmd(self, cmd, timeout=15):
-        cwd = os.getcwd()
-        os.chdir(self.tmp_path)
-        sprocess = subprocess.Popen(
-            shlex.split(cmd),
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE)
+        sprocess = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         try:
             start = time.time()
             stdout, stderr = sprocess.communicate(timeout=timeout)
             end = time.time()
-            return (sprocess.returncode, stdout.decode("ascii"), stderr.decode("ascii"), end-start)
+            return (sprocess.returncode, stdout, stderr, end-start)
         except subprocess.TimeoutExpired:
             sprocess.kill()
             return (None, None, None, None)
-        finally:
-            os.chdir(cwd)
 
     def compute_fitness(self, result, return_code, stdout, stderr, elapsed_time):
         try:
@@ -295,12 +288,17 @@ class AbstractProgram(ABC):
     def evaluate_patch(self, patch, timeout=15):
         # apply + run
         self.apply(patch)
-        return_code, stdout, stderr, elapsed_time = self.exec_cmd(self.test_command, timeout)
+        cwd = os.getcwd()
+        try:
+            os.chdir(self.tmp_path)
+            return_code, stdout, stderr, elapsed_time = self.exec_cmd(shlex.split(self.test_command), timeout)
+        finally:
+            os.chdir(cwd)
         if return_code is None: # timeout
             return RunResult('TIMEOUT')
         else:
             result = RunResult('SUCCESS', None)
-            self.compute_fitness(result, return_code, stdout, stderr, elapsed_time)
+            self.compute_fitness(result, return_code, stdout.decode("ascii"), stderr.decode("ascii"), elapsed_time)
             assert not (result.status == 'SUCCESS' and result.fitness is None)
             return result
 

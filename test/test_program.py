@@ -135,8 +135,8 @@ class TestLineProgram(object):
 
     def test_exec_cmd(self, setup_line):
         program = setup_line
-        _, stdout, _, _ = program.exec_cmd("echo hello")
-        assert stdout.strip() == "hello"
+        _, stdout, _, _ = program.exec_cmd(['echo', 'hello'])
+        assert stdout.decode('ascii').strip() == "hello"
 
     def test_evaluate_patch(self, setup_line):
         program = setup_line
@@ -222,8 +222,8 @@ class TestTreeProgram(object):
 
     def test_exec_cmd(self, setup_tree):
         program = setup_tree
-        _, stdout, _, _ = program.exec_cmd("echo hello")
-        assert stdout.strip() == "hello"
+        _, stdout, _, _ = program.exec_cmd(['echo', 'hello'])
+        assert stdout.decode('ascii').strip() == "hello"
 
     def test_evaluate_patch(self, setup_tree):
         program = setup_tree

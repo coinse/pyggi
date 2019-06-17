@@ -21,7 +21,7 @@ from .. import PYGGI_DIR
 from ..utils import Logger, weighted_choice
 
 class RunResult:
-    def __init__(self, status='error', fitness=None):
+    def __init__(self, status, fitness=None):
         self.status = status
         self.fitness = fitness
     def __str__(self):
@@ -294,6 +294,7 @@ class AbstractProgram(ABC):
         else:
             result = RunResult('SUCCESS', None)
             self.compute_fitness(result, return_code, stdout, stderr, elapsed_time)
+            assert not (result.status == 'SUCCESS' and result.fitness is None)
             return result
 
     def diff(self, patch) -> str:

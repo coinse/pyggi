@@ -20,13 +20,16 @@ class Patch:
         self.edit_list = []
 
     def __str__(self):
-        return ' | '.join(list(map(str, self.edit_list)))
+        return ' | '.join(map(str, self.edit_list))
 
     def __len__(self):
         return len(self.edit_list)
 
     def __eq__(self, other):
         return self.edit_list == other.edit_list
+
+    def __hash__(self):
+        return hash(str(self))
 
     def clone(self):
         """

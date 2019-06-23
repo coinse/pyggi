@@ -1,6 +1,6 @@
 import time
 from abc import ABCMeta, abstractmethod
-from ..base import Patch, Algorithm, ParseError, StatusCode
+from ..base import Patch, Algorithm
 
 class LocalSearch(Algorithm):
     """
@@ -91,9 +91,9 @@ class LocalSearch(Algorithm):
         warmup = list()
         empty_patch = Patch(self.program)
         for i in range(warmup_reps):
-            status_code, fitness = self.program.evaluate_patch(empty_patch, timeout=timeout)
-            if status_code is StatusCode.NORMAL:
-                warmup.append(fitness)
+            result = self.program.evaluate_patch(empty_patch, timeout=timeout)
+            if result.status is 'SUCCESS':
+                warmup.append(result.fitness)
         original_fitness = float(sum(warmup)) / len(warmup) if warmup else None
 
         if verbose:
@@ -115,28 +115,29 @@ class LocalSearch(Algorithm):
             cur_result['Success'] = False
             cur_result['FitnessEval'] = 0
             cur_result['InvalidPatch'] = 0
+            cur_result['diff'] = None
 
             start = time.time()
             for cur_iter in range(1, max_iter + 1):
                 patch = self.get_neighbour(best_patch.clone())
-                status_code, fitness = self.program.evaluate_patch(patch, timeout=timeout)
+                run = self.program.evaluate_patch(patch, timeout=timeout)
                 cur_result['FitnessEval'] += 1
 
-                if status_code is not StatusCode.NORMAL:
+                if run.status is not 'SUCCESS':
                     cur_result['InvalidPatch'] += 1
                     update_best = False
                 else:
-                    update_best = self.is_better_than_the_best(fitness, best_fitness)
+                    update_best = self.is_better_than_the_best(run.fitness, best_fitness)
 
                 if update_best:
-                    best_fitness, best_patch = fitness, patch
+                    best_fitness, best_patch = run.fitness, patch
 
                 if verbose:
                     self.program.logger.info("{}\t{}\t{}\t{}{}\t{}".format(
-                        cur_epoch, cur_iter, status_code, '*' if update_best else '',
-                        fitness, patch))
+                        cur_epoch, cur_iter, run.status, '*' if update_best else '',
+                        run.fitness, patch))
 
-                if fitness is not None and self.stopping_criterion(cur_iter, fitness):
+                if run.fitness is not None and self.stopping_criterion(cur_iter, run.fitness):
                     cur_result['Success'] = True
                     break
 

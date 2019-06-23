@@ -20,13 +20,12 @@ from distutils.dir_util import copy_tree
 from .. import PYGGI_DIR
 from ..utils import Logger, weighted_choice
 
-class StatusCode(enum.Enum):
-    NORMAL = 'NORMAL'
-    TIME_OUT = 'TIME_OUT'
-    PARSE_ERROR = 'PARSE_ERR'
-
-class ParseError(Exception):
-    pass
+class RunResult:
+    def __init__(self, status, fitness=None):
+        self.status = status
+        self.fitness = fitness
+    def __str__(self):
+        return '<{} {}>'.format(self.__class__.__name__, str(vars(self))[1:-1])
 
 class AbstractEngine(ABC):
     @classmethod
@@ -66,7 +65,6 @@ class AbstractProgram(ABC):
     CONFIG_FILE_NAME = '.pyggi.config'
     TMP_DIR = os.path.join(PYGGI_DIR, 'tmp_variants')
     SAVE_DIR = os.path.join(PYGGI_DIR, 'saved_variants')
-    Result = collections.namedtuple("Result", 'status_code elapsed_time stdout stderr')
 
     def __init__(self, path, config=None):
         self.timestamp = str(int(time.time()))
@@ -274,45 +272,30 @@ class AbstractProgram(ABC):
             start = time.time()
             stdout, stderr = sprocess.communicate(timeout=timeout)
             end = time.time()
-            result = self.__class__.Result(status_code=StatusCode.NORMAL,
-                            elapsed_time=(end - start),
-                            stdout=stdout.decode("ascii"),
-                            stderr=stderr.decode("ascii"))
+            return (sprocess.returncode, stdout.decode("ascii"), stderr.decode("ascii"), end-start)
         except subprocess.TimeoutExpired:
             sprocess.kill()
-            result = self.__class__.Result(status_code=StatusCode.TIME_OUT,
-                            elapsed_time=None,
-                            stdout=None,
-                            stderr=None)
-        os.chdir(cwd)
-        return result
+            return (None, None, None, None)
+        finally:
+            os.chdir(cwd)
 
-    def run(self, timeout=15):
-        """
-        Run the test script of the temporary variant
-
-        :param float timeout: The time limit of test run (unit: seconds)
-        :return: The fitness value of the patch
-        """
-        return self.exec_cmd(self.test_command, timeout)
-
-    def compute_fitness(self, elapsed_time, stdout, stderr):
+    def compute_fitness(self, result, return_code, stdout, stderr, elapsed_time):
         try:
-            return float(stdout.strip())
+            result.fitness = float(stdout.strip())
         except:
-            raise ParseError
+            result.status = 'PARSE_ERROR'
 
     def evaluate_patch(self, patch, timeout=15):
         # apply + run
         self.apply(patch)
-        result = self.run(timeout)
-        if result.status_code == StatusCode.TIME_OUT:
-            return StatusCode.TIME_OUT, None
-        try:
-            fitness = self.compute_fitness(result.elapsed_time, result.stdout, result.stderr)
-        except ParseError:
-            return StatusCode.PARSE_ERROR, None
-        return StatusCode.NORMAL, fitness
+        return_code, stdout, stderr, elapsed_time = self.exec_cmd(self.test_command, timeout)
+        if return_code is None: # timeout
+            return RunResult('TIMEOUT')
+        else:
+            result = RunResult('SUCCESS', None)
+            self.compute_fitness(result, return_code, stdout, stderr, elapsed_time)
+            assert not (result.status == 'SUCCESS' and result.fitness is None)
+            return result
 
     def diff(self, patch) -> str:
         """

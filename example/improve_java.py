@@ -5,7 +5,7 @@ import sys
 import random
 import argparse
 import os
-from pyggi.base import Patch, ParseError, AbstractProgram
+from pyggi.base import Patch, AbstractProgram
 from pyggi.line import LineProgram
 from pyggi.line import LineReplacement, LineInsertion, LineDeletion
 from pyggi.tree import TreeProgram, XmlEngine
@@ -13,16 +13,16 @@ from pyggi.tree import StmtReplacement, StmtInsertion, StmtDeletion
 from pyggi.algorithms import LocalSearch
 
 class MyProgram(AbstractProgram):
-    def compute_fitness(self, elapsed_time, stdout, stderr):
+    def compute_fitness(self, result, return_code, stdout, stderr, elapsed_time):
         try:
             runtime, pass_all = stdout.strip().split(',')
             runtime = float(runtime)
             if not pass_all == 'true':
-                raise ParseError
+                result.status = 'PARSE_ERROR'
             else:
-                return runtime
+                result.fitness = runtime
         except:
-            raise ParseError
+            result.status = 'PARSE_ERROR'
 
 class MyLineProgram(LineProgram, MyProgram):
     pass

@@ -4,7 +4,7 @@ Improving non-functional properties ::
 import sys
 import random
 import argparse
-from pyggi.base import Patch, ParseError, AbstractProgram
+from pyggi.base import Patch, AbstractProgram
 from pyggi.line import LineProgram
 from pyggi.line import LineReplacement, LineInsertion, LineDeletion
 from pyggi.tree import TreeProgram
@@ -12,7 +12,7 @@ from pyggi.tree import StmtReplacement, StmtInsertion, StmtDeletion
 from pyggi.algorithms import LocalSearch
 
 class MyProgram(AbstractProgram):
-    def compute_fitness(self, elapsed_time, stdout, stderr):
+    def compute_fitness(self, result, return_code, stdout, stderr, elapsed_time):
         import re
         m = re.findall("runtime: ([0-9.]+)", stdout)
         if len(m) > 0:
@@ -20,11 +20,11 @@ class MyProgram(AbstractProgram):
             failed = re.findall("([0-9]+) failed", stdout)
             pass_all = len(failed) == 0
             if pass_all:
-                return round(float(runtime), 3)
+                result.fitness = round(float(runtime), 3)
             else:
-                raise ParseError
+                result.status = 'PARSE_ERROR'
         else:
-            raise ParseError
+            result.status = 'PARSE_ERROR'
 
 class MyLineProgram(LineProgram, MyProgram):
     pass

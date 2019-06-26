@@ -30,7 +30,7 @@ class Logger(object):
             pathlib.Path(Logger.LOG_DIR).mkdir(parents=True)
         # file handler
         self.log_file_path = os.path.join(Logger.LOG_DIR, "{}.log".format(name))
-        file_handler = logging.FileHandler(self.log_file_path)
+        file_handler = logging.FileHandler(self.log_file_path, delay=True)
         file_handler.setFormatter(formatter)
         file_handler.setLevel(logging.DEBUG)
         # stream handler
@@ -40,47 +40,47 @@ class Logger(object):
         self._logger.addHandler(file_handler)
         self._logger.addHandler(stream_handler)
 
-    def debug(self, msg):
+    def debug(self, msg, *args):
         """
         Logs a message with level DEBUG on this logger
 
         :param msg: The message to record
         :return: None
         """
-        self._logger.debug(msg)
+        self._logger.debug(msg, *args)
 
-    def info(self, msg):
+    def info(self, msg, *args):
         """
         Logs a message with level INFO on this logger
 
         :param msg: The message to record
         :return: None
         """
-        self._logger.info(msg)
+        self._logger.info(msg, *args)
 
-    def warning(self, msg):
+    def warning(self, msg, *args):
         """
         Logs a message with level WARNING on this logger
 
         :param msg: The message to record
         :return: None
         """
-        self._logger.warning(msg)
+        self._logger.warning(msg, *args)
 
-    def error(self, msg):
+    def error(self, msg, *args):
         """
         Logs a message with level ERROR on this logger
 
         :param msg: The message to record
         :return: None
         """
-        self._logger.error(msg)
+        self._logger.error(msg, *args)
 
-    def critical(self, msg):
+    def critical(self, msg, *args):
         """
         Logs a message with level CRITICAL on this logger
 
         :param msg: The message to record
         :return: None
         """
-        self._logger.critical(msg)
+        self._logger.critical(msg, *args)

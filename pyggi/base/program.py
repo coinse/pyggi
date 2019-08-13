@@ -15,6 +15,7 @@ import subprocess
 import shlex
 import copy
 import difflib
+import signal
 from abc import ABC, abstractmethod
 from distutils.dir_util import copy_tree
 from .. import PYGGI_DIR
@@ -267,14 +268,16 @@ class AbstractProgram(ABC):
         sprocess = subprocess.Popen(
             shlex.split(cmd),
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE)
+            stderr=subprocess.PIPE,
+            preexec_fn=os.setsid)
         try:
             start = time.time()
             stdout, stderr = sprocess.communicate(timeout=timeout)
             end = time.time()
             return (sprocess.returncode, stdout.decode("ascii"), stderr.decode("ascii"), end-start)
         except subprocess.TimeoutExpired:
-            sprocess.kill()
+            os.killpg(os.getpgid(sprocess.pid), signal.SIGKILL)
+            _, _ = sprocess.communicate()
             return (None, None, None, None)
         finally:
             os.chdir(cwd)

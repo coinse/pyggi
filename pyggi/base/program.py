@@ -270,8 +270,8 @@ class AbstractProgram(ABC):
         self.write_to_tmp_dir(new_contents)
         return new_contents
 
-    def exec_cmd(self, cmd, timeout=15, env=None):
-        sprocess = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
+    def exec_cmd(self, cmd, timeout=15, env=None, shell=False):
+        sprocess = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env, shell=shell)
         try:
             start = time.time()
             stdout, stderr = sprocess.communicate(timeout=timeout)

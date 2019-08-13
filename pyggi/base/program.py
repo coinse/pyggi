@@ -16,6 +16,7 @@ import shlex
 import copy
 import difflib
 import errno
+import signal
 from abc import ABC, abstractmethod
 from distutils.dir_util import copy_tree
 from .. import PYGGI_DIR
@@ -271,14 +272,15 @@ class AbstractProgram(ABC):
         return new_contents
 
     def exec_cmd(self, cmd, timeout=15, env=None, shell=False):
-        sprocess = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env, shell=shell)
+        sprocess = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env, shell=shell, preexec_fn=os.setsid)
         try:
             start = time.time()
             stdout, stderr = sprocess.communicate(timeout=timeout)
             end = time.time()
             return (sprocess.returncode, stdout, stderr, end-start)
         except subprocess.TimeoutExpired:
-            sprocess.kill()
+            os.killpg(os.getpgid(sprocess.pid), signal.SIGKILL)
+            _, _ = sprocess.communicate()
             return (None, None, None, None)
 
     def compute_fitness(self, result, return_code, stdout, stderr, elapsed_time):

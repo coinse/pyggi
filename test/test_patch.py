@@ -1,11 +1,11 @@
 import pytest
-from pyggi.base import Patch
-from pyggi.line import LineProgram
-from pyggi.line import LineDeletion, LineMoving, LineInsertion
+from pyggi import Program, Patch, GranularityLevel
+from pyggi.custom_operator import LineDeletion, LineMoving
+
 
 @pytest.fixture(scope='session')
 def setup():
-    program = LineProgram('../sample/Triangle_bug_java')
+    program = Program('./resource/Triangle_bug', GranularityLevel.LINE)
     assert len(program.target_files) == 1
     assert program.target_files[0] == 'Triangle.java'
 
@@ -19,6 +19,7 @@ class TestPatch(object):
         patch, program = setup
 
         assert patch.program == program
+        assert patch.test_result == None
         assert len(patch.edit_list) == 0
 
     def test_str(self, setup):
@@ -33,7 +34,7 @@ class TestPatch(object):
 
     def test_eq(self, setup):
         patch, program = setup
-        program2 = LineProgram('../sample/Triangle_bug_java')
+        program2 = Program('./resource/Triangle_bug', GranularityLevel.LINE)
         patch2 = Patch(program2)
 
         assert patch == patch2
@@ -44,6 +45,7 @@ class TestPatch(object):
 
         assert cloned_patch.program == patch.program
         assert cloned_patch == patch
+        assert cloned_patch.test_result == None
 
     def test_add(self, setup):
         patch, program = setup
@@ -61,20 +63,32 @@ class TestPatch(object):
         assert len(patch) == 2
         assert patch.edit_list[1] == moving_instance
 
+    def test_get_atomics(self, setup):
+        patch, program = setup
+    
+        assert len(patch.get_atomics('LineReplacement')) == 2
+        assert len(patch.get_atomics('LineInsertion')) == 1
+        
+        atomics = patch.get_atomics()
+        count = 0
+        for edit in patch.edit_list:
+            for atomic in edit.atomic_operators:
+                assert atomic in atomics
+                count += 1
+        assert count == len(atomics)
+
     def test_apply(self, setup):
         patch, program = setup
 
-        assert True
+        assert len(program.contents['Triangle.java']) + len(
+            patch.get_atomics('LineInsertion'))== len(patch.apply()['Triangle.java'])
 
     def test_run_test(self, setup):
         patch, program = setup
-        run = program.evaluate_patch(patch)
+        test_result = patch.run_test()
 
-        assert len(patch) > 0
-        if run.status == 'SUCCESS':
-            assert run.fitness is not None
-        else:
-            assert run.fitness is None
+        assert test_result.compiled in [True, False]
+        assert test_result.elapsed_time > 0
 
     def test_remove(self, setup):
         patch, program = setup

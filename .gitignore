@@ -3,17 +3,14 @@
 
 paper/
 
-ast_test.py
-line_test.py
-
 # Setuptools distribution folder.
 /dist/
 
 # Python egg metadata, regenerated from source files by setuptools.
 /*.egg-info
 
-.pyggi/*
-*/.pyggi/*
+pyggi_tmp/*
+*/pyggi_tmp/*
 
 # Pyenv
 .python-version

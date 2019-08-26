@@ -16,6 +16,7 @@ such as source code manipulation and patch management.
 
 ## Documentation
 You can find the PYGGI's documentation [here](https://coinse.github.io/pyggi/).
+(Currently outdated, will be updated soon!)
 
 ## Citation
 

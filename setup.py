@@ -6,7 +6,7 @@ def readme():
 
 setup(
     name='pyggi',
-    version='1.1',
+    version='2.0',
     description='Python General Framework for Genetic Improvement',
     long_description=readme(),
     classifiers=[],

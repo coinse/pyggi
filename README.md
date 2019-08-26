@@ -14,23 +14,33 @@ such as source code manipulation and patch management.
 ## Prerequisites
 * [Python 3.5+](https://www.continuum.io/downloads)
 
-
 ## Documentation
-You can find the PYGGI's documentation [here](https://coinse.github.io/pyggi/)
+You can find the PYGGI's documentation [here](https://coinse.github.io/pyggi/).
+(Currently outdated, will be updated soon!)
 
 ## Citation
-An, G., Kim, J., & Yoo, S. (2018). [Comparing Line and AST Granularity Level for Program Repair using PyGGI](https://coinse.kaist.ac.kr/publications/pdfs/An2018to.pdf). In GI. https://doi.org/10.1145/3194810.3194814
 
 ```
-  @inproceedings{An2018to,
-  author = {An, Gabin and Kim, Jinhan and Yoo, Shin},
-  booktitle = {Proceedings of the 4th Genetic Improvement Workshop},
-  series = {GI@ICSE 2018},
-  title = {Comparing Line and AST Granularity Level for Program Repair using PyGGI},
-  year = {2018},
-  doi = {10.1145/3194810.3194814},
+@inproceedings{An:2019:PLI:3338906.3341184,
+ author = {An, Gabin and Blot, Aymeric and Petke, Justyna and Yoo, Shin},
+ title = {PyGGI 2.0: Language Independent Genetic Improvement Framework},
+ booktitle = {Proceedings of the 2019 27th ACM Joint Meeting on European Software Engineering Conference and Symposium on the Foundations of Software Engineering},
+ series = {ESEC/FSE 2019},
+ year = {2019},
+ isbn = {978-1-4503-5572-8},
+ location = {Tallinn, Estonia},
+ pages = {1100--1104},
+ numpages = {5},
+ url = {http://doi.acm.org/10.1145/3338906.3341184},
+ doi = {10.1145/3338906.3341184},
+ acmid = {3341184},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {Genetic Improvement, Search-based Software Engineering},
 }
 ```
+
+[pdf](https://dl.acm.org/citation.cfm?id=3341184)
 
 ## Getting Started
 
@@ -46,36 +56,61 @@ $ python setup.py install
 ```
 
 #### 3. Run the example
-###### 1. Improving runtime of Triangle by deleting delay() function call
+##### 1. Improving runtime of Triangle by deleting delay() function call
 * java
 
 ```bash
 $ cd example
-$ python improve.py ../sample/Triangle_fast
+$ python improve_java.py --project_path ../sample/Triangle_fast_java --mode [line|tree] --epoch [EPOCH] --iter [MAX_ITER]
 ```
 
 * python
 
 ```bash
 $ cd example
-$ python improve_python.py ../sample/Triangle_fast_python
+$ python improve_python.py --project_path ../sample/Triangle_fast_python/ --mode [line|tree] --epoch [EPOCH] --iter [MAX_ITER]
 ```
 
-###### 2. Repairing the bug of Triangle
+##### 2. Repairing the bug of Triangle
+* java
+
 ```bash
 $ cd example
-$ python repair.py ../sample/Triangle_bug
+$ python repair_java.py --project_path ../sample/Triangle_bug_java --mode [line|tree] --epoch [EPOCH] --iter [MAX_ITER]
 ```
+
+* python
+
+```bash
+$ cd example
+$ python repair_python.py --project_path ../sample/Triangle_bug_python/ --mode [line|tree] --epoch [EPOCH] --iter [MAX_ITER]
+```
+
+##### Important notice about using `tree` mode for Java, C++, or C programs
+For the Java samples (`Triangle_fast_java`, `Triangle_bug_java`), we provide the `XML` version of `Triangle.java` files translated by [srcML (download)](https://www.srcml.org/#download).
+However, in the general case, you should translate the target `Java`, `C++`, or `C` files into `XML` files before initialising Program instances and provide the translated those `XML` files as target files.
+
+Or, you can simply override the `setup` method of `AbstractProgram`, which is initially empty, to execute the translation command.
+
+ex) Translating `Triangle.java` to `Triangle.java.xml` using srcML (See the context at `example/improve_java.py`)
+```
+class MyTreeProgram(TreeProgram):
+    def setup(self):
+        if not os.path.exists(os.path.join(self.tmp_path, "Triangle.java.xml")):
+            self.exec_cmd("srcml Triangle.java -o Triangle.java.xml")
+```
+
+Then, PyGGI will manipulate the XML files using `XmlEngine`(in `pyggi/tree/xml_engine.py`) and convert it back to the original language by stripping all the XML tags before running the test command.
 
 ## Program setup convention
 
 Two files should be provided: a configuration file and a test script.
 You can refer the sample programs in the sample directory.
 
-#### 1. Config file
-{target_dir_path}/PYGGI_CONFIG
+#### 1. Config file (JSON format)
+{target_dir_path}/.pyggi.config
 
-ex) sample/Triangle_fast/PYGGI_CONFIG
+ex) sample/Triangle_fast_java/.pyggi.config
 ```
 {
   "target_files": [
@@ -83,6 +118,24 @@ ex) sample/Triangle_fast/PYGGI_CONFIG
   ],
   "test_command": "./run.sh"
 }
+```
+
+However, you can also specify the config file name (default: `.pyggi.config`),
+
+ex)
+```python
+program = LineProgram("sample/Triangle_fast_java", config='.custom.pyggi.config')
+```
+
+or directly provide the `dict` type configuration when initialising Program.
+ex)
+
+```python
+config = {
+    "target_files": ["Triangle.java"],
+    "test_command": "./run.sh"
+}
+program = LineProgram("sample/Triangle_fast_java", config=config)
 ```
 
 #### 2. Test script file
@@ -100,28 +153,36 @@ javac -cp "./junit-4.10.jar" Triangle.java TriangleTest.java TestRunner.java
 java -cp "./junit-4.10.jar:./" TestRunner TriangleTest
 ```
 
-The output of the test command should look like this,
+The output of the test command should be the fitness of the program (only number),
 ```
-[PYGGI_RESULT] {runtime: 7, pass_all: true, ...}
+7.0
 ```
-or, you can use own result parser when generating a `TestResult` instance.
+or, you can use own result parser by overriding the `compute_fitness` method of Program classes.
 
-See more details in [here](https://coinse.github.io/pyggi/pyggi.test_result.html).
-
-This is the example of a custom result parser,
+This is the example of a custom result parser from `example/improve_python.py`,
 ```python
-def result_parser(stdout, stderr):
-    import re
-    m = re.findall("runtime: ([0-9.]+)", stdout)
-    if len(m) > 0:
-        runtime = m[0]
-        failed = re.findall("([0-9]+) failed", stdout)
-        pass_all = len(failed) == 0
-        return TestResult(True, {'runtime': runtime, 'pass_all': pass_all})
-    else:
-  return TestResult(False, None)
+class MyProgram(AbstractProgram):
+    def compute_fitness(self, elapsed_time, stdout, stderr):
+        import re
+        m = re.findall("runtime: ([0-9.]+)", stdout)
+        if len(m) > 0:
+            runtime = m[0]
+            failed = re.findall("([0-9]+) failed", stdout)
+            pass_all = len(failed) == 0
+            if pass_all:
+                return round(float(runtime), 3)
+            else:
+                raise ParseError
+        else:
+            raise ParseError
+
+class MyLineProgram(LineProgram, MyProgram):
+    pass
+
+class MyTreeProgram(TreeProgram, MyProgram):
+    pass
 ```
-, when the standard output is following:
+, when the standard output is in the `pytest` format, such as:
 ```
 ======================================== test session starts ========================================
 platform linux -- Python 3.6.2, pytest-3.2.3, py-1.4.34, pluggy-0.4.0

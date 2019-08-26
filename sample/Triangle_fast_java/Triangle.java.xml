@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<unit xmlns="http://www.srcML.org/srcML/src" revision="0.9.5" language="Java" filename="Triangle.java"><class><specifier>public</specifier> class <name>Triangle</name> <block>{
+
+    <enum><specifier>public</specifier> enum <name>TriangleType</name> <block>{
+        <decl><name>INVALID</name></decl>, <decl><name>SCALENE</name></decl>, <decl><name>EQUALATERAL</name></decl>, <decl><name>ISOCELES</name></decl>
+    }</block></enum>
+
+    <function><specifier>public</specifier> <specifier>static</specifier> <type><name>TriangleType</name></type> <name>classifyTriangle</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>a</name></decl></parameter>, <parameter><decl><type><name>int</name></type> <name>b</name></decl></parameter>, <parameter><decl><type><name>int</name></type> <name>c</name></decl></parameter>)</parameter_list> <block>{
+
+        <expr_stmt><expr><call><name>delay</name><argument_list>()</argument_list></call></expr>;</expr_stmt>
+
+        <comment type="line">// Sort the sides so that a &lt;= b &lt;= c</comment>
+        <if>if <condition>(<expr><name>a</name> <operator>&gt;</operator> <name>b</name></expr>)</condition><then> <block>{
+            <decl_stmt><decl><type><name>int</name></type> <name>tmp</name> <init>= <expr><name>a</name></expr></init></decl>;</decl_stmt>
+            <expr_stmt><expr><name>a</name> <operator>=</operator> <name>b</name></expr>;</expr_stmt>
+            <expr_stmt><expr><name>b</name> <operator>=</operator> <name>tmp</name></expr>;</expr_stmt>
+        }</block></then></if>
+
+        <if>if <condition>(<expr><name>a</name> <operator>&gt;</operator> <name>c</name></expr>)</condition><then> <block>{
+            <decl_stmt><decl><type><name>int</name></type> <name>tmp</name> <init>= <expr><name>a</name></expr></init></decl>;</decl_stmt>
+            <expr_stmt><expr><name>a</name> <operator>=</operator> <name>c</name></expr>;</expr_stmt>
+            <expr_stmt><expr><name>c</name> <operator>=</operator> <name>tmp</name></expr>;</expr_stmt>
+        }</block></then></if>
+
+        <if>if <condition>(<expr><name>b</name> <operator>&gt;</operator> <name>c</name></expr>)</condition><then> <block>{
+            <decl_stmt><decl><type><name>int</name></type> <name>tmp</name> <init>= <expr><name>b</name></expr></init></decl>;</decl_stmt>
+            <expr_stmt><expr><name>b</name> <operator>=</operator> <name>c</name></expr>;</expr_stmt>
+            <expr_stmt><expr><name>c</name> <operator>=</operator> <name>tmp</name></expr>;</expr_stmt>
+        }</block></then></if>
+
+        <if>if <condition>(<expr><name>a</name> <operator>+</operator> <name>b</name> <operator>&lt;=</operator> <name>c</name></expr>)</condition><then> <block>{
+            <return>return <expr><name><name>TriangleType</name><operator>.</operator><name>INVALID</name></name></expr>;</return>
+        }</block></then> <elseif>else <if>if <condition>(<expr><name>a</name> <operator>==</operator> <name>b</name> <operator>&amp;&amp;</operator> <name>b</name> <operator>==</operator> <name>c</name></expr>)</condition><then> <block>{
+            <return>return <expr><name><name>TriangleType</name><operator>.</operator><name>EQUALATERAL</name></name></expr>;</return>
+        }</block></then></if></elseif> <elseif>else <if>if <condition>(<expr><name>a</name> <operator>==</operator> <name>b</name> <operator>||</operator> <name>b</name> <operator>==</operator> <name>c</name></expr>)</condition><then> <block>{
+            <return>return <expr><name><name>TriangleType</name><operator>.</operator><name>ISOCELES</name></name></expr>;</return>
+        }</block></then></if></elseif> <else>else <block>{
+            <return>return <expr><name><name>TriangleType</name><operator>.</operator><name>SCALENE</name></name></expr>;</return>
+        }</block></else></if>
+
+    }</block></function>
+
+    <function><specifier>private</specifier> <specifier>static</specifier> <type><name>void</name></type> <name>delay</name><parameter_list>()</parameter_list> <block>{
+        <try>try <block>{
+            <expr_stmt><expr><call><name><name>Thread</name><operator>.</operator><name>sleep</name></name><argument_list>(<argument><expr><literal type="number">50</literal></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+        }</block> <catch>catch <parameter_list>(<parameter><decl><type><name>InterruptedException</name></type> <name>e</name></decl></parameter>)</parameter_list> <block>{
+            <comment type="line">// do nothing</comment>
+        }</block></catch></try>
+    }</block></function>
+
+}</block></class>
+</unit>

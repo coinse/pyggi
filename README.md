@@ -13,6 +13,7 @@ such as source code manipulation and patch management.
 
 ## Prerequisites
 * [Python 3.5+](https://www.continuum.io/downloads)
+* [srcML](https://www.srcml.org/#download) (optional if you want to use the XML engine on srcML translated files. [example](https://github.com/coinse/pyggi/blob/master/example/repair_java.py))
 
 ## Documentation
 You can find the PYGGI's documentation [here](https://coinse.github.io/pyggi/).
@@ -40,7 +41,7 @@ You can find the PYGGI's documentation [here](https://coinse.github.io/pyggi/).
 }
 ```
 
-[pdf](https://dl.acm.org/citation.cfm?id=3341184)
+The pdf file is available at [link](https://dl.acm.org/citation.cfm?id=3341184).
 
 ## Getting Started
 

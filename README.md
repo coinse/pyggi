@@ -18,18 +18,28 @@ such as source code manipulation and patch management.
 You can find the PYGGI's documentation [here](https://coinse.github.io/pyggi/).
 
 ## Citation
-An, G., Kim, J., & Yoo, S. (2018). [Comparing Line and AST Granularity Level for Program Repair using PyGGI](https://coinse.kaist.ac.kr/publications/pdfs/An2018to.pdf). In GI. https://doi.org/10.1145/3194810.3194814
 
 ```
-  @inproceedings{An2018to,
-  author = {An, Gabin and Kim, Jinhan and Yoo, Shin},
-  booktitle = {Proceedings of the 4th Genetic Improvement Workshop},
-  series = {GI@ICSE 2018},
-  title = {Comparing Line and AST Granularity Level for Program Repair using PyGGI},
-  year = {2018},
-  doi = {10.1145/3194810.3194814},
+@inproceedings{An:2019:PLI:3338906.3341184,
+ author = {An, Gabin and Blot, Aymeric and Petke, Justyna and Yoo, Shin},
+ title = {PyGGI 2.0: Language Independent Genetic Improvement Framework},
+ booktitle = {Proceedings of the 2019 27th ACM Joint Meeting on European Software Engineering Conference and Symposium on the Foundations of Software Engineering},
+ series = {ESEC/FSE 2019},
+ year = {2019},
+ isbn = {978-1-4503-5572-8},
+ location = {Tallinn, Estonia},
+ pages = {1100--1104},
+ numpages = {5},
+ url = {http://doi.acm.org/10.1145/3338906.3341184},
+ doi = {10.1145/3338906.3341184},
+ acmid = {3341184},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {Genetic Improvement, Search-based Software Engineering},
 }
 ```
+
+[pdf](https://dl.acm.org/citation.cfm?id=3341184)
 
 ## Getting Started
 

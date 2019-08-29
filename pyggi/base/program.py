@@ -211,7 +211,7 @@ class AbstractProgram(ABC):
 
     def remove_tmp_variant(self):
         tmp = self.tmp_path
-        shutil.rmtree(tmp)
+        shutil.rmtree(tmp, ignore_errors=True)
         bounds = [os.path.abspath('.'), os.path.abspath(os.path.join(self.TMP_DIR, '..'))]
         try:
             while True:

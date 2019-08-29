@@ -211,13 +211,14 @@ class AbstractProgram(ABC):
 
     def remove_tmp_variant(self):
         tmp = self.tmp_path
+        shutil.rmtree(tmp)
         bounds = [os.path.abspath('.'), os.path.abspath(os.path.join(self.TMP_DIR, '..'))]
         try:
             while True:
-                shutil.rmtree(tmp)
                 tmp = os.path.dirname(tmp)
                 if os.path.abspath(tmp) in bounds:
                     break
+                os.rmdir(tmp)
         except OSError as e:
             if e.errno != errno.ENOTEMPTY:
                 raise

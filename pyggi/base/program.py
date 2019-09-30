@@ -16,6 +16,7 @@ import shlex
 import copy
 import difflib
 import errno
+import select
 import signal
 from abc import ABC, abstractmethod
 from distutils.dir_util import copy_tree
@@ -276,14 +277,40 @@ class AbstractProgram(ABC):
         self.write_to_tmp_dir(new_contents)
         return new_contents
 
-    def exec_cmd(self, cmd, timeout=15, env=None, shell=False):
-        sprocess = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env, shell=shell, preexec_fn=os.setsid)
+    def exec_cmd(self, cmd, timeout=15, env=None, shell=False, max_pipesize=1e4):
+        # 1e6 bytes is 1Mb
         try:
+            stdout = b''
+            stderr = b''
+            stdout_size = 0
+            stderr_size = 0
             start = time.time()
-            stdout, stderr = sprocess.communicate(timeout=timeout)
+            sprocess = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env, shell=shell, preexec_fn=os.setsid)
+            while sprocess.poll() is None:
+                end = time.time()
+                if end-start > timeout:
+                    sprocess.kill()
+                    stdout += sprocess.stdout.read()
+                    stderr += sprocess.stderr.read()
+                    raise subprocess.TimeoutExpired()
+                for _ in range(1024):
+                    if not len(select.select([sprocess.stdout], [], [], 0)[0]):
+                        break
+                    stdout += sprocess.stdout.read(1)
+                    stdout_size += 1
+                for _ in range(1024):
+                    if not len(select.select([sprocess.stderr], [], [], 0)[0]):
+                        break
+                    stderr += sprocess.stderr.read(1)
+                    stderr_size += 1
+                if stdout_size+stderr_size >= max_pipesize:
+                    raise IOError()
             end = time.time()
+            stdout += sprocess.stdout.read()
+            stderr += sprocess.stderr.read()
             return (sprocess.returncode, stdout, stderr, end-start)
-        except subprocess.TimeoutExpired:
+
+        except (subprocess.TimeoutExpired, IOError):
             os.killpg(os.getpgid(sprocess.pid), signal.SIGKILL)
             _, _ = sprocess.communicate()
             return (None, None, None, None)

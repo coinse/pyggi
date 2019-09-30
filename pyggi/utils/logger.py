@@ -40,47 +40,47 @@ class Logger(object):
         self._logger.addHandler(file_handler)
         self._logger.addHandler(stream_handler)
 
-    def debug(self, msg, *args):
+    def debug(self, msg, *args, **kwargs):
         """
         Logs a message with level DEBUG on this logger
 
         :param msg: The message to record
         :return: None
         """
-        self._logger.debug(msg, *args)
+        self._logger.debug(msg, *args, **kwargs)
 
-    def info(self, msg, *args):
+    def info(self, msg, *args, **kwargs):
         """
         Logs a message with level INFO on this logger
 
         :param msg: The message to record
         :return: None
         """
-        self._logger.info(msg, *args)
+        self._logger.info(msg, *args, **kwargs)
 
-    def warning(self, msg, *args):
+    def warning(self, msg, *args, **kwargs):
         """
         Logs a message with level WARNING on this logger
 
         :param msg: The message to record
         :return: None
         """
-        self._logger.warning(msg, *args)
+        self._logger.warning(msg, *args, **kwargs)
 
-    def error(self, msg, *args):
+    def error(self, msg, *args, **kwargs):
         """
         Logs a message with level ERROR on this logger
 
         :param msg: The message to record
         :return: None
         """
-        self._logger.error(msg, *args)
+        self._logger.error(msg, *args, **kwargs)
 
-    def critical(self, msg, *args):
+    def critical(self, msg, *args, **kwargs):
         """
         Logs a message with level CRITICAL on this logger
 
         :param msg: The message to record
         :return: None
         """
-        self._logger.critical(msg, *args)
+        self._logger.critical(msg, *args, **kwargs)

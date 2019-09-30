@@ -84,3 +84,6 @@ class Logger(object):
         :return: None
         """
         self._logger.critical(msg, *args, **kwargs)
+
+    def exception(self, msg, *args, **kwargs):
+        self._logger.critical(msg, *args, **kwargs)

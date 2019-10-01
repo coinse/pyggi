@@ -289,10 +289,7 @@ class AbstractProgram(ABC):
             while sprocess.poll() is None:
                 end = time.time()
                 if end-start > timeout:
-                    sprocess.kill()
-                    stdout += sprocess.stdout.read()
-                    stderr += sprocess.stderr.read()
-                    raise subprocess.TimeoutExpired()
+                    raise TimeoutError()
                 for _ in range(1024):
                     if not len(select.select([sprocess.stdout], [], [], 0)[0]):
                         break
@@ -310,7 +307,7 @@ class AbstractProgram(ABC):
             stderr += sprocess.stderr.read()
             return (sprocess.returncode, stdout, stderr, end-start)
 
-        except (subprocess.TimeoutExpired, IOError):
+        except (TimeoutError, IOError):
             os.killpg(os.getpgid(sprocess.pid), signal.SIGKILL)
             _, _ = sprocess.communicate()
             return (None, None, None, None)

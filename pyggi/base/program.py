@@ -210,6 +210,10 @@ class AbstractProgram(ABC):
         pathlib.Path(self.tmp_path).mkdir(parents=True, exist_ok=True)
         copy_tree(self.path, self.tmp_path)
 
+    def reset_tmp_variant(self):
+        shutil.rmtree(self.tmp_path)
+        shutil.copytree(self.path, self.tmp_path)
+
     def remove_tmp_variant(self):
         tmp = self.tmp_path
         shutil.rmtree(tmp, ignore_errors=True)
@@ -273,6 +277,7 @@ class AbstractProgram(ABC):
             - key: The target file name(path) related to the program root path
             - value: The contents of the file
         """
+        self.reset_tmp_variant()
         new_contents = self.get_modified_contents(patch)
         self.write_to_tmp_dir(new_contents)
         return new_contents

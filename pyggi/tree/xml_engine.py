@@ -40,8 +40,13 @@ class XmlEngine(AbstractTreeEngine):
     def write_to_tmp_dir(cls, contents_of_file, tmp_path):
         root, ext = os.path.splitext(tmp_path)
         assert ext == '.xml'
-        with open(root, 'w') as tmp_file:
-            tmp_file.write(cls.dump(contents_of_file))
+        super().write_to_tmp_dir(contents_of_file, root)
+
+    @classmethod
+    def reset_in_tmp_dir(cls, target_file, ref_path, tmp_path):
+        root, ext = os.path.splitext(target_file)
+        assert ext == '.xml'
+        super().reset_in_tmp_dir(root, ref_path, tmp_path)
 
     @classmethod
     def dump(cls, contents_of_file):

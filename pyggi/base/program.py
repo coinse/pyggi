@@ -295,16 +295,19 @@ class AbstractProgram(ABC):
                 end = time.time()
                 if end-start > timeout:
                     raise TimeoutError()
-                for _ in range(1024):
-                    if not len(select.select([sprocess.stdout], [], [], 0)[0]):
-                        break
-                    stdout += sprocess.stdout.read(1)
-                    stdout_size += 1
-                for _ in range(1024):
-                    if not len(select.select([sprocess.stderr], [], [], 0)[0]):
-                        break
-                    stderr += sprocess.stderr.read(1)
-                    stderr_size += 1
+                a = select.select([sprocess.stdout, sprocess.stderr], [], [], 1)[0]
+                if sprocess.stdout in a:
+                    for _ in range(1024):
+                        if not len(select.select([sprocess.stdout], [], [], 0)[0]):
+                            break
+                        stdout += sprocess.stdout.read(1)
+                        stdout_size += 1
+                if sprocess.stderr in a:
+                    for _ in range(1024):
+                        if not len(select.select([sprocess.stderr], [], [], 0)[0]):
+                            break
+                        stderr += sprocess.stderr.read(1)
+                        stderr_size += 1
                 if stdout_size+stderr_size >= max_pipesize:
                     raise IOError()
             end = time.time()

@@ -148,17 +148,19 @@ class XmlEngine(AbstractTreeEngine):
             return False
 
         # mutate
+        sp = cls.guess_spacing(parent.text)
         for i, child in enumerate(parent):
             if child == target:
                 tmp = copy.deepcopy(ingredient)
                 if op.direction == 'after':
                     tmp.tail = child.tail
-                    child.tail = None
+                    child.tail = '\n' + sp
                     i += 1
                 else:
-                    tmp.tail = None
+                    tmp.tail = '\n' + sp
                 parent.insert(i, tmp)
                 break
+            sp = cls.guess_spacing(child.tail)
         else:
             assert False
 
@@ -248,3 +250,10 @@ class XmlEngine(AbstractTreeEngine):
                     element.text += match.group(1)
         for child in element:
             cls.rotate_newlines(child)
+
+    @classmethod
+    def guess_spacing(cls, text):
+        if text is None:
+            return ''
+        m = [''] + re.findall(r"\n(\s*)", text, re.MULTILINE)
+        return m[-1]

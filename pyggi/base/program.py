@@ -316,9 +316,10 @@ class AbstractProgram(ABC):
             return (sprocess.returncode, stdout, stderr, end-start)
 
         except (TimeoutError, IOError):
+            end = time.time()
             os.killpg(os.getpgid(sprocess.pid), signal.SIGKILL)
             _, _ = sprocess.communicate()
-            return (None, None, None, None)
+            return (None, stdout, stderr, end-start)
 
     def compute_fitness(self, result, return_code, stdout, stderr, elapsed_time):
         try:

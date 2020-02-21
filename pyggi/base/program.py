@@ -319,7 +319,7 @@ class AbstractProgram(ABC):
             end = time.time()
             os.killpg(os.getpgid(sprocess.pid), signal.SIGKILL)
             _, _ = sprocess.communicate()
-            return (None, stdout, stderr, end-start)
+            return (sprocess.returncode, stdout, stderr, end-start)
 
     def compute_fitness(self, result, return_code, stdout, stderr, elapsed_time):
         try:

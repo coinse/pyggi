@@ -84,7 +84,10 @@ class LineMoving(LineEdit):
     def apply(self, program, new_contents, modification_points):
         engine = program.engines[self.target[0]]
         engine.do_insert(program, self, new_contents, modification_points)
-        return engine.do_delete(program, self, new_contents, modification_points)
+        self.target, self.ingredient = self.ingredient, self.target
+        return_code = engine.do_delete(program, self, new_contents, modification_points)
+        self.target, self.ingredient = self.ingredient, self.target
+        return return_code
 
     @classmethod
     def create(cls, program, target_file=None, ingr_file=None, direction='before', method='random'):

@@ -2,7 +2,7 @@ import os
 import random
 from abc import abstractmethod
 from ..base import AbstractProgram, AbstractEdit
-from .engine import LineEngine
+from . import AbstractLineEngine, LineEngine
 
 class LineProgram(AbstractProgram):
     @classmethod
@@ -29,7 +29,7 @@ class LineReplacement(LineEdit):
     @classmethod
     def create(cls, program, target_file=None, ingr_file=None, method='random'):
         if target_file is None:
-            target_file = program.random_file()
+            target_file = program.random_file(AbstractLineEngine)
         if ingr_file is None:
             ingr_file = program.random_file(engine=program.engines[target_file])
         assert program.engines[target_file] == program.engines[ingr_file]

@@ -162,9 +162,10 @@ class AbstractProgram(ABC):
         return self.engines[file_name].get_source(self, file_name, index)
 
     def random_file(self, engine=None):
-        files = self.target_files
         if engine:
-            files = list(filter(lambda f: self.engines[f] == engine, files))
+            files = [f for f in self.target_files if issubclass(self.engines[f], engine)]
+        else:
+            files = self.target_files
         return random.choice(files)
 
     def random_target(self, target_file=None, method="random"):

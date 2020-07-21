@@ -3,7 +3,7 @@ import ast
 import astor
 import random
 from abc import abstractmethod
-from . import AstorEngine, XmlEngine
+from . import AbstractTreeEngine, AstorEngine, XmlEngine
 from ..base import AbstractProgram, AbstractEdit
 from ..utils import get_file_extension
 
@@ -39,7 +39,7 @@ class StmtReplacement(TreeEdit):
     @classmethod
     def create(cls, program, target_file=None, ingr_file=None, method='random'):
         if target_file is None:
-            target_file = program.random_file()
+            target_file = program.random_file(AbstractTreeEngine)
         if ingr_file is None:
             ingr_file = program.random_file(engine=program.engines[target_file])
         assert program.engines[target_file] == program.engines[ingr_file]
@@ -60,7 +60,7 @@ class StmtInsertion(TreeEdit):
     @classmethod
     def create(cls, program, target_file=None, ingr_file=None, direction=None, method='random'):
         if target_file is None:
-            target_file = program.random_file()
+            target_file = program.random_file(AbstractTreeEngine)
         if ingr_file is None:
             ingr_file = program.random_file(engine=program.engines[target_file])
         assert program.engines[target_file] == program.engines[ingr_file]
@@ -81,7 +81,7 @@ class StmtDeletion(TreeEdit):
     @classmethod
     def create(cls, program, target_file=None, method='random'):
         if target_file is None:
-            target_file = program.random_file()
+            target_file = program.random_file(AbstractTreeEngine)
         return cls(program.random_target(target_file, method))
 
 class StmtMoving(TreeEdit):
@@ -102,7 +102,7 @@ class StmtMoving(TreeEdit):
     @classmethod
     def create(cls, program, target_file=None, ingr_file=None, direction=None, method='random'):
         if target_file is None:
-            target_file = program.random_file()
+            target_file = program.random_file(AbstractTreeEngine)
         if ingr_file is None:
             ingr_file = program.random_file(engine=program.engines[target_file])
         assert program.engines[target_file] == program.engines[ingr_file]

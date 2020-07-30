@@ -146,9 +146,12 @@ class XmlEngine(AbstractTreeEngine):
         for i, child in enumerate(parent):
             if child == target:
                 tmp = copy.deepcopy(ingredient)
-                tmp.tail = None
                 if op.direction == 'after':
+                    tmp.tail = child.tail
+                    child.tail = None
                     i += 1
+                else:
+                    tmp.tail = None
                 parent.insert(i, tmp)
                 break
         else:

@@ -106,6 +106,8 @@ class LocalSearch(Algorithm):
             self.program.logger.info("Epoch\tIter\tStatus\tFitness\tPatch")
 
         for cur_epoch in range(1, epoch + 1):
+            # Reset Search
+            self.setup()
             cur_result = {}
             best_patch = empty_patch
             best_fitness = original_fitness

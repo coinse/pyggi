@@ -61,6 +61,7 @@ if __name__ == "__main__":
         local_search.operators = [LineReplacement, LineInsertion, LineDeletion]
     elif args.mode == 'tree':
         program = MyTreeProgram(args.project_path)
+        local_search = MyLocalSearch(program)
         local_search.operators = [StmtReplacement, StmtInsertion, StmtDeletion]
 
     result = local_search.run(warmup_reps=5, epoch=args.epoch, max_iter=args.iter, timeout=15)

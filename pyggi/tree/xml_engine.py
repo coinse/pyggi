@@ -40,8 +40,13 @@ class XmlEngine(AbstractTreeEngine):
     def write_to_tmp_dir(cls, contents_of_file, tmp_path):
         root, ext = os.path.splitext(tmp_path)
         assert ext == '.xml'
-        with open(root, 'w') as tmp_file:
-            tmp_file.write(cls.dump(contents_of_file))
+        super().write_to_tmp_dir(contents_of_file, root)
+
+    @classmethod
+    def reset_in_tmp_dir(cls, target_file, ref_path, tmp_path):
+        root, ext = os.path.splitext(target_file)
+        assert ext == '.xml'
+        super().reset_in_tmp_dir(root, ref_path, tmp_path)
 
     @classmethod
     def dump(cls, contents_of_file):
@@ -143,14 +148,19 @@ class XmlEngine(AbstractTreeEngine):
             return False
 
         # mutate
+        sp = cls.guess_spacing(parent.text)
         for i, child in enumerate(parent):
             if child == target:
                 tmp = copy.deepcopy(ingredient)
-                tmp.tail = None
                 if op.direction == 'after':
+                    tmp.tail = child.tail
+                    child.tail = '\n' + sp
                     i += 1
+                else:
+                    tmp.tail = '\n' + sp
                 parent.insert(i, tmp)
                 break
+            sp = cls.guess_spacing(child.tail)
         else:
             assert False
 
@@ -240,3 +250,10 @@ class XmlEngine(AbstractTreeEngine):
                     element.text += match.group(1)
         for child in element:
             cls.rotate_newlines(child)
+
+    @classmethod
+    def guess_spacing(cls, text):
+        if text is None:
+            return ''
+        m = [''] + re.findall(r"\n(\s*)", text, re.MULTILINE)
+        return m[-1]

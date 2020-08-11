@@ -15,6 +15,9 @@ import subprocess
 import shlex
 import copy
 import difflib
+import errno
+import select
+import signal
 from abc import ABC, abstractmethod
 from distutils.dir_util import copy_tree
 from .. import PYGGI_DIR
@@ -207,8 +210,23 @@ class AbstractProgram(ABC):
         pathlib.Path(self.tmp_path).mkdir(parents=True, exist_ok=True)
         copy_tree(self.path, self.tmp_path)
 
-    def remove_tmp_variant(self):
+    def reset_tmp_variant(self):
         shutil.rmtree(self.tmp_path)
+        shutil.copytree(self.path, self.tmp_path)
+
+    def remove_tmp_variant(self):
+        tmp = self.tmp_path
+        shutil.rmtree(tmp, ignore_errors=True)
+        bounds = [os.path.abspath('.'), os.path.abspath(os.path.join(self.TMP_DIR, '..'))]
+        try:
+            while True:
+                tmp = os.path.dirname(tmp)
+                if os.path.abspath(tmp) in bounds:
+                    break
+                os.rmdir(tmp)
+        except OSError as e:
+            if e.errno != errno.ENOTEMPTY:
+                raise
 
     def write_to_tmp_dir(self, new_contents):
         """
@@ -234,7 +252,7 @@ class AbstractProgram(ABC):
         """
         return self.engines[file_name].dump(contents[file_name])
 
-    def get_modified_contents(self, patch):
+    def get_modified_contents(self, patch, minify=True):
         target_files = self.contents.keys()
         modification_points = copy.deepcopy(self.modification_points)
         new_contents = copy.deepcopy(self.contents)
@@ -242,6 +260,8 @@ class AbstractProgram(ABC):
             edits = list(filter(lambda a: a.target[0] == target_file, patch.edit_list))
             for edit in edits:
                 edit.apply(self, new_contents, modification_points)
+            if minify and len(edits) == 0:
+                del new_contents[target_file]
         return new_contents
 
     def apply(self, patch):
@@ -257,27 +277,49 @@ class AbstractProgram(ABC):
             - key: The target file name(path) related to the program root path
             - value: The contents of the file
         """
+        self.reset_tmp_variant()
         new_contents = self.get_modified_contents(patch)
         self.write_to_tmp_dir(new_contents)
         return new_contents
 
-    def exec_cmd(self, cmd, timeout=15):
-        cwd = os.getcwd()
-        os.chdir(self.tmp_path)
-        sprocess = subprocess.Popen(
-            shlex.split(cmd),
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE)
+    def exec_cmd(self, cmd, timeout=15, env=None, shell=False, max_pipesize=1e4):
+        # 1e6 bytes is 1Mb
         try:
+            stdout = b''
+            stderr = b''
+            stdout_size = 0
+            stderr_size = 0
             start = time.time()
-            stdout, stderr = sprocess.communicate(timeout=timeout)
+            sprocess = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env, shell=shell, preexec_fn=os.setsid)
+            while sprocess.poll() is None:
+                end = time.time()
+                if end-start > timeout:
+                    raise TimeoutError()
+                a = select.select([sprocess.stdout, sprocess.stderr], [], [], 1)[0]
+                if sprocess.stdout in a:
+                    for _ in range(1024):
+                        if not len(select.select([sprocess.stdout], [], [], 0)[0]):
+                            break
+                        stdout += sprocess.stdout.read(1)
+                        stdout_size += 1
+                if sprocess.stderr in a:
+                    for _ in range(1024):
+                        if not len(select.select([sprocess.stderr], [], [], 0)[0]):
+                            break
+                        stderr += sprocess.stderr.read(1)
+                        stderr_size += 1
+                if stdout_size+stderr_size >= max_pipesize:
+                    raise IOError()
             end = time.time()
-            return (sprocess.returncode, stdout.decode("ascii"), stderr.decode("ascii"), end-start)
-        except subprocess.TimeoutExpired:
-            sprocess.kill()
-            return (None, None, None, None)
-        finally:
-            os.chdir(cwd)
+            stdout += sprocess.stdout.read()
+            stderr += sprocess.stderr.read()
+            return (sprocess.returncode, stdout, stderr, end-start)
+
+        except (TimeoutError, IOError):
+            end = time.time()
+            os.killpg(os.getpgid(sprocess.pid), signal.SIGKILL)
+            _, _ = sprocess.communicate()
+            return (sprocess.returncode, stdout, stderr, end-start)
 
     def compute_fitness(self, result, return_code, stdout, stderr, elapsed_time):
         try:
@@ -288,12 +330,17 @@ class AbstractProgram(ABC):
     def evaluate_patch(self, patch, timeout=15):
         # apply + run
         self.apply(patch)
-        return_code, stdout, stderr, elapsed_time = self.exec_cmd(self.test_command, timeout)
+        cwd = os.getcwd()
+        try:
+            os.chdir(self.tmp_path)
+            return_code, stdout, stderr, elapsed_time = self.exec_cmd(shlex.split(self.test_command), timeout)
+        finally:
+            os.chdir(cwd)
         if return_code is None: # timeout
             return RunResult('TIMEOUT')
         else:
             result = RunResult('SUCCESS', None)
-            self.compute_fitness(result, return_code, stdout, stderr, elapsed_time)
+            self.compute_fitness(result, return_code, stdout.decode("ascii"), stderr.decode("ascii"), elapsed_time)
             assert not (result.status == 'SUCCESS' and result.fitness is None)
             return result
 
@@ -306,7 +353,7 @@ class AbstractProgram(ABC):
         :rtype: str
         """
         diffs = ''
-        new_contents = self.get_modified_contents(patch)
+        new_contents = self.get_modified_contents(patch, minify=False)
         for file_name in self.target_files:
             orig = self.dump(self.contents, file_name)
             modi = self.dump(new_contents, file_name)

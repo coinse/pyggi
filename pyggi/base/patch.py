@@ -26,7 +26,7 @@ class Patch:
         return len(self.edit_list)
 
     def __eq__(self, other):
-        return self.edit_list == other.edit_list
+        return isinstance(other, Patch) and self.edit_list == other.edit_list
 
     def clone(self):
         """

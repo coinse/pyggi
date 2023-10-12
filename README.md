@@ -1,4 +1,6 @@
-# PYGGI(Python General Framework for Genetic Improvement) [![Build Status](https://travis-ci.org/coinse/pyggi.svg?branch=master)](https://travis-ci.org/coinse/pyggi) [![Coverage Status](https://coveralls.io/repos/github/coinse/pyggi/badge.svg?branch=master)](https://coveralls.io/github/coinse/pyggi?branch=master)
+# PYGGI(Python General Framework for Genetic Improvement)
+
+[![Build Status](https://travis-ci.org/coinse/pyggi.svg?branch=master)](https://travis-ci.org/coinse/pyggi) [![Coverage Status](https://coveralls.io/repos/github/coinse/pyggi/badge.svg?branch=master)](https://coveralls.io/github/coinse/pyggi?branch=master)
 
 <p align="center">
   <img alt="PYGGI logo" src="/images/pyggi_logo.png" />
@@ -47,7 +49,7 @@ The pdf file is available at [link](https://dl.acm.org/citation.cfm?id=3341184).
 
 #### 1. Clone the repository
 ```bash
-$ git clone ~
+$ git clone https://github.com/coinse/pyggi
 $ cd PYGGI
 ```
 
@@ -87,7 +89,7 @@ $ cd example
 $ python repair_python.py --project_path ../sample/Triangle_bug_python/ --mode [line|tree] --epoch [EPOCH] --iter [MAX_ITER]
 ```
 
-##### Important notice about using `tree` mode for Java, C++, or C programs
+##### Important notes about using `tree` mode for Java, C++, or C programs
 For the Java samples (`Triangle_fast_java`, `Triangle_bug_java`), we provide the `XML` version of `Triangle.java` files translated by [srcML (download)](https://www.srcml.org/#download).
 However, in the general case, you should translate the target `Java`, `C++`, or `C` files into `XML` files before initialising Program instances and provide the translated those `XML` files as target files.
 
@@ -105,14 +107,14 @@ Then, PyGGI will manipulate the XML files using `XmlEngine`(in `pyggi/tree/xml_e
 
 ## Program setup convention
 
-Two files should be provided: a configuration file and a test script.
-You can refer the sample programs in the sample directory.
+To run PyGGI, these files should be provided in the target directory:
+ 1. A **Configuration File** (`.pyggi.config`) containing the information about the path to the target files that you want to _improve_, and the test command that can be used to calculate the fitness values of program variants during the GI process.
+ 2. A **Test Script** 
 
 #### 1. Config file (JSON format)
-{target_dir_path}/.pyggi.config
 
-ex) sample/Triangle_fast_java/.pyggi.config
-```
+ex) [`sample/Triangle_fast_java/.pyggi.config`](sample/Triangle_fast_java/.pyggi.config)
+```json
 {
   "target_files": [
     "Triangle.java"
@@ -121,11 +123,13 @@ ex) sample/Triangle_fast_java/.pyggi.config
 }
 ```
 
-However, you can also specify the config file name (default: `.pyggi.config`),
+You can also specify the config file name in Python script if you want it be different from the default value `.pyggi.config`,
 
 ex)
 ```python
-program = LineProgram("sample/Triangle_fast_java", config='.custom.pyggi.config')
+program = LineProgram(
+    "sample/Triangle_fast_java",   # directory containing the program  
+    config='.custom.pyggi.config') # config file name
 ```
 
 or directly provide the `dict` type configuration when initialising Program.
@@ -136,13 +140,16 @@ config = {
     "target_files": ["Triangle.java"],
     "test_command": "./run.sh"
 }
-program = LineProgram("sample/Triangle_fast_java", config=config)
+program = LineProgram(
+    "sample/Triangle_fast_java",
+    config=config # config
+)
 ```
 
 #### 2. Test script file
-{target_dir_path}/run.sh
+`{target_dir_path}/run.sh`
 
-ex) sample/Triangle_fast/run.sh
+ex) [`sample/Triangle_fast_java/run.sh`](./sample/Triangle_fast_java/run.sh)
 ```sh
 #!/bin/sh
 set -e
@@ -183,7 +190,7 @@ class MyLineProgram(LineProgram, MyProgram):
 class MyTreeProgram(TreeProgram, MyProgram):
     pass
 ```
-, when the standard output is in the `pytest` format, such as:
+which can parse the output from `pytest`, such as:
 ```
 ======================================== test session starts ========================================
 platform linux -- Python 3.6.2, pytest-3.2.3, py-1.4.34, pluggy-0.4.0

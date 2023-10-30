@@ -266,18 +266,24 @@ class AbstractProgram(ABC):
     def exec_cmd(self, cmd, timeout=15):
         cwd = os.getcwd()
         os.chdir(self.tmp_path)
+        kwargs = {}
+        if os.name == 'posix':
+            kwargs['preexec_fn'] = os.setsid
         sprocess = subprocess.Popen(
             shlex.split(cmd),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            preexec_fn=os.setsid)
+            **kwargs)
         try:
             start = time.time()
             stdout, stderr = sprocess.communicate(timeout=timeout)
             end = time.time()
             return (sprocess.returncode, stdout.decode("ascii"), stderr.decode("ascii"), end-start)
         except subprocess.TimeoutExpired:
-            os.killpg(os.getpgid(sprocess.pid), signal.SIGKILL)
+            if os.name == 'posix':
+                os.killpg(os.getpgid(sprocess.pid), signal.SIGKILL)
+            else:
+                sprocess.kill()
             _, _ = sprocess.communicate()
             return (None, None, None, None)
         finally:

@@ -269,6 +269,11 @@ class AbstractProgram(ABC):
         kwargs = {}
         if os.name == 'posix':
             kwargs['preexec_fn'] = os.setsid
+        elif os.name == 'nt':
+            kwargs['creationflags'] = subprocess.CREATE_NEW_PROCESS_GROUP
+        else:
+            raise Exception("Unsupported OS")
+        
         sprocess = subprocess.Popen(
             shlex.split(cmd),
             stdout=subprocess.PIPE,
@@ -283,6 +288,7 @@ class AbstractProgram(ABC):
             if os.name == 'posix':
                 os.killpg(os.getpgid(sprocess.pid), signal.SIGKILL)
             else:
+                sprocess.send_signal(signal.CTRL_BREAK_EVENT)
                 sprocess.kill()
             _, _ = sprocess.communicate()
             return (None, None, None, None)

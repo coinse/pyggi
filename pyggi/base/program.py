@@ -287,7 +287,7 @@ class AbstractProgram(ABC):
         except subprocess.TimeoutExpired:
             if os.name == 'posix':
                 os.killpg(os.getpgid(sprocess.pid), signal.SIGKILL)
-            else:
+            elif os.name == 'nt':
                 sprocess.send_signal(signal.CTRL_BREAK_EVENT)
                 sprocess.kill()
             _, _ = sprocess.communicate()
